@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      body {
+        font: 10px sans-serif;
+      }
+      .dotRed {
+        fill: red;
+      }
+      .dotGray {
+        fill: lightgray;
+      }
+      .dotBlue {
+        fill: blue;
+      }
+      .dotWhite {
+        fill: white;
+      }
+      .dot {
+        stroke: #000;
+        opacity: 0.7;
+      }
+      .line {
+        stroke: red;
+        stroke-width: 1;
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: 120px;
+        height: 42px;
+        padding: 2px;
+        font: 12px sans-serif;
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      var margin = {top: 20, right: 20, bottom: 30, left: 50},
+      width = 960 - margin.left - margin.right,
+      height = 700 - margin.top - margin.bottom;
+
+      var x = d3.scaleLinear().range([0, width]);
+      var y = d3.scaleLinear().range([0, height]);
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+      // lines
+      svg.append("line")
+        .attr("class", "line")
+        .attr("x1",-1)
+        .attr("x2",1)
+        .attr("y1", 97)
+        .attr("y2", 97);
+
+      d3.csv("data.csv", function(error, data) {
+        if (error) throw error;
+
+        // format the data
+
+        data.forEach(function(d) {
+            d.yaxis = d.yaxis;
+        });
+
+        // Scale the range of the data
+        x.domain([-0.65,0.65]);
+        y.domain([18,-0.5]);
+
+        // add the tooltip
+        var div = d3.select("body").append("div")
+          .attr("class", "tooltip")
+          .style("opacity", 0);
+
+        // Add the scatterplot
+        svg.selectAll("dot")
+            .data(data)
+          .enter().append("circle")
+            .on("mouseover", function(d) {
+              div.transition()
+                .duration(100)
+                .style("opacity", .9);
+              div.html("<b>" + d.Genename + "</b> "+ "<br/>" + "x: " + d.xaxis + "<br/>" + "y: " + d.yaxis)
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+              div.transition()
+                .duration(200)
+                .style("opacity", 0);
+            })
+            .attr("r", function(d) { return d.size * 1.1; })
+            .attr("cx", function(d) { return x(d.xaxis); })
+            .attr("cy", function(d) { return y(d.yaxis); })
+            .attr("class", function(d) {
+              if(d.color == "UVM") {
+                return "dot dotBlue";
+              } else if (d.color == "CLL") {
+                return "dot dotRed";
+              } else if (d.color == "CLL+UVM") {
+                return "dot dotGray";
+              } else {
+                return "dot dotWhite";
+              }
+            });
+        // Add the X Axis
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        // Add the Y Axis
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+      });
+    </script>
+  </body>
+</html>
