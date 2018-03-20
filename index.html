@@ -144,17 +144,23 @@
 
         var dot = elemEnter.append("circle")
             .on("mouseover", function(d) {
+              svg.selectAll("circle")
+                .transition()
+                .duration(200)
+                .style("opacity", 0.2);
               div.transition()
                 .duration(100)
                 .style("opacity", .9);
               div.html("<b>" + d.Genename + "</b> "+ "<br/>" + "x: " + d.xaxis + "<br/>" + "y: " + d.yaxis + "<br/>" + "size: " + d.size)
                 .style("left", (d3.event.pageX + 5) + "px")
                 .style("top", (d3.event.pageY + 10) + "px");
-              svg.selectAll("circle")
-                .style("opacity", 0.2);
               svg.selectAll(".name")
+                .transition()
+                .duration(200)
                 .style("opacity", 0.2);
               d3.select(this)
+                .transition()
+                .duration(200)
                 .attr("stroke-width", strokeWidth * 2)
                 .style("opacity", 1);
               svg.append("text")
@@ -172,11 +178,11 @@
                 .attr("stroke-width", strokeWidth);
               svg.selectAll("circle")
                 .transition()
-                .duration(100)
+                .duration(200)
                 .style("opacity", 0.7);
               svg.selectAll("text")
                 .transition()
-                .duration(100)
+                .duration(200)
                 .style("opacity", 1);
               d3.select("#t"+d.Genename)
                 .remove();
