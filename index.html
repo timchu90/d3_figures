@@ -35,7 +35,7 @@
         position: absolute;
         text-align: center;
         width: 120px;
-        height: 42px;
+        height: 50px;
         padding: 2px;
         font: 12px sans-serif;
         background: lightsteelblue;
@@ -47,7 +47,8 @@
   </head>
   <body>
     <script>
-      var margin = {top: 20, right: 20, bottom: 30, left: 50},
+      var strokeWidth = 1;
+      var margin = {top: 20, right: 20, bottom: 45, left: 50},
       width = 960 - margin.left - margin.right,
       height = 700 - margin.top - margin.bottom;
 
@@ -81,20 +82,23 @@
           if(d.color != "backgroud") {
             if(d.yaxis > 11) {
               svg.append("text")
-                .attr("x", x(d.xaxis)-15)
+                .attr("x", x(d.xaxis))
                 .attr("y", y(d.yaxis)-10)
+                .style("text-anchor", "middle")
                 .text(d.Genename);
             } else if (d.yaxis > 9){
               if (d.xaxis > 0.1 || d.xaxis < -0.1) {
                 svg.append("text")
-                  .attr("x", x(d.xaxis)-15)
+                  .attr("x", x(d.xaxis))
                   .attr("y", y(d.yaxis)-10)
+                  .style("text-anchor", "middle")
                   .text(d.Genename);
               }
             } else if (d.xaxis > 0.28 || d.xaxis < -0.28){
               svg.append("text")
-                .attr("x", x(d.xaxis)-15)
+                .attr("x", x(d.xaxis))
                 .attr("y", y(d.yaxis)-10)
+                .style("text-anchor", "middle")
                 .text(d.Genename);
             }
           }
@@ -113,17 +117,21 @@
 
         var dot = elemEnter.append("circle")
             .on("mouseover", function(d) {
+              d3.select(this)
+                .attr("stroke-width", strokeWidth * 2);
               div.transition()
                 .duration(100)
                 .style("opacity", .9);
-              div.html("<b>" + d.Genename + "</b> "+ "<br/>" + "x: " + d.xaxis + "<br/>" + "y: " + d.yaxis)
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
+              div.html("<b>" + d.Genename + "</b> "+ "<br/>" + "x: " + d.xaxis + "<br/>" + "y: " + d.yaxis + "<br/>" + "size: " + d.size)
+                .style("left", (d3.event.pageX + 5) + "px")
+                .style("top", (d3.event.pageY + 10) + "px");
             })
             .on("mouseout", function(d) {
               div.transition()
                 .duration(200)
                 .style("opacity", 0);
+              d3.select(this)
+                .attr("stroke-width", strokeWidth);
             })
             .attr("r",function(d) {
               if (d.size < 2.5) {
@@ -150,9 +158,24 @@
             .attr("transform", "translate(0," + height + ")")
             .call(d3.axisBottom(x));
 
+        svg.append("text")
+          .style("text-anchor", "middle")
+          .text("diff_PSI")
+          .attr("transform",
+                "translate(" + (width/2) + " ," +
+                               (height + margin.top + 20) + ")");
+
         // Add the Y Axis
         svg.append("g")
-            .call(d3.axisLeft(y));
+          .call(d3.axisLeft(y));
+
+        svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 0 - margin.left)
+          .attr("x",0 - (height / 2))
+          .attr("dy", "1em")
+          .style("text-anchor", "middle")
+          .text("-log10(p-value) MUT vs WT");
 
       });
     </script>
