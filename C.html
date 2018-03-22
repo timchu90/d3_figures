@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      body {
+        font: 10px sans-serif;
+      }
+      .line {
+        stroke-width: 2px;
+        opacity: 0.4;
+      }
+      #k700e {
+        stroke: darkgreen;
+        fill: lightgreen;
+      }
+      #k666n {
+        stroke: darkred;
+        fill: pink;
+      }
+      #r625 {
+        stroke: steelblue;
+        fill: lightblue;
+      }
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var margin = {top: 20, right: 20, bottom: 45, left: 50}
+      var width = chartDiv.clientHeight - margin.left - margin.right + 150;
+      var height = chartDiv.clientHeight - margin.top - margin.bottom - 50;
+
+      var x = d3.scaleLinear().range([0, width - margin.right]);
+      var y = d3.scaleLinear().range([0, height]);
+
+      var valueline = d3.area()
+        .curve(d3.curveBasis)
+        .x(function(d) { return x(d.x); })
+        .y1(function(d) { return y(d.y); })
+        .y0(y(1));
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.right + margin.left - 20)
+        .attr("height", height + margin.top + margin.bottom )
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+      d3.tsv("dataC.txt", function(error, data) {
+        if (error) throw error;
+        var K700E = Array.apply(null, Array(100)).map(Number.prototype.valueOf,0);
+        var K666N = Array.apply(null, Array(100)).map(Number.prototype.valueOf,0);
+        var R625 = Array.apply(null, Array(100)).map(Number.prototype.valueOf,0);
+
+        //convert input to density array
+        data.forEach( function(d) {
+          if (d.group == 'K700E'){
+            K700E[d.distance] = K700E[d.distance] + 1/2120;
+          } else if (d.group == 'R625') {
+            R625[d.distance] = R625[d.distance] + 1/634;
+          } else {
+            K666N[d.distance] = K666N[d.distance] + 1/122;
+          }
+        })
+
+        //change data to object
+        var K700Edata = [];
+        var K666Ndata = [];
+        var R625data = [];
+        for (i = 0; i < 100; i++) {
+          K700Edata.push({
+            x: i,
+            y: K700E[i]
+          })
+          K666Ndata.push({
+            x: i,
+            y: K666N[i]
+          })
+          R625data.push({
+            x: i,
+            y: R625[i]
+          })
+        }
+
+
+        // Scale the range of the data
+        x.domain([0, 100]);
+        y.domain([0.1, 0]);
+
+        //paths
+        svg.append("path")
+          .data([R625data])
+          .attr("id","r625")
+          .attr("class", "line")
+          .attr("d", valueline);
+
+        svg.append("path")
+          .data([K700Edata])
+          .attr("id","k700e")
+          .attr("class", "line")
+          .attr("d", valueline);
+
+        svg.append("path")
+          .data([K666Ndata])
+          .attr("id","k666n")
+          .attr("class", "line")
+          .attr("d", valueline);
+
+
+        //xaxis
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        svg.append("text")
+          .style("text-anchor", "middle")
+          .text("Distance(bp) from associated canonical 3'SS")
+          .attr("transform",
+                "translate(" + (width/2) + " ," +
+                               (height + margin.top + 20) + ")");
+        //y axis
+        svg.append("g")
+         .call(d3.axisLeft(y));
+
+        svg.append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 0 - margin.left)
+         .attr("x", 0 - (height / 2))
+         .attr("dy", "1em")
+         .style("text-anchor", "middle")
+         .text("Density");
+      });
+
+    </script>
+  </body>
+</html>
