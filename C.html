@@ -45,16 +45,11 @@
       var y = d3.scaleLinear().range([height, 0]);
 
       //size of bins
-
-      //k700e
-      var bin1 = 6;
-      //k666n
-      var bin2 = 8;
-      //r625
-      var bin3 = 2.45;
+      //k700e,k666n,r625
+      var bin = [6,8,2.45]
 
       var valueline = d3.line()
-        .curve(d3.curveBundle.beta(1))
+        .curve(d3.curveBundle.beta(0.93))
         .x(function(d) { return x(d.x); })
         .y(function(d) { return y(d.y); })
 
@@ -74,11 +69,11 @@
         //convert input to density array
         data.forEach( function(d) {
           if (d.group == 'K700E'){
-            K700E[Math.ceil(d.distance/bin1)] = K700E[Math.ceil(d.distance/bin1)] + 1/2120/bin1;
+            K700E[Math.ceil(d.distance/bin[0])] = K700E[Math.ceil(d.distance/bin[0])] + 1/2120/bin[0];
           } else if (d.group == 'R625') {
-            R625[Math.ceil(d.distance/bin3)] = R625[Math.ceil(d.distance/bin3)] + 1/634/bin3;
+            R625[Math.ceil(d.distance/bin[2])] = R625[Math.ceil(d.distance/bin[2])] + 1/634/bin[2];
           } else {
-            K666N[Math.ceil(d.distance/bin2)] = K666N[Math.ceil(d.distance/bin2)] + 1/122/bin2;
+            K666N[Math.ceil(d.distance/bin[1])] = K666N[Math.ceil(d.distance/bin[1])] + 1/122/bin[1];
           }
         })
 
@@ -88,24 +83,23 @@
         var R625data = [];
         for (i = 0; i < 100; i++) {
           K700Edata.push({
-            x: i * bin1,
+            x: i * bin[0],
             y: K700E[i]
-          })
+          });
           K666Ndata.push({
-            x: i * bin2,
+            x: i * bin[1],
             y: K666N[i]
-          })
+          });
           R625data.push({
-            x: i * bin3,
+            x: i * bin[2],
             y: R625[i]
-          })
+          });
         }
         var allData = [
           {'name':'K666N', 'values':K666Ndata},
           {'name':'K700E', 'values':K700Edata},
-          {'name':'R625', 'values':R625data},
-        ]
-        console.log(allData)
+          {'name':'R625', 'values':R625data}
+        ];
         // Scale the range of the data
         x.domain([0, 100]);
         y.domain([0, 0.08]);
@@ -140,19 +134,19 @@
         var paths = svg.selectAll('paths')
           .data(allData)
           .enter().append('g')
-          .attr('class','paths')
+          .attr('class','paths');
 
         paths.append('path')
           .attr("id", function(d){return d.name})
           .attr("class", "line")
-          .attr("d", function(d){return valueline(d.values)})
+          .attr("d", function(d){return valueline(d.values)});
 
         paths.append('path')
           .attr("id", function(d){return d.name})
           .attr("d", function(d){return valueline(d.values)})
           .attr("opacity", "0.8")
           .style("fill","none")
-          .style("stroke-width", "1.5")
+          .style("stroke-width", "1.5");
 
         //xaxis
         svg.append("g")
@@ -205,7 +199,7 @@
 
         mousePerLine.append('text')
           .attr('class', 'mouse-text')
-          .attr('x', 10)
+          .attr('x', 10);
 
         mouseG.append('svg:rect')
           .attr('width', width) // can't catch mouse events on a g element
