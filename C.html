@@ -9,18 +9,18 @@
       }
       .line {
         stroke-width: 2px;
-        opacity: 0.5;
+        opacity: 0.25;
         pointer-events: none;
       }
-      #k700e {
+      #K700E {
         stroke: darkgreen;
         fill: lightgreen;
       }
-      #k666n {
+      #K666N {
         stroke: darkred;
         fill: pink;
       }
-      #r625 {
+      #R625 {
         stroke: steelblue;
         fill: lightblue;
       }
@@ -38,14 +38,23 @@
     <div id="chart"></div>
     <script>
       var chartDiv = document.getElementById("chart");
-      var margin = {top: 20, right: 20, bottom: 45, left: 50}
+      var margin = {top: 20, right: 15, bottom: 45, left: 50}
       var width = chartDiv.clientHeight - margin.left - margin.right + 150;
       var height = chartDiv.clientHeight - margin.top - margin.bottom - 50;
       var x = d3.scaleLinear().range([0, width - margin.right]);
-      var y = d3.scaleLinear().range([0, height]);
+      var y = d3.scaleLinear().range([height, 0]);
+
+      //size of bins
+
+      //k700e
+      var bin1 = 6;
+      //k666n
+      var bin2 = 8;
+      //r625
+      var bin3 = 2.45;
 
       var valueline = d3.line()
-        .curve(d3.curveBasis)
+        .curve(d3.curveBundle.beta(1))
         .x(function(d) { return x(d.x); })
         .y(function(d) { return y(d.y); })
 
@@ -65,11 +74,11 @@
         //convert input to density array
         data.forEach( function(d) {
           if (d.group == 'K700E'){
-            K700E[d.distance] = K700E[d.distance] + 1/2120;
+            K700E[Math.ceil(d.distance/bin1)] = K700E[Math.ceil(d.distance/bin1)] + 1/2120/bin1;
           } else if (d.group == 'R625') {
-            R625[d.distance] = R625[d.distance] + 1/634;
+            R625[Math.ceil(d.distance/bin3)] = R625[Math.ceil(d.distance/bin3)] + 1/634/bin3;
           } else {
-            K666N[d.distance] = K666N[d.distance] + 1/122;
+            K666N[Math.ceil(d.distance/bin2)] = K666N[Math.ceil(d.distance/bin2)] + 1/122/bin2;
           }
         })
 
@@ -79,26 +88,27 @@
         var R625data = [];
         for (i = 0; i < 100; i++) {
           K700Edata.push({
-            x: i,
+            x: i * bin1,
             y: K700E[i]
           })
           K666Ndata.push({
-            x: i,
+            x: i * bin2,
             y: K666N[i]
           })
           R625data.push({
-            x: i,
+            x: i * bin3,
             y: R625[i]
           })
         }
         var allData = [
-          {'name':'k700e', 'values':K700Edata},
-          {'name':'k666n', 'values':K666Ndata},
-          {'name':'r625', 'values':R625data}
+          {'name':'K666N', 'values':K666Ndata},
+          {'name':'K700E', 'values':K700Edata},
+          {'name':'R625', 'values':R625data},
         ]
+        console.log(allData)
         // Scale the range of the data
         x.domain([0, 100]);
-        y.domain([0.1, 0]);
+        y.domain([0, 0.08]);
         //legend
         var legend = svg.selectAll('g')
          .data(allData)
@@ -107,7 +117,7 @@
          .attr('class', 'legend');
 
         legend.append('rect')
-         .attr('x', width - 200)
+         .attr('x', width - 100)
          .attr('y', function(d, i) {
            return i * 20;
          })
@@ -118,13 +128,14 @@
          });
 
         legend.append('text')
-         .attr('x', width - 185)
+         .attr('x', width - 85)
          .attr('y', function(d, i) {
            return (i * 20) + 9;
          })
          .text(function(d) {
            return d.name;
          });
+
         //paths
         var paths = svg.selectAll('paths')
           .data(allData)
@@ -135,7 +146,13 @@
           .attr("id", function(d){return d.name})
           .attr("class", "line")
           .attr("d", function(d){return valueline(d.values)})
-          .style("fill","none");
+
+        paths.append('path')
+          .attr("id", function(d){return d.name})
+          .attr("d", function(d){return valueline(d.values)})
+          .attr("opacity", "0.8")
+          .style("fill","none")
+          .style("stroke-width", "1.5")
 
         //xaxis
         svg.append("g")
@@ -186,6 +203,10 @@
           .style("stroke-width", "2px")
           .style("opacity", "0");
 
+        mousePerLine.append('text')
+          .attr('class', 'mouse-text')
+          .attr('x', 10)
+
         mouseG.append('svg:rect')
           .attr('width', width) // can't catch mouse events on a g element
           .attr('height', height)
@@ -196,7 +217,7 @@
               .style("opacity", "0");
             d3.selectAll(".mouse-per-line circle")
               .style("opacity", "0");
-            d3.selectAll(".mouse-per-line text")
+            d3.selectAll(".mouse-text")
               .style("opacity", "0");
           })
           .on('mouseover', function() { // on mouse in show line, circles and text
@@ -204,7 +225,7 @@
               .style("opacity", "1");
             d3.selectAll(".mouse-per-line circle")
               .style("opacity", "1");
-            d3.selectAll(".mouse-per-line text")
+            d3.selectAll(".mouse-text")
               .style("opacity", "1");
           })
           .on('mousemove', function() { // mouse moving over canvas
@@ -230,6 +251,9 @@
                   else if (pos.x < mouse[0]) beginning = target;
                   else break; //position found
                 }
+                d3.select(this).select('text')
+                  .text(y.invert(pos.y).toFixed(5));
+
                 return "translate(" + mouse[0] + "," + pos.y +")";
               }
             );
