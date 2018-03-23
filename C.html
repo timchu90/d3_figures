@@ -7,21 +7,22 @@
       body {
         font: 10px sans-serif;
       }
-
       .line {
         stroke-width: 2px;
-        opacity: 1;
-        fill: none;
+        opacity: 0.5;
         pointer-events: none;
       }
       #k700e {
         stroke: darkgreen;
+        fill: lightgreen;
       }
       #k666n {
         stroke: darkred;
+        fill: pink;
       }
       #r625 {
         stroke: steelblue;
+        fill: lightblue;
       }
       #chart {
         position: fixed;
@@ -40,12 +41,11 @@
       var margin = {top: 20, right: 20, bottom: 45, left: 50}
       var width = chartDiv.clientHeight - margin.left - margin.right + 150;
       var height = chartDiv.clientHeight - margin.top - margin.bottom - 50;
-
       var x = d3.scaleLinear().range([0, width - margin.right]);
       var y = d3.scaleLinear().range([0, height]);
 
       var valueline = d3.line()
-        .curve(d3.curveBundle.beta(0.75))
+        .curve(d3.curveBasis)
         .x(function(d) { return x(d.x); })
         .y(function(d) { return y(d.y); })
 
@@ -91,30 +91,51 @@
             y: R625[i]
           })
         }
-
-
+        var allData = [
+          {'name':'k700e', 'values':K700Edata},
+          {'name':'k666n', 'values':K666Ndata},
+          {'name':'r625', 'values':R625data}
+        ]
         // Scale the range of the data
         x.domain([0, 100]);
         y.domain([0.1, 0]);
+        //legend
+        var legend = svg.selectAll('g')
+         .data(allData)
+         .enter()
+         .append('g')
+         .attr('class', 'legend');
 
+        legend.append('rect')
+         .attr('x', width - 200)
+         .attr('y', function(d, i) {
+           return i * 20;
+         })
+         .attr('width', 10)
+         .attr('height', 10)
+         .attr('id', function(d) {
+           return d.name;
+         });
+
+        legend.append('text')
+         .attr('x', width - 185)
+         .attr('y', function(d, i) {
+           return (i * 20) + 9;
+         })
+         .text(function(d) {
+           return d.name;
+         });
         //paths
-        svg.append("path")
-          .data([R625data])
-          .attr("id","r625")
-          .attr("class", "line")
-          .attr("d", valueline);
+        var paths = svg.selectAll('paths')
+          .data(allData)
+          .enter().append('g')
+          .attr('class','paths')
 
-        svg.append("path")
-          .data([K700Edata])
-          .attr("id","k700e")
+        paths.append('path')
+          .attr("id", function(d){return d.name})
           .attr("class", "line")
-          .attr("d", valueline);
-
-        svg.append("path")
-          .data([K666Ndata])
-          .attr("id","k666n")
-          .attr("class", "line")
-          .attr("d", valueline);
+          .attr("d", function(d){return valueline(d.values)})
+          .style("fill","none");
 
         //xaxis
         svg.append("g")
@@ -138,47 +159,82 @@
          .attr("dy", "1em")
          .style("text-anchor", "middle")
          .text("Density");
-      });
 
-      var mouseG = svg.append("g")
-        .attr("class", "mouse-over-effects");
+        var mouseG = svg.append("g")
+          .attr("class", "mouse-over-effects");
 
-      mouseG.append("path") // this is the black vertical line to follow mouse
-        .attr("class", "mouse-line")
-        .style("stroke", "black")
-        .style("stroke-width", "1px")
-        .style("opacity", "0");
+        mouseG.append("path") // this is the black vertical line to follow mouse
+          .attr("class", "mouse-line")
+          .style("stroke", "black")
+          .style("stroke-width", "1px")
+          .style("opacity", "0");
 
-      mouseG.append('svg:rect')
-        .attr('width', width) // can't catch mouse events on a g element
-        .attr('height', height)
-        .attr('fill', 'none')
-        .attr('pointer-events', 'all')
-        .on('mouseout', function() { // on mouse out hide line, circles and text
-          d3.select(".mouse-line")
-            .style("opacity", "0");
-          d3.selectAll(".mouse-per-line circle")
-            .style("opacity", "0");
-          d3.selectAll(".mouse-per-line text")
-            .style("opacity", "0");
-        })
-        .on('mouseover', function() { // on mouse in show line, circles and text
-          d3.select(".mouse-line")
-            .style("opacity", "1");
-          d3.selectAll(".mouse-per-line circle")
-            .style("opacity", "1");
-          d3.selectAll(".mouse-per-line text")
-            .style("opacity", "1");
-        })
-        .on('mousemove', function() { // mouse moving over canvas
-          var mouse = d3.mouse(this);
-          d3.select(".mouse-line")
-            .attr("d", function() {
-              var d = "M" + mouse[0] + "," + height;
-              d += " " + mouse[0] + "," + 0;
-              return d;
-            });
+        var mousePerLine = mouseG.selectAll('.mouse-per-line')
+          .data(allData)
+          .enter()
+          .append("g")
+          .attr("class", "mouse-per-line");
+
+        var lines = document.getElementsByClassName('line');
+
+        mousePerLine.append("circle")
+          .attr("r", 5)
+          .attr("id", function(d) {
+            return d.name;
+          })
+          .style("fill", "none")
+          .style("stroke-width", "2px")
+          .style("opacity", "0");
+
+        mouseG.append('svg:rect')
+          .attr('width', width) // can't catch mouse events on a g element
+          .attr('height', height)
+          .attr('fill', 'none')
+          .attr('pointer-events', 'all')
+          .on('mouseout', function() { // on mouse out hide line, circles and text
+            d3.select(".mouse-line")
+              .style("opacity", "0");
+            d3.selectAll(".mouse-per-line circle")
+              .style("opacity", "0");
+            d3.selectAll(".mouse-per-line text")
+              .style("opacity", "0");
+          })
+          .on('mouseover', function() { // on mouse in show line, circles and text
+            d3.select(".mouse-line")
+              .style("opacity", "1");
+            d3.selectAll(".mouse-per-line circle")
+              .style("opacity", "1");
+            d3.selectAll(".mouse-per-line text")
+              .style("opacity", "1");
+          })
+          .on('mousemove', function() { // mouse moving over canvas
+            var mouse = d3.mouse(this);
+            d3.select(".mouse-line")
+              .attr("d", function() {
+                var d = "M" + mouse[0] + "," + height;
+                d += " " + mouse[0] + "," + 0;
+                return d;
+              });
+            d3.selectAll(".mouse-per-line")
+              .attr("transform", function(d, i) {
+                var beginning = 0,
+                    end = lines[i].getTotalLength(),
+                    target = null;
+                while(true){
+                  target = Math.floor((beginning + end) / 2);
+                  pos = lines[i].getPointAtLength(target);
+                  if ((target === end || target === beginning) && pos.x !== mouse[0]) {
+                      break;
+                  }
+                  if (pos.x > mouse[0])      end = target;
+                  else if (pos.x < mouse[0]) beginning = target;
+                  else break; //position found
+                }
+                return "translate(" + mouse[0] + "," + pos.y +")";
+              }
+            );
           });
+      });
     </script>
   </body>
 </html>
