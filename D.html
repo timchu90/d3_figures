@@ -196,7 +196,7 @@
             .attr("cx", function(d) { return x(0); })
             .attr("cy", function(d) { return y(0); })
               .transition()
-              .duration(1000)
+              .duration(2000)
               .attr("cx", function(d) { return x(d.xaxis); })
               .attr("cy", function(d) { return y(d.yaxis); })
             .attr("class", function(d) {
@@ -215,7 +215,7 @@
       svg.selectAll(".name")
         .attr("opacity",0)
           .transition()
-          .duration(2000)
+          .duration(4000)
           .attr("opacity",1)
         // Add the X Axis
         svg.append("g")
