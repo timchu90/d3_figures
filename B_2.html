@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var margin = {top: 20, right: 15, bottom: 45, left: 50}
+      var gridW = 5;
+      var gridH = 0.3;
+      var width = gridW * 164;
+      var height = gridH * 1472;
+
+
+      var colors = ["#104E8B","#104E8C","#104F8D","#10508F","#105190","#105292","#115393",
+      "#115395","#115496","#115598","#115699","#11579B","#12589C","#12589E","#12599F",
+      "#125AA1","#125BA2","#135CA3","#135DA5","#135DA6","#135EA8","#135FA9","#1360AB",
+      "#1461AC","#1462AE","#1462AF","#1463B1","#1464B2","#1465B4","#1566B5","#1567B7",
+      "#1567B8","#1568B9","#1569BB","#166ABC","#166BBE","#166CBF","#166CC1","#166DC2",
+      "#166EC4","#176FC5","#1770C7","#1771C8","#1771CA","#1772CB","#1773CD","#1874CE",
+      "#1875D0","#1876D1","#1876D2","#1877D4","#1978D5","#1979D7","#197AD8","#197BDA",
+      "#197BDB","#197CDD","#1A7DDE","#1A7EE0","#1A7FE1","#1A80E3","#1A80E4","#1A81E6",
+      "#1B82E7","#1B83E8","#1B84EA","#1B85EB","#1B85ED","#1C86EE","#1C87F0","#1C88F1",
+      "#1C89F3","#1C8AF4","#1C8AF6","#1D8BF7","#1D8CF9","#1D8DFA","#1D8EFC","#1D8FFD",
+      "#1E90FF","#1E90FF","#2B95FD","#399BFB","#47A1F9","#54A7F7","#62ADF6","#70B3F4",
+      "#7EB9F2","#8BBEF0","#99C4EE","#A7CAED","#B4D0EB","#C2D6E9","#D0DCE7","#DEE2E5",
+      "#E5E0DF","#E7D7D4","#E9CEC9","#EBC5BE","#EDBCB3","#EEB3A9","#F0AA9E","#F2A193",
+      "#F49888","#F68F7D","#F78672","#F97D67","#FB745C","#FD6B51","#FF6347","#FF6347",
+      "#FE6246","#FD6146","#FC6045","#FB5F45","#FA5E44","#F95E44","#F85D43","#F75C43",
+      "#F65B42","#F55A42","#F45941","#F35941","#F25840","#F15740","#F0563F","#EF553F",
+      "#EE553F","#ED543E","#EC533E","#EB523D","#EA513D","#E9503C","#E8503C","#E74F3B",
+      "#E64E3B","#E54D3A","#E44C3A","#E34B39","#E24B39","#E14A38","#E04938","#DF4838",
+      "#DE4737","#DD4737","#DC4636","#DB4536","#DA4435","#D94335","#D84234","#D84234",
+      "#D74133","#D64033","#D53F32","#D43E32","#D33D31","#D23D31","#D13C30","#D03B30",
+      "#CF3A30","#CE392F","#CD392F","#CC382E","#CB372E","#CA362D","#C9352D","#C8342C",
+      "#C7342C","#C6332B","#C5322B","#C4312A","#C3302A","#C22F29","#C12F29","#C02E29",
+      "#BF2D28","#BE2C28","#BD2B27","#BC2B27","#BB2A26","#BA2926","#B92825","#B82725",
+      "#B72624","#B62624","#B52523","#B42423","#B32322","#B22222","#B22222"]
+
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.right + margin.left - 20)
+        .attr("height", height + margin.top + margin.bottom )
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+      d3.tsv('dataB.tsv', function(error, data) {
+        if (error) throw error;
+
+        var buckets = 190;
+
+        var x_elements = d3.set(data.map(function(d) { return d.sample; } )).values(),
+            y_elements = d3.set(data.map(function(d) { return d.variant; } )).values();
+
+        var y_Scales = []
+
+        y_elements.forEach(function(variant){
+          y_Scales.push(
+            d3.scaleQuantile()
+                .domain([0, d3.max(data.filter(d => d.variant == variant), function (d) {return d.value;})])
+                .range(colors)
+          )
+        });
+
+        var xScale = d3.scaleBand()
+          .domain(x_elements)
+          .range([0, x_elements.length * gridW]);
+
+        var yScale = d3.scaleBand()
+          .domain(y_elements)
+          .range([y_elements.length * gridH,0]);
+
+        var elem = svg.selectAll('g')
+          .data(data)
+          .enter()
+
+        elem.append('rect')
+          .attr('width', gridW)
+          .attr('height', gridH)
+          .attr('x', function(d) { return xScale(d.sample); })
+          .attr('y', function(d) { return yScale(d.variant); })
+          .attr('class','hmRect')
+          .style('stroke','none')
+          .style("fill", function(d) {return y_Scales[y_elements.indexOf(d.variant)](d.value); });
+      });
+    </script>
+  </body>
+</html>

@@ -212,11 +212,12 @@
             });
 
       //name transition
-      svg.selectAll(".name")
-        .attr("opacity",0)
-          .transition()
-          .duration(4000)
-          .attr("opacity",1)
+        svg.selectAll(".name")
+          .attr("opacity",0)
+            .transition()
+            .duration(4000)
+            .attr("opacity",1)
+
         // Add the X Axis
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
