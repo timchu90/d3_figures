@@ -17,6 +17,18 @@
         height: inherit;
         z-index: -1;
       }
+      div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: 150px;
+        height: 45px;
+        padding: 2px;
+        font: 12px sans-serif;
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+      }
     </style>
   </head>
   <body>
@@ -24,25 +36,68 @@
     </div>
     <script>
       var chartDiv = document.getElementById("chart");
-      var margin = {top: 20, right: 15, bottom: 45, left: 50}
-      var width = chartDiv.clientHeight - margin.left - margin.right + 150;
-      var height = chartDiv.clientHeight - margin.top - margin.bottom - 50;
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+
+      var scale = d3.scaleLinear().range([0, height]).domain([0,1000]);
+
+      var heatmap_x = scale(308);
+      var heatmap_y = scale(224);
+      var heatmap_w = scale(806);
+      var heatmap_h = scale(555);
+
+      var numsamples = 164;
 
       var svg = d3.select("body").append("svg")
-        .attr("width", width + margin.right + margin.left - 20)
-        .attr("height", height + margin.top + margin.bottom )
+        .attr("width", width)
+        .attr("height", height)
+
+      var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
 
       svg.append("svg:image")
         .attr('height', height)
         .attr("xlink:href","B.png")
 
-      svg.append('rect')
-        .attr('stroke','black')
-        .attr('fill','none')
-        .attr('width',width)
-        .attr('height',height)
-        .attr('x',20)
-        .attr('y',0)
+      d3.tsv('samplenames.txt',function(error, data) {
+        if (error) throw error;
+        var x_elements = d3.set(data.map(function(d) { return d.sample; } )).values()
+        var xScale = d3.scaleBand()
+          .domain(x_elements)
+          .range([0, x_elements.length * heatmap_w/numsamples]);
+
+        var heatmap = svg.selectAll('g')
+          .data(data)
+          .enter()
+          .append('g')
+
+        heatmap.append('rect')
+          .attr('stroke','red')
+          .attr('fill','black')
+          .attr('fill-opacity',0)
+          .attr('opacity',0)
+          .attr('x',function(d) { return heatmap_x + xScale(d.sample); } )
+          .attr('y',heatmap_y)
+          .attr('height',heatmap_h)
+          .attr('width',heatmap_w/numsamples)
+          .on('mouseover',function(d){
+            div.html("<b>" + d.sample + "</b> "+ "<br/>" + "cohort: " + d.cohort + "<br/>" + "mutation: " + d.mutation)
+              .style("left", (d3.event.pageX + 5) + "px")
+              .style("top", (d3.event.pageY + 10) + "px")
+              .style("opacity", .9);
+            d3.select(this)
+              .style('opacity',1)
+          })
+          .on('mouseout',function(d){
+            div.style('opacity',0)
+            d3.select(this)
+              .transition()
+                .duration(200)
+                .style('opacity',0)
+          })
+      });
     </script>
   </body>
 </html>
