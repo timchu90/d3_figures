@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+
+
+      function calcPoints(x,y) {
+        var hex_h = 175;
+        var hex_w = 100;
+        var peak_h = 30
+        return x + ',' + (y+peak_h) +
+          ' ' + x + ',' + (y+hex_h) +
+          ' ' + (x+(hex_w/2)) + ',' + (y + hex_h + peak_h) +
+          ' ' + (x + hex_w) + ',' + (y + hex_h) +
+          ' ' + (x + hex_w) + ',' + (y + peak_h) +
+          ' ' + (x+(hex_w/2)) + ',' + y
+      }
+
+      svg.append('polygon')
+        .attr('stroke','black')
+        .attr('fill','none')
+        .attr('points', calcPoints(0,0))
+
+      svg.append('polygon')
+        .attr('points', calcPoints(200,200))
+
+    </script>
+  </body>
+</html>

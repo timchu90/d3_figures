@@ -56,10 +56,14 @@
         .attr("class", "tooltip")
         .style("opacity", 0);
 
-
       svg.append("svg:image")
-        .attr('height', height)
+        .attr('height', 0)
         .attr("xlink:href","B.png")
+        .style("opacity",0)
+          .transition()
+          .duration(2000)
+          .style("opacity",1)
+          .attr('height',height)
 
       d3.tsv('samplenames.txt',function(error, data) {
         if (error) throw error;
