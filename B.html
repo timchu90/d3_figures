@@ -24,9 +24,9 @@
         height: 45px;
         padding: 2px;
         font: 12px sans-serif;
-        background: lightsteelblue;
+        background: steelblue;
         border: 0px;
-        border-radius: 8px;
+        border-radius: 5px;
         pointer-events: none;
       }
     </style>
@@ -74,7 +74,8 @@
           .append('g')
 
         heatmap.append('rect')
-          .attr('stroke','red')
+          .attr('stroke','black')
+          .attr('stroke-width','0.5px')
           .attr('fill','black')
           .attr('fill-opacity',0)
           .attr('opacity',0)
