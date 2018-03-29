@@ -23,30 +23,65 @@
       var width = chartDiv.clientWidth -20;
       var height = chartDiv.clientHeight -20;
 
+      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var y = d3.scaleLinear().range([0,height]).domain([1000,0])
+
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
       var svg = d3.select("body").append("svg")
         .attr("width", width)
         .attr("height", height)
 
-
+      //calculate points to generate hex using center x,y
+      var hex_h = scale(60);
+      var hex_w = scale(40);
+      var peak_h = scale(15);
       function calcPoints(x,y) {
-        var hex_h = 175;
-        var hex_w = 100;
-        var peak_h = 30
-        return x + ',' + (y+peak_h) +
-          ' ' + x + ',' + (y+hex_h) +
-          ' ' + (x+(hex_w/2)) + ',' + (y + hex_h + peak_h) +
-          ' ' + (x + hex_w) + ',' + (y + hex_h) +
-          ' ' + (x + hex_w) + ',' + (y + peak_h) +
-          ' ' + (x+(hex_w/2)) + ',' + y
+        return (x - (hex_w/2)) + ',' + (y-(hex_h/2)) +
+          ' ' + (x - (hex_w/2)) + ',' + (y+(hex_h/2)) +
+          ' ' + x + ',' + (y + (hex_h/2) + peak_h) +
+          ' ' + (x + (hex_w/2)) + ',' + (y+(hex_h/2)) +
+          ' ' + (x + (hex_w/2)) + ',' + (y-(hex_h/2)) +
+          ' ' + x + ',' + (y - (hex_h/2) - peak_h)
+      }
+      //calculate x,y position of hex on circle given degrees
+      var arc_x = x(600);
+      var arc_y = y(150);
+      var arc_r = scale(450);
+      function calcArc(deg) {
+        return {
+          x:arc_x + arc_r * Math.cos(deg * (Math.PI / 180)),
+          y:arc_y + arc_r * Math.sin(deg * (Math.PI / 180)),
+        };
+      }
+      //circle for testing
+      /*
+      svg.append('circle')
+        .attr('fill','none')
+        .attr('stroke','black')
+        .attr('cx',arc_x)
+        .attr('cy',arc_y)
+        .attr('r',arc_r)
+      */
+      //calculate degree separating each hex
+      var angles = []
+      for(var i = 0; i < 21; i++){
+        angles.push(220+(i*5.5))
       }
 
-      svg.append('polygon')
-        .attr('stroke','black')
-        .attr('fill','none')
-        .attr('points', calcPoints(0,0))
-
-      svg.append('polygon')
-        .attr('points', calcPoints(200,200))
+      //draw the hexes
+      angles.forEach(function(a,index){
+        svg.append('polygon')
+          .attr('stroke','green')
+          .attr('fill','limegreen')
+          .attr('opacity',0)
+          .attr('points', calcPoints(calcArc(a).x,calcArc(a).y))
+          .attr('transform','rotate(' + (a + 90) + ','+calcArc(a).x+','+calcArc(a).y+')')
+          .transition()
+            .delay(index*50)
+            .duration(200)
+            .attr('opacity',1)
+      })
 
     </script>
   </body>

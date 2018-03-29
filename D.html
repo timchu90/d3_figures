@@ -215,8 +215,9 @@
         svg.selectAll(".name")
           .attr("opacity",0)
             .transition()
-            .duration(4000)
-            .attr("opacity",1)
+              .delay(2000)
+              .duration(1000)
+              .attr("opacity",1)
 
         // Add the X Axis
         svg.append("g")
