@@ -13,6 +13,9 @@
         z-index: -2;
         height: 100%;
       }
+      #hex5,#hex7{
+        fill: gold;
+      }
     </style>
   </head>
   <body>
@@ -34,7 +37,7 @@
 
       //calculate points to generate hex using center x,y
       var hex_h = scale(60);
-      var hex_w = scale(40);
+      var hex_w = scale(43);
       var peak_h = scale(15);
       function calcPoints(x,y) {
         return (x - (hex_w/2)) + ',' + (y-(hex_h/2)) +
@@ -45,8 +48,8 @@
           ' ' + x + ',' + (y - (hex_h/2) - peak_h)
       }
       //calculate x,y position of hex on circle given degrees
-      var arc_x = x(600);
-      var arc_y = y(150);
+      var arc_x = x(400);
+      var arc_y = y(130);
       var arc_r = scale(450);
       function calcArc(deg) {
         return {
@@ -66,14 +69,16 @@
       //calculate degree separating each hex
       var angles = []
       for(var i = 0; i < 21; i++){
-        angles.push(220+(i*5.5))
+        angles.push(215+(i*6.1))
       }
 
+      var spine = svg.append('g').attr('class','spine')
       //draw the hexes
       angles.forEach(function(a,index){
-        svg.append('polygon')
+        spine.append('polygon')
           .attr('stroke','green')
-          .attr('fill','limegreen')
+          .attr('id','hex'+index)
+          .attr('fill','yellowgreen')
           .attr('opacity',0)
           .attr('points', calcPoints(calcArc(a).x,calcArc(a).y))
           .attr('transform','rotate(' + (a + 90) + ','+calcArc(a).x+','+calcArc(a).y+')')
@@ -82,6 +87,115 @@
             .duration(200)
             .attr('opacity',1)
       })
+
+      //draw donut charts
+      var pie = d3.pie()
+          .sort(null)
+          .value(function(d) { return d.numsample; });
+
+      var calcDonutUp = function(deg,dist){
+        spine.append('line')
+          .attr('x1',calcArc(deg).x)
+          .attr('y1',calcArc(deg).y)
+          .attr('x2', dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x )
+          .attr('y2', dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y )
+          .attr('stroke','black')
+        return {
+          x: dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x ,
+          y: dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y
+        }
+      }
+
+      var calcDonutDown = function(deg,dist){
+        spine.append('line')
+          .attr('x1',calcArc(deg).x)
+          .attr('y1',calcArc(deg).y)
+          .attr('x2', -1 * dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x )
+          .attr('y2', -1 * dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y )
+          .attr('stroke','black')
+        return {
+          x: -1 * dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x  ,
+          y: -1 * dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y
+        }
+      }
+
+      var donutGen = function(input, radius, r_out, r_in, angle, distance, direction){
+        d3.tsv(input, function(error,data){
+          if (error) throw error;
+
+          var arc = d3.arc()
+              .outerRadius(radius - r_out)
+              .innerRadius(radius - r_in);
+
+          var biggarc = d3.arc()
+              .outerRadius(radius)
+              .innerRadius(radius - r_in);
+
+          if(direction == 'up'){
+            var donut = svg.append('g')
+              .append("g")
+              .attr("transform", "translate(" + calcDonutUp(angle,distance).x + "," + calcDonutUp(angle,distance).y + ")")
+              .attr('class','donut')
+          } else {
+            var donut = svg.append('g')
+              .append("g")
+              .attr("transform", "translate(" + calcDonutDown(angle,distance).x + "," + calcDonutDown(angle,distance).y + ")")
+              .attr('class','donut')
+          }
+
+          var g = donut.selectAll(".arc")
+              .data(pie(data))
+            .enter().append("g")
+              .attr("class", "arc")
+
+          g.append("path")
+            .attr('d',arc)
+            .style('stroke','white')
+            .style('fill','dodgerblue')
+            .attr('opacity',0)
+            .attr('pointer-events', 'none')
+            .on('mouseover',function(d){
+              d3.select(this)
+                .transition()
+                  .duration(200)
+                  .attr('d',biggarc)
+            })
+            .on('mouseout',function(d){
+              d3.select(this)
+                .transition()
+                  .duration(100)
+                  .attr('d',arc)
+            })
+            .transition()
+              .delay(1000)
+              .duration(500)
+              .attr('opacity',1)
+            .transition()
+              //transition doesnt work if you hover during reveal.
+              //disable mouse until after
+              .attr('pointer-events','')
+        });
+      }
+
+      donutGen('dataA/E622D.tsv', scale(20), scale(2), scale(12), angles[4], scale(100), 'up')
+      donutGen('dataA/R625C.tsv', scale(50), scale(5), scale(28), angles[4], scale(190), 'up')
+      donutGen('dataA/R625H.tsv', scale(60), scale(6), scale(35), angles[4], scale(320), 'up')
+
+      donutGen('dataA/H662D.tsv', scale(20), scale(2), scale(12), angles[5], scale(100), 'down')
+      donutGen('dataA/H662Q.tsv', scale(30), scale(3), scale(17), angles[5], scale(170), 'down')
+      donutGen('dataA/H662R.tsv', scale(20), scale(2), scale(12), angles[5], scale(240), 'down')
+      donutGen('dataA/K666E.tsv', scale(25), scale(3), scale(14), angles[5], scale(305), 'down')
+      donutGen('dataA/K666N.tsv', scale(50), scale(5), scale(28), angles[5], scale(400), 'down')
+      donutGen('dataA/K666T.tsv', scale(30), scale(3), scale(17), angles[5], scale(500), 'down')
+
+      donutGen('dataA/K700E.tsv', scale(120), scale(12), scale(65), angles[6], scale(265), 'up')
+
+      donutGen('dataA/G742D.tsv', scale(25), scale(3), scale(14), angles[7], scale(100), 'up')
+
+      donutGen('dataA/D781E.tsv', scale(20), scale(2), scale(12), angles[8], scale(100), 'down')
+      donutGen('dataA/D781G.tsv', scale(25), scale(3), scale(14), angles[8], scale(170), 'down')
+
+      donutGen('dataA/D894H.tsv', scale(20), scale(2), scale(12), angles[11], scale(100), 'up')
 
     </script>
   </body>
