@@ -305,7 +305,7 @@
         .data(cohorts)
         .enter()
           .append('g')
-          .attr('class', 'legend');
+          .attr('class', 'legend')
 
       legend.append('rect')
         .attr('x', scale(1100))
@@ -315,6 +315,11 @@
         .attr('width', scale(20))
         .attr('height', scale(20))
         .attr('fill', function(d){return colorScale(d)})
+        .attr('opacity',0)
+        .transition()
+          .delay(2000)
+          .duration(250)
+          .attr('opacity',1)
 
       legend.append('text')
         .attr('font-size', scale(20))
@@ -324,7 +329,12 @@
         })
         .text(function(d) {
           return d;
-        });
+        })
+        .attr('opacity',0)
+        .transition()
+          .delay(2000)
+          .duration(500)
+          .attr('opacity',1)
     </script>
   </body>
 </html>
