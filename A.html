@@ -16,6 +16,10 @@
       #hex5,#hex7{
         fill: gold;
       }
+      body {
+        font-family: sans-serif
+      }
+
     </style>
   </head>
   <body>
@@ -96,7 +100,7 @@
         }
       }
 
-      var donutGen = function(input, radius, r_out, r_in, angle, distance, direction){
+      var donutGen = function(input, radius, r_out, r_in, angle, distance, direction, labeldir){
         d3.tsv(input, function(error,data){
           if (error) throw error;
 
@@ -121,7 +125,7 @@
               .attr('stroke-width','1.5px')
               .attr('opacity',0)
               .transition()
-                .delay(1000)
+                .delay(1200)
                 .duration(500)
                 .attr('opacity',1)
             spine.append('circle')
@@ -143,7 +147,7 @@
               .attr('stroke-width','1.5px')
               .attr('opacity',0)
               .transition()
-                .delay(1000)
+                .delay(1200)
                 .duration(500)
                 .attr('opacity',1)
             spine.append('circle')
@@ -185,28 +189,70 @@
               //transition doesnt work if you hover during reveal.
               //disable mouse until after
               .attr('pointer-events','')
+
+            //sample number label
+            donut.append('text')
+              .attr('class','totallabel')
+              .style("text-anchor", "middle")
+              .text(d3.sum(data.map(function(d){ return d.numsample})))
+              .attr('dy', r_in/3)
+              .attr('font-size', r_in + 1)
+              .attr('opacity',0)
+              .transition()
+                .delay(1500)
+                .duration(500)
+                .attr('opacity',1)
+
+            if(labeldir == 'right'){
+              donut.append('text')
+                .attr('class','mutlabel')
+                .text(input.slice(6,11))
+                .attr('dx', radius)
+                .attr('dy',  r_in/3 )
+                .attr('font-size', r_in + 1)
+                .attr('opacity',0)
+                .transition()
+                  .delay(1800)
+                  .duration(500)
+                  .attr('opacity',1)
+
+            } else {
+              donut.append('text')
+                .attr('class','mutlabel')
+                .text(input.slice(6,11))
+                .style("text-anchor", "end")
+                .attr('dx', radius * -1)
+                .attr('dy',  r_in/3)
+                .attr('font-size', r_in + 1)
+                .attr('opacity',0)
+                .transition()
+                  .delay(1800)
+                  .duration(500)
+                  .attr('opacity',1)
+            }
+
         });
       }
 
-      donutGen('dataA/E622D.tsv', scale(20), scale(2), scale(12), angles[4], scale(100), 'up')
-      donutGen('dataA/R625C.tsv', scale(50), scale(5), scale(28), angles[4], scale(190), 'up')
-      donutGen('dataA/R625H.tsv', scale(60), scale(6), scale(35), angles[4], scale(320), 'up')
+      donutGen('dataA/E622D.tsv', scale(20), scale(2), scale(12), angles[4], scale(100), 'up', 'left')
+      donutGen('dataA/R625C.tsv', scale(50), scale(5), scale(28), angles[4], scale(190), 'up', 'left')
+      donutGen('dataA/R625H.tsv', scale(60), scale(6), scale(35), angles[4], scale(320), 'up', 'left')
 
-      donutGen('dataA/H662D.tsv', scale(20), scale(2), scale(12), angles[5], scale(100), 'down')
-      donutGen('dataA/H662Q.tsv', scale(30), scale(3), scale(17), angles[5], scale(170), 'down')
-      donutGen('dataA/H662R.tsv', scale(20), scale(2), scale(12), angles[5], scale(240), 'down')
-      donutGen('dataA/K666E.tsv', scale(25), scale(3), scale(14), angles[5], scale(305), 'down')
-      donutGen('dataA/K666N.tsv', scale(50), scale(5), scale(28), angles[5], scale(400), 'down')
-      donutGen('dataA/K666T.tsv', scale(30), scale(3), scale(17), angles[5], scale(500), 'down')
+      donutGen('dataA/H662D.tsv', scale(20), scale(2), scale(12), angles[5], scale(100), 'down', 'left')
+      donutGen('dataA/H662Q.tsv', scale(30), scale(3), scale(17), angles[5], scale(170), 'down', 'left')
+      donutGen('dataA/H662R.tsv', scale(20), scale(2), scale(12), angles[5], scale(240), 'down', 'left')
+      donutGen('dataA/K666E.tsv', scale(25), scale(3), scale(14), angles[5], scale(305), 'down', 'left')
+      donutGen('dataA/K666N.tsv', scale(50), scale(5), scale(28), angles[5], scale(400), 'down', 'left')
+      donutGen('dataA/K666T.tsv', scale(30), scale(3), scale(17), angles[5], scale(500), 'down', 'left')
 
-      donutGen('dataA/K700E.tsv', scale(120), scale(12), scale(65), angles[6], scale(265), 'up')
+      donutGen('dataA/K700E.tsv', scale(120), scale(12), scale(65), angles[6], scale(265), 'up', 'right')
 
-      donutGen('dataA/G742D.tsv', scale(25), scale(3), scale(14), angles[7], scale(100), 'up')
+      donutGen('dataA/G742D.tsv', scale(25), scale(3), scale(14), angles[7], scale(100), 'up', 'right')
 
-      donutGen('dataA/D781E.tsv', scale(20), scale(2), scale(12), angles[8], scale(100), 'down')
-      donutGen('dataA/D781G.tsv', scale(25), scale(3), scale(14), angles[8], scale(170), 'down')
+      donutGen('dataA/D781E.tsv', scale(20), scale(2), scale(12), angles[8], scale(100), 'down', 'right')
+      donutGen('dataA/D781G.tsv', scale(25), scale(3), scale(14), angles[8], scale(170), 'down', 'right')
 
-      donutGen('dataA/D894H.tsv', scale(20), scale(2), scale(12), angles[11], scale(100), 'up')
+      donutGen('dataA/D894H.tsv', scale(20), scale(2), scale(12), angles[11], scale(100), 'up', 'right')
 
       //draw the hexes
       angles.forEach(function(a,index){
