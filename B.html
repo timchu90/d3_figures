@@ -83,6 +83,7 @@
           .attr('fill','black')
           .attr('fill-opacity',0)
           .attr('opacity',0)
+          .attr('pointer-events','none')
           .attr('x',function(d) { return heatmap_x + xScale(d.sample); } )
           .attr('y',heatmap_y)
           .attr('height',heatmap_h)
@@ -102,6 +103,9 @@
                 .duration(200)
                 .style('opacity',0)
           })
+          .transition()
+            .delay(2000)
+            .attr('pointer-events','')
       });
     </script>
   </body>
