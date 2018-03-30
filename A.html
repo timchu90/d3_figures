@@ -13,7 +13,7 @@
         z-index: -2;
         height: 100%;
       }
-      #hex5,#hex7{
+      #hex4,#hex6{
         fill: gold;
       }
       body {
@@ -97,8 +97,6 @@
       }
 
       var spine = svg.append('g').attr('class','spine')
-
-
 
       var lines = spine.append('g')
       //draw donut charts
@@ -232,6 +230,7 @@
                 .duration(500)
                 .attr('opacity',1)
 
+            //mutation label
             if(labeldir == 'right'){
               donut.append('text')
                 .attr('class','mutlabel')
@@ -335,6 +334,30 @@
           .delay(2000)
           .duration(500)
           .attr('opacity',1)
+
+      var pills = svg.append('g')
+
+      pills.append('rect')
+        .attr('fill','firebrick')
+        .attr('stroke','darkred')
+        .attr('x', scale(225))
+        .attr('y', scale(650))
+        .attr('width',scale(120))
+        .attr('height', scale(45))
+        .attr('rx', scale(25))
+        .attr('ry', scale(25))
+        .attr('transform','rotate(115,' + scale(225) + ',' + scale(650) + ')')
+
+      pills.append('rect')
+        .attr('fill','dodgerblue')
+        .attr('stroke','darkblue')
+        .attr('x', scale(175))
+        .attr('y', scale(755))
+        .attr('width',scale(120))
+        .attr('height', scale(45))
+        .attr('rx', scale(25))
+        .attr('ry', scale(25))
+        .attr('transform','rotate(100,' + scale(175) + ',' + scale(755) + ')')
     </script>
   </body>
 </html>
