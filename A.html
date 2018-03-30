@@ -73,33 +73,16 @@
       }
 
       var spine = svg.append('g').attr('class','spine')
-      //draw the hexes
-      angles.forEach(function(a,index){
-        spine.append('polygon')
-          .attr('stroke','green')
-          .attr('id','hex'+index)
-          .attr('fill','yellowgreen')
-          .attr('opacity',0)
-          .attr('points', calcPoints(calcArc(a).x,calcArc(a).y))
-          .attr('transform','rotate(' + (a + 90) + ','+calcArc(a).x+','+calcArc(a).y+')')
-          .transition()
-            .delay(index*50)
-            .duration(200)
-            .attr('opacity',1)
-      })
 
+
+
+      var lines = spine.append('g')
       //draw donut charts
       var pie = d3.pie()
           .sort(null)
           .value(function(d) { return d.numsample; });
 
       var calcDonutUp = function(deg,dist){
-        spine.append('line')
-          .attr('x1',calcArc(deg).x)
-          .attr('y1',calcArc(deg).y)
-          .attr('x2', dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x )
-          .attr('y2', dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y )
-          .attr('stroke','black')
         return {
           x: dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x ,
           y: dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y
@@ -107,12 +90,6 @@
       }
 
       var calcDonutDown = function(deg,dist){
-        spine.append('line')
-          .attr('x1',calcArc(deg).x)
-          .attr('y1',calcArc(deg).y)
-          .attr('x2', -1 * dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x )
-          .attr('y2', -1 * dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y )
-          .attr('stroke','black')
         return {
           x: -1 * dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x  ,
           y: -1 * dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y
@@ -132,15 +109,49 @@
               .innerRadius(radius - r_in);
 
           if(direction == 'up'){
-            var donut = svg.append('g')
-              .append("g")
+            var donut = svg.append("g")
               .attr("transform", "translate(" + calcDonutUp(angle,distance).x + "," + calcDonutUp(angle,distance).y + ")")
               .attr('class','donut')
+            lines.append('line')
+              .attr('x1',calcArc(angle).x)
+              .attr('y1',calcArc(angle).y)
+              .attr('x2', distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x )
+              .attr('y2', distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y )
+              .attr('stroke','black')
+              .attr('stroke-width','1.5px')
+              .attr('opacity',0)
+              .transition()
+                .delay(1000)
+                .duration(500)
+                .attr('opacity',1)
+            spine.append('circle')
+              .attr('cx',distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x)
+              .attr('cy',distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y)
+              .attr('r', radius - r_in)
+              .attr('stroke','none')
+              .attr('fill','white')
           } else {
-            var donut = svg.append('g')
-              .append("g")
+            var donut = svg.append("g")
               .attr("transform", "translate(" + calcDonutDown(angle,distance).x + "," + calcDonutDown(angle,distance).y + ")")
               .attr('class','donut')
+            lines.append('line')
+              .attr('x1',calcArc(angle).x)
+              .attr('y1',calcArc(angle).y)
+              .attr('x2', -1 * distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x )
+              .attr('y2', -1 * distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y )
+              .attr('stroke','black')
+              .attr('stroke-width','1.5px')
+              .attr('opacity',0)
+              .transition()
+                .delay(1000)
+                .duration(500)
+                .attr('opacity',1)
+            spine.append('circle')
+              .attr('cx', -1 * distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x)
+              .attr('cy', -1 * distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y)
+              .attr('r', radius - r_in)
+              .attr('stroke','none')
+              .attr('fill','white')
           }
 
           var g = donut.selectAll(".arc")
@@ -197,6 +208,20 @@
 
       donutGen('dataA/D894H.tsv', scale(20), scale(2), scale(12), angles[11], scale(100), 'up')
 
+      //draw the hexes
+      angles.forEach(function(a,index){
+        spine.append('polygon')
+          .attr('stroke','green')
+          .attr('id','hex'+index)
+          .attr('fill','yellowgreen')
+          .attr('opacity',0)
+          .attr('points', calcPoints(calcArc(a).x,calcArc(a).y))
+          .attr('transform','rotate(' + (a + 90) + ','+calcArc(a).x+','+calcArc(a).y+')')
+          .transition()
+            .delay(index*50)
+            .duration(200)
+            .attr('opacity',1)
+      })
     </script>
   </body>
 </html>
