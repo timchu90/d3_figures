@@ -48,10 +48,6 @@
             .outerRadius(scale(300))
             .innerRadius(scale(200));
 
-        var arc_hist = d3.arc()
-            .outerRadius(scale(350))
-            .innerRadius(scale(300));
-
         var pieArray = pie(data);
 
         var g = donut.selectAll(".arc_chr")
@@ -74,13 +70,16 @@
                 .startAngle(startAngle + 0.005)
                 .endAngle(endAngle - 0.005)
                 .value(function(d) { return d.length; });
+            var arc_hist = d3.arc()
+                .outerRadius(function(d){return scale(300) + scale(d.data.height)})
+                .innerRadius(scale(300));
             var g = donut.selectAll(".arc_hist")
               .data(histogram(data))
               .enter().append("g")
               .attr("class","arc_hist")
 
             g.append("path")
-              .attr("d",arc_hist)
+              .attr("d", arc_hist)
               .style("fill","black")
           })
         //  }
