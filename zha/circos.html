@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+
+      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var y = d3.scaleLinear().range([0,height]).domain([1000,0])
+
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+
+      var pie = d3.pie()
+          .sort(null)
+          .padAngle(0.01)
+          .value(function(d) { return d.length; });
+
+      var donut = svg.append("g")
+        .attr("transform", "translate(" + x(500) + "," + y(500) + ")")
+        .attr('class','donut')
+
+      d3.tsv("mm10prChrLen.txt", function(error,data){
+        if (error) throw error;
+
+        var arc_chr = d3.arc()
+            .outerRadius(scale(300))
+            .innerRadius(scale(200));
+
+        var arc_hist = d3.arc()
+            .outerRadius(scale(350))
+            .innerRadius(scale(300));
+
+        var pieArray = pie(data);
+
+        var g = donut.selectAll(".arc_chr")
+            .data(pie(data))
+          .enter().append("g")
+            .attr("class", "arc_chr")
+
+        g.append("path")
+          .attr('d',arc_chr)
+          .style('fill','dodgerblue')
+
+        //for (var i in pieArray) {
+        var i = 0;
+          d3.tsv("chr1_hist.txt", function(error,data){
+            if (error) throw error;
+            var startAngle = pieArray[i].startAngle;
+            var endAngle = pieArray[i].endAngle;
+            var histogram = d3.pie()
+                .sort(null)
+                .startAngle(startAngle + 0.005)
+                .endAngle(endAngle - 0.005)
+                .value(function(d) { return d.length; });
+            var g = donut.selectAll(".arc_hist")
+              .data(histogram(data))
+              .enter().append("g")
+              .attr("class","arc_hist")
+
+            g.append("path")
+              .attr("d",arc_hist)
+              .style("fill","black")
+          })
+        //  }
+
+      })
+    </script>
+  </body>
+</html>
