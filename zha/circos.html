@@ -25,7 +25,7 @@
 
       var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
       var y = d3.scaleLinear().range([0,height]).domain([1000,0])
-
+      var mm10chr = ['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY',' chrP','chrR']
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
 
       var svg = d3.select("body").append("svg")
@@ -41,50 +41,64 @@
         .attr("transform", "translate(" + x(500) + "," + y(500) + ")")
         .attr('class','donut')
 
-      d3.tsv("mm10prChrLen.txt", function(error,data){
-        if (error) throw error;
+      // function to generate initial circle
+      var buildDonut = function(input, callback){
+        d3.tsv(input, function(error,data){
+          if (error) throw error;
 
-        var arc_chr = d3.arc()
-            .outerRadius(scale(300))
-            .innerRadius(scale(200));
+          var arc_chr = d3.arc()
+              .outerRadius(scale(300))
+              .innerRadius(scale(200));
 
-        var pieArray = pie(data);
+          var pieArray = pie(data);
+          var g = donut.selectAll(".arc_chr")
+              .data(pieArray)
+            .enter().append("g")
+              .attr("class", "arc_chr")
+          g.append("path")
+            .attr('d',arc_chr)
+            .style('fill','dodgerblue')
+          //callback to next in queue, return with pieArray
+          callback(null, pieArray)
+        })
+      }
 
-        var g = donut.selectAll(".arc_chr")
-            .data(pie(data))
-          .enter().append("g")
-            .attr("class", "arc_chr")
-
-        g.append("path")
-          .attr('d',arc_chr)
-          .style('fill','dodgerblue')
-
-        //for (var i in pieArray) {
-        var i = 0;
-          d3.tsv("chr1_hist.txt", function(error,data){
-            if (error) throw error;
-            var startAngle = pieArray[i].startAngle;
-            var endAngle = pieArray[i].endAngle;
-            var histogram = d3.pie()
-                .sort(null)
-                .startAngle(startAngle + 0.005)
-                .endAngle(endAngle - 0.005)
-                .value(function(d) { return d.length; });
-            var arc_hist = d3.arc()
-                .outerRadius(function(d){return scale(300) + scale(d.data.height)})
+      //build donut, use angles to generate histograms
+      d3.queue()
+        .defer(buildDonut,"mm10prChrLen.txt")
+        .await(function(error, pieArray){
+          if (error) throw error;
+          d3.tsv("XR4P24.txt", function(error,data){
+            //console.log(data)
+            for (var i in pieArray){
+              var binSize = 2500000
+              var binNum = Math.floor(pieArray[i].data.length / binSize)
+              var bins = Array.apply(null, Array(binNum)).map(Number.prototype.valueOf,0)
+              console.log(mm10chr[i])
+              var translocEvents = data.filter(function(item){
+                return item.Rname==mm10chr[i]
+              })
+              for (var j in translocEvents){
+                bins[Math.floor(translocEvents[j].Junction/binSize)] = bins[Math.floor(translocEvents[j].Junction/binSize)] + 5
+              }
+              var arc_hist = d3.arc()
+                .outerRadius(function(d){return scale(300) + scale(d.data)})
                 .innerRadius(scale(300));
-            var g = donut.selectAll(".arc_hist")
-              .data(histogram(data))
-              .enter().append("g")
-              .attr("class","arc_hist")
-
-            g.append("path")
-              .attr("d", arc_hist)
-              .style("fill","black")
+              var histogram = d3.pie()
+                  .sort(null)
+                  .startAngle(pieArray[i].startAngle + 0.006)
+                  .endAngle(pieArray[i].endAngle - 0.006)
+                  .value(function(d) { return binSize });
+              var h = donut.selectAll()
+                  .data(histogram(bins))
+                .enter().append("g")
+                  .attr("class","arc_hist")
+              h.append("path")
+                .attr("d", arc_hist)
+                .style("fill","black")
+            }
           })
-        //  }
-
-      })
+        })
     </script>
   </body>
 </html>
