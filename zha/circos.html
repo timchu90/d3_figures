@@ -63,49 +63,64 @@
         })
       }
 
+      var RAGangle = 6.05478491672
       var PPOIangle = 1.76806868207
+      var eventThresh = 5
+      var binSize = 2500000
 
+      var chord = d3.line()
+        .x(function(d) { return d.x; })
+        .y(function(d) { return d.y; })
+        .curve(d3.curveBasis)
+
+      var arc_hist = d3.arc()
+        .outerRadius(function(d){return scale(300) + scale(5 * d.data)})
+        .innerRadius(scale(300));
       //build donut, use angles to generate histograms
       d3.queue()
         .defer(buildDonut,"mm10prChrLen.txt")
         .await(function(error, pieArray){
           if (error) throw error;
+          console.log(pieArray)
           d3.tsv("XR4P24.txt", function(error,data){
             // for each chr, build bins, populate with events
             for (var i in pieArray){
-              var binSize = 2500000
               var binNum = Math.floor(pieArray[i].data.length / binSize)
               var bins = Array.apply(null, Array(binNum)).map(Number.prototype.valueOf,0)
-              console.log(mm10chr[i])
               var translocEvents = data.filter(function(item){
                 return item.Rname==mm10chr[i]
               })
+              //console.log(translocEvents)
               for (var j in translocEvents){
-                bins[Math.floor(translocEvents[j].Junction/binSize)] = bins[Math.floor(translocEvents[j].Junction/binSize)] + 1
+                bins[Math.floor(translocEvents[j].Junction/binSize)] = bins[Math.floor(translocEvents[j].Junction/binSize)] + 1;
               }
-              var arc_hist = d3.arc()
-                .outerRadius(function(d){return scale(300) + scale(5 * d.data)})
-                .innerRadius(scale(300));
               var histogram = d3.pie()
                   .sort(null)
                   .startAngle(pieArray[i].startAngle + 0.006)
                   .endAngle(pieArray[i].endAngle - 0.006)
                   .value(function(d) { return binSize });
-              var bin_hist = histogram(bins)
-              console.log(bin_hist)
+              var bin_hist = histogram(bins);
+              //console.log(pieArray[i].data)
+              //console.log(bin_hist)
               //get set of bins over threshold
               var eventsOverThresh = bin_hist.filter(function(item){
-                return item.data>=5
+                return item.data >= eventThresh;
               })
+              //draw historam
+              var h = donut.selectAll()
+                  .data(bin_hist)
+                .enter().append("g")
+                  .attr("class","arc_hist");
+              h.append("path")
+                .attr("d", arc_hist)
+                .style("fill","black");
               //draw curve to each bin over threshold
-              console.log(eventsOverThresh)
               for(var i in eventsOverThresh){
-                var eventAngle = (eventsOverThresh[i].startAngle + eventsOverThresh[i].endAngle) / 2
-                console.log(eventAngle)
+                var eventAngle = (eventsOverThresh[i].startAngle + eventsOverThresh[i].endAngle) / 2;
                 var curve = [
                   {
-                    x: scale(200) * Math.cos(PPOIangle - Math.PI/2 + 0.006) + x(500),
-                    y: scale(200) * Math.sin(PPOIangle - Math.PI/2 + 0.006) + y(500)
+                    x: scale(200) * Math.cos(RAGangle - Math.PI/2 + 0.006) + x(500),
+                    y: scale(200) * Math.sin(RAGangle - Math.PI/2 + 0.006) + y(500)
                   },
                   {
                     x: x(500),
@@ -116,28 +131,11 @@
                     y: scale(200) * Math.sin(eventAngle - Math.PI/2 + 0.006) + y(500)
                   }
                 ]
-                console.log(curve)
-                var chord = d3.line()
-                  .x(function(d) { return d.x; })
-                  .y(function(d) { return d.y; })
-                  .curve(d3.curveBasis)
-
-                console.log(chord(curve))
-
                 svg.append('path')
                   .attr('d', chord(curve))
                   .attr('fill', 'none')
-                  .attr('stroke','black')
-
+                  .attr('stroke','black');
               }
-
-              var h = donut.selectAll()
-                  .data(bin_hist)
-                .enter().append("g")
-                  .attr("class","arc_hist")
-              h.append("path")
-                .attr("d", arc_hist)
-                .style("fill","black")
             }
           })
         })
