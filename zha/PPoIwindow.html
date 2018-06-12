@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var margin = {top: 20, right: 15, bottom: 45, left: 50}
+      var gridW = 10;
+      var gridH = 10;
+      var width = gridW * 100;
+      var height = gridH * 18;
+
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.right + margin.left - 20)
+        .attr("height", height + margin.top + margin.bottom )
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+      d3.tsv('PPoIwindowData/WTP24_PPOIreads.txt', function(error, data) {
+        if (error) throw error;
+        console.log(data)
+        console.log(Array(17).keys())
+        var regions = d3.set(data.map(function(d) { return d.region; } )).values()
+
+        var xScale = d3.scaleBand()
+          .domain([0,100])
+          .range([0, 100 * gridW]);
+
+        var yScale = d3.scaleBand()
+          .domain(Array(17).keys())
+          .range([18 * gridH,0]);
+
+        for (var i in regions){
+          //console.log(regions[i])
+          bins = Array.apply(null, Array(100)).map(Number.prototype.valueOf,0)
+          var reads = data.filter(function(item){
+            return item.region==regions[i]
+          })
+          regionStart = regions[i].split(':')[1].split('-')[0]
+          for (var j in reads){
+            bins[Math.floor((reads[j].position-regionStart)/100)] = bins[Math.floor((reads[j].position-regionStart)/100)] + 1/reads.length;
+          }
+          console.log(bins)
+          var elem = svg.selectAll('g')
+            .data(bins)
+            .enter()
+
+          elem.append('rect')
+            .attr('width', gridW)
+            .attr('height', gridH)
+            .attr('x', function(d) {return 0; })
+            .attr('y', function(d) { console.log(yScale(i)); return yScale(i); })
+            .attr('class','hmRect')
+            .style('stroke','none');
+        }
+
+        /*
+        var y_Scales = []
+        y_elements.forEach(function(variant){
+          y_Scales.push(
+            d3.scaleQuantile()
+                .domain([0, d3.max(data.filter(d => d.variant == variant), function (d) {return d.value;})])
+                .range(colors)
+          )
+        });
+
+        for (var j in translocEvents){
+          bins[Math.floor(translocEvents[j].Junction/binSize)] = bins[Math.floor(translocEvents[j].Junction/binSize)] + 1/data.length;
+        }
+        */
+
+      });
+    </script>
+  </body>
+</html>
