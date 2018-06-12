@@ -24,9 +24,19 @@
       var width = gridW * 100;
       var height = gridH * 18;
 
+      var colors = ["#f7fbff"
+,"#deebf7"
+,"#c6dbef"
+,"#9ecae1"
+,"#6baed6"
+,"#4292c6"
+,"#2171b5"
+,"#08519c"
+,"#08306b"]
+
 
       var svg = d3.select("body").append("svg")
-        .attr("width", width + margin.right + margin.left - 20)
+        .attr("width", width + margin.right + margin.left)
         .attr("height", height + margin.top + margin.bottom )
       .append("g")
         .attr("transform",
@@ -35,17 +45,19 @@
       d3.tsv('PPoIwindowData/WTP24_PPOIreads.txt', function(error, data) {
         if (error) throw error;
         console.log(data)
-        console.log(Array(17).keys())
+
         var regions = d3.set(data.map(function(d) { return d.region; } )).values()
 
         var xScale = d3.scaleBand()
-          .domain([0,100])
+          .domain(new Array(100).fill().map((d, i) => i + 0))
           .range([0, 100 * gridW]);
 
         var yScale = d3.scaleBand()
-          .domain(Array(17).keys())
+          .domain(regions)
           .range([18 * gridH,0]);
 
+        reformatData = []
+        largestBin = 0;
         for (var i in regions){
           //console.log(regions[i])
           bins = Array.apply(null, Array(100)).map(Number.prototype.valueOf,0)
@@ -54,22 +66,41 @@
           })
           regionStart = regions[i].split(':')[1].split('-')[0]
           for (var j in reads){
-            bins[Math.floor((reads[j].position-regionStart)/100)] = bins[Math.floor((reads[j].position-regionStart)/100)] + 1/reads.length;
+            if(reads[j].position > regionStart){
+              bins[Math.floor((reads[j].position-regionStart)/100)] = bins[Math.floor((reads[j].position-regionStart)/100)] + 1;
+            }
           }
-          console.log(bins)
-          var elem = svg.selectAll('g')
-            .data(bins)
-            .enter()
 
-          elem.append('rect')
-            .attr('width', gridW)
-            .attr('height', gridH)
-            .attr('x', function(d) {return 0; })
-            .attr('y', function(d) { console.log(yScale(i)); return yScale(i); })
-            .attr('class','hmRect')
-            .style('stroke','none');
+          for (var j in bins){
+            if(bins[j]>largestBin){
+              largestBin = bins[j]
+            }
+            reformatData.push(
+              {
+                region: regions[i],
+                binNum: j,
+                binVal: bins[j]
+              }
+            )
+          }
         }
 
+        var colorScale = d3.scaleQuantile()
+          .domain([0,largestBin])
+          .range(colors)
+
+        var elem = svg.selectAll('g')
+          .data(reformatData)
+          .enter()
+
+        elem.append('rect')
+          .attr('width', gridW)
+          .attr('height', gridH)
+          .attr('x', function(d) {return xScale(d.binNum); })
+          .attr('y', function(d) {return yScale(d.region); })
+          .attr('class','hmRect')
+          .style('stroke','none')
+          .style('fill',function(d) {return colorScale(d.binVal); });
         /*
         var y_Scales = []
         y_elements.forEach(function(variant){
