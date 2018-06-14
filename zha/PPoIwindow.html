@@ -21,151 +21,131 @@
     <div id="chart"></div>
     <script>
       var chartDiv = document.getElementById("chart");
-      var margin = {top: 20, right: 15, bottom: 45, left: 50}
-      var gridW = 10;
-      var gridH = 10;
-      var width = gridW * 100;
-      var height = gridH * 18;
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
 
-      var colors = [
-      "#DEE2E5","#E5E0DF","#E7D7D4","#E9CEC9","#EBC5BE","#EDBCB3","#EEB3A9","#F0AA9E",
-      "#F2A193","#F49888","#F68F7D","#F78672","#F97D67","#FB745C","#FD6B51","#FF6347","#FF6347",
-      "#FE6246","#FD6146","#FC6045","#FB5F45","#FA5E44","#F95E44","#F85D43","#F75C43",
-      "#F65B42","#F55A42","#F45941","#F35941","#F25840","#F15740","#F0563F","#EF553F",
-      "#EE553F","#ED543E","#EC533E","#EB523D","#EA513D","#E9503C","#E8503C","#E74F3B",
-      "#E64E3B","#E54D3A","#E44C3A","#E34B39","#E24B39","#E14A38","#E04938","#DF4838",
-      "#DE4737","#DD4737","#DC4636","#DB4536","#DA4435","#D94335","#D84234","#D84234",
-      "#D74133","#D64033","#D53F32","#D43E32","#D33D31","#D23D31","#D13C30","#D03B30",
-      "#CF3A30","#CE392F","#CD392F","#CC382E","#CB372E","#CA362D","#C9352D","#C8342C",
-      "#C7342C","#C6332B","#C5322B","#C4312A","#C3302A","#C22F29","#C12F29","#C02E29",
-      "#BF2D28","#BE2C28","#BD2B27","#BC2B27","#BB2A26","#BA2926","#B92825","#B82725",
-      "#B72624","#B62624","#B52523","#B42423","#B32322","#B22222","#B22222"]
-
+      //array of colors to paint heatmap with
       colors = d3.schemeBlues[9]
 
-
       var svg = d3.select("body").append("svg")
-        .attr("width", width + margin.right + margin.left)
-        .attr("height", height + margin.top + margin.bottom )
-      .append("g")
-        .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
+        .attr("width", width)
+        .attr("height", height)
 
-      d3.tsv('PPoIwindowData/WTSTI_PPOIreads.txt', function(error, data) {
-        if (error) throw error;
-        console.log(data)
+      //function that draws the heatmap
+      var DrawHeatmap = function(input, xloc, yloc, readnum, readThresh, gridH, gridW){
+        d3.tsv(input, function(error, data) {
+          if (error) throw error;
+          console.log(data)
 
-        var regions = d3.set(data.map(function(d) { return d.region; } )).values()
+          var heatmap = svg.append("g")
+            .attr("transform",
+                  "translate(" +  scale(xloc) + "," + scale(yloc) + ")");
 
-        reformatData = []
-        largestBin = 0;
-        for (var i in regions){
-          //console.log(regions[i])
-          bins = Array.apply(null, Array(100)).map(Number.prototype.valueOf,0)
-          var reads = data.filter(function(item){
-            return item.region==regions[i]
-          })
-          regionStart = regions[i].split(':')[1].split('-')[0]
-          for (var j in reads){
-            if(reads[j].position > regionStart){
-              bins[Math.floor((reads[j].position-regionStart)/100)] = bins[Math.floor((reads[j].position-regionStart)/100)] + 1;
-            }
-          }
-          for (var j in bins){
-            if(bins[j]>largestBin){
-              largestBin = bins[j]
-            }
-            reformatData.push(
-              {
-                region: regions[i],
-                binNum: j,
-                binVal: bins[j]
+          var regions = d3.set(data.map(function(d) { return d.region; } )).values()
+
+          reformatData = []
+          //largestBin = 0;
+
+          for (var i in regions){
+            //console.log(regions[i])
+            bins = Array.apply(null, Array(100)).map(Number.prototype.valueOf,0)
+            var reads = data.filter(function(item){
+              return item.region==regions[i]
+            })
+            regionStart = regions[i].split(':')[1].split('-')[0]
+            for (var j in reads){
+              if(reads[j].position > regionStart){
+                bins[Math.floor((reads[j].position-regionStart)/100)] = bins[Math.floor((reads[j].position-regionStart)/100)] + 1/readnum;
               }
-            )
+            }
+            for (var j in bins){
+              /*
+              if(bins[j]>largestBin){
+                largestBin = bins[j]
+              }*/
+              reformatData.push(
+                {
+                  region: regions[i],
+                  binNum: j,
+                  binVal: bins[j]
+                }
+              )
+            }
           }
-        }
-        console.log(reformatData)
-        /*
+          console.log(reformatData)
+          /*
 
-        var PPOIsites = reformatData.filter(function(item){
-          return item.binNum==49
-        })
-        function comparePPOIsites(a,b) {
-          if (a.binVal < b.binVal)
-            return -1;
-          if (a.binVal > b.binVal)
-            return 1;
-          return 0;
-        }
+          var PPOIsites = reformatData.filter(function(item){
+            return item.binNum==49
+          })
+          function comparePPOIsites(a,b) {
+            if (a.binVal < b.binVal)
+              return -1;
+            if (a.binVal > b.binVal)
+              return 1;
+            return 0;
+          }
 
-        PPOIsites.sort(comparePPOIsites)
-        console.log(PPOIsites)
+          PPOIsites.sort(comparePPOIsites)
+          console.log(PPOIsites)
 
-        var regionsSorted = PPOIsites.map(a => a.region)
-        console.log(regionsSorted)
-        */
+          var regionsSorted = PPOIsites.map(a => a.region)
+          console.log(regionsSorted)
+          */
 
-        var regionsSorted = [
-          'chr1:46071100-46081100',
-          'chr1:93147786-93157786',
-          'chr1:113899189-113909189',
-          'chr1:191116008-191126008',
-          'chr3:121244941-121254941',
-          'chr3:138072312-138082312',
-          'chr4:72023087-72033087',
-          'chr5:114847065-114857065',
-          'chr7:120749166-120759166',
-          'chr9:113561737-113571737',
-          'chr10:55567708-55577708',
-          'chr12:80436534-80446534',
-          'chr13:45893844-45903844',
-          'chr14:56689153-56699153',
-          'chr17:6936940-6946940',
-          'chr17:7947365-7957365',
-          'chr17:24661019-24671019',
-          'chrX:116282269-116292269'
-        ]
+          var regionsSorted = [
+            'chr1:46071100-46081100',
+            'chr1:93147786-93157786',
+            'chr1:113899189-113909189',
+            'chr1:191116008-191126008',
+            'chr3:121244941-121254941',
+            'chr3:138072312-138082312',
+            'chr4:72023087-72033087',
+            'chr5:114847065-114857065',
+            'chr7:120749166-120759166',
+            'chr9:113561737-113571737',
+            'chr10:55567708-55577708',
+            'chr12:80436534-80446534',
+            'chr13:45893844-45903844',
+            'chr14:56689153-56699153',
+            'chr17:6936940-6946940',
+            'chr17:7947365-7957365',
+            'chr17:24661019-24671019',
+            'chrX:116282269-116292269'
+          ]
 
-        var xScale = d3.scaleBand()
-          .domain(new Array(100).fill().map((d, i) => i + 0))
-          .range([0, 100 * gridW]);
+          var xScale = d3.scaleBand()
+            .domain(new Array(100).fill().map((d, i) => i + 0))
+            .range([0, 100 * scale(gridW)]);
 
-        var yScale = d3.scaleBand()
-          .domain(regionsSorted)
-          .range([0,18 * gridH]);
+          var yScale = d3.scaleBand()
+            .domain(regionsSorted)
+            .range([0,18 * scale(gridH)]);
 
-        var colorScale = d3.scaleQuantile()
-          .domain([0,18])
-          .range(colors)
+          var colorScale = d3.scaleQuantile()
+            .domain([0,readThresh])
+            .range(colors)
 
-        var elem = svg.selectAll('g')
-          .data(reformatData)
-          .enter()
+          var elem = heatmap.selectAll('g')
+            .data(reformatData)
+            .enter()
 
-        elem.append('rect')
-          .attr('width', gridW)
-          .attr('height', gridH)
-          .attr('x', function(d) {return xScale(d.binNum); })
-          .attr('y', function(d) {return yScale(d.region); })
-          .attr('class','hmRect')
-          .style('stroke','none')
-          .style('fill',function(d) {return colorScale(d.binVal);});
-        /*
-        var y_Scales = []
-        y_elements.forEach(function(variant){
-          y_Scales.push(
-            d3.scaleQuantile()
-                .domain([0, d3.max(data.filter(d => d.variant == variant), function (d) {return d.value;})])
-                .range(colors)
-          )
+          elem.append('rect')
+            .attr('width', scale(gridW))
+            .attr('height', scale(gridH))
+            .attr('x', function(d) {return xScale(d.binNum); })
+            .attr('y', function(d) {return yScale(d.region); })
+            .attr('class','hmRect')
+            .style('stroke','none')
+            .style('fill',function(d) {return colorScale(d.binVal);});
         });
+      }
 
-        for (var j in translocEvents){
-          bins[Math.floor(translocEvents[j].Junction/binSize)] = bins[Math.floor(translocEvents[j].Junction/binSize)] + 1/data.length;
-        }
-        */
-
-      });
+      DrawHeatmap("PPoIwindowData/WTSTI_PPOIreads.txt",10,10,11720120,0.000001,10,10)
+      DrawHeatmap("PPoIwindowData/WTP24_PPOIreads.txt",10,210,22555862,0.000001,10,10)
+      DrawHeatmap("PPoIwindowData/XR4STISTD_PPOIreads.txt",10,410,37815260,0.000001,10,10)
+      DrawHeatmap("PPoIwindowData/XR4P24_PPOIreads.txt",10,610,22058537,0.000001,10,10)
     </script>
   </body>
 </html>

@@ -24,145 +24,153 @@
       var height = chartDiv.clientHeight -20;
 
       var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
-      var y = d3.scaleLinear().range([0,height]).domain([1000,0])
+      var y = d3.scaleLinear().range([0,height]).domain([0,1000])
       var mm10chr = ['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY',' chrP','chrR']
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
 
       var RAGangle = 6.25158924242
       var PPOIangle = 1.76806868207
-      var eventThresh = 5
-      var binSize = 2500000
-      var eventInput = "circosData/WT24.txt"
-      var baitAngle = PPOIangle
-      var histogramMultiplier = 2500
-      var chrInner = 180
-      var chrOuter = 210
-
       var svg = d3.select("body").append("svg")
         .attr("width", width)
         .attr("height", height)
 
-      var pie = d3.pie()
-          .sort(null)
-          .padAngle(0.01)
-          .value(function(d) { return d.length; });
+      var DrawCircos = function(input,xloc,yloc,baitAngle,chrInner,chrOuter,binSize,eventThresh,histogramMultiplier){
 
-      var donut = svg.append("g")
-        .attr("transform", "translate(" + x(500) + "," + y(500) + ")")
-        .attr('class','donut')
+        var pie = d3.pie()
+            .sort(null)
+            .padAngle(0.01)
+            .value(function(d) { return d.length; });
 
-      // function to generate initial circle
-      var buildDonut = function(input, callback){
-        d3.tsv(input, function(error,data){
-          if (error) throw error;
+        var donut = svg.append("g")
+          .attr("transform", "translate(" + x(xloc) + "," + y(yloc) + ")")
+          .attr('class','donut')
 
-          var arc_chr = d3.arc()
-              .outerRadius(scale(chrOuter))
-              .innerRadius(scale(chrInner));
+        // function to generate initial circle
+        var buildDonut = function(input, callback){
+          d3.tsv(input, function(error,data){
+            if (error) throw error;
 
-          var pieArray = pie(data);
-          var g = donut.selectAll(".arc_chr")
-              .data(pieArray)
-            .enter().append("g")
-              .attr("class", "arc_chr")
-          g.append("path")
-            .attr('d',arc_chr)
-            .style('fill','dodgerblue')
-          //callback to next in queue, return with pieArray
-          callback(null, pieArray)
-        })
-      }
+            var arc_chr = d3.arc()
+                .outerRadius(scale(chrOuter))
+                .innerRadius(scale(chrInner));
 
-      var chord = d3.line()
-        .x(function(d) { return d.x; })
-        .y(function(d) { return d.y; })
-        .curve(d3.curveBasis)
+            var pieArray = pie(data);
+            var g = donut.selectAll(".arc_chr")
+                .data(pieArray)
+              .enter().append("g")
+                .attr("class", "arc_chr")
+            g.append("path")
+              .attr('d',arc_chr)
+              .style('fill','dodgerblue')
+            //callback to next in queue, return with pieArray
+            callback(null, pieArray)
+          })
+        }
 
-      var arc_hist = d3.arc()
-        .outerRadius(function(d){
-          if(d.data == 0){
-            return scale(chrOuter);
-          } else {
-            return scale(chrOuter) + scale(histogramMultiplier * d.data)
-          }
-        })
-        .innerRadius(scale(chrOuter));
-      //build donut, use angles to generate histograms
-      d3.queue()
-        .defer(buildDonut,"circosData/mm10prChrLen.txt")
-        .await(function(error, pieArray){
-          if (error) throw error;
-          console.log(pieArray)
-          d3.tsv(eventInput, function(error,data){
-            // for each chr, build bins, populate with events
-            for (var i in pieArray){
-              var binNum = Math.floor(pieArray[i].data.length / binSize)
-              var bins = Array.apply(null, Array(binNum)).map(Number.prototype.valueOf,0)
-              //console.log(data.length)
-              var translocEvents = data.filter(function(item){
-                return item.Rname==mm10chr[i]
-              })
-              //console.log(translocEvents)
-              for (var j in translocEvents){
-                bins[Math.floor(translocEvents[j].Junction/binSize)] = bins[Math.floor(translocEvents[j].Junction/binSize)] + 1/data.length;
-              }
-              //normalize for chrP size. 2.5Mb/5370bp
-              if(i == 21){
-                bins[0] = bins[0] * 465.55
-              }
-              //normalize for chrR size and extra copies. 2.5Mb/(45306bp*350)
-              if (i == 22){
-                bins[0] = bins[0] * 0.157658084
-              }
+        var chord = d3.line()
+          .x(function(d) { return d.x; })
+          .y(function(d) { return d.y; })
+          .curve(d3.curveBasis)
 
-              var histogram = d3.pie()
-                  .sort(null)
-                  .startAngle(pieArray[i].startAngle + 0.006)
-                  .endAngle(pieArray[i].endAngle - 0.006)
-                  .value(function(d) { return binSize });
-              var bin_hist = histogram(bins);
-              //console.log(pieArray[i].data)
-              //console.log(bin_hist)
-
-              //draw historam
-              var h = donut.selectAll()
-                  .data(bin_hist)
-                .enter().append("g")
-                  .attr("class","arc_hist");
-              h.append("path")
-                .attr("d", arc_hist)
-                .style("fill","black");
-
-              //get set of bins over threshold
-              var eventsOverThresh = bin_hist.filter(function(item){
-                return item.data >= eventThresh/data.length;
-              })
-              //draw curve to each bin over threshold
-              for(var i in eventsOverThresh){
-                var eventAngle = (eventsOverThresh[i].startAngle + eventsOverThresh[i].endAngle) / 2;
-                var curve = [
-                  {
-                    x: scale(chrInner) * Math.cos(baitAngle - Math.PI/2) + x(500),
-                    y: scale(chrInner) * Math.sin(baitAngle - Math.PI/2) + y(500)
-                  },
-                  {
-                    x: x(500),
-                    y: y(500)
-                  },
-                  {
-                    x: scale(chrInner) * Math.cos(eventAngle - Math.PI/2) + x(500),
-                    y: scale(chrInner) * Math.sin(eventAngle - Math.PI/2) + y(500)
-                  }
-                ]
-                svg.append('path')
-                  .attr('d', chord(curve))
-                  .attr('fill', 'none')
-                  .attr('stroke','black')
-                  .attr('stroke-width','0.5px');
-              }
+        var arc_hist = d3.arc()
+          .outerRadius(function(d){
+            if(d.data == 0){
+              return scale(chrOuter);
+            } else {
+              return scale(chrOuter) + scale(histogramMultiplier * Math.log10(1+d.data))
             }
           })
-        })
+          .innerRadius(scale(chrOuter));
+        //build donut, use angles to generate histograms
+        d3.queue()
+          .defer(buildDonut,"circosData/mm10prChrLen.txt")
+          .await(function(error, pieArray){
+            if (error) throw error;
+            console.log(pieArray)
+            d3.tsv(input, function(error,data){
+              // for each chr, build bins, populate with events
+              for (var i in pieArray){
+                var binNum = Math.floor(pieArray[i].data.length / binSize)
+                var bins = Array.apply(null, Array(binNum)).map(Number.prototype.valueOf,0)
+                //console.log(data.length)
+                var translocEvents = data.filter(function(item){
+                  return item.Rname==mm10chr[i]
+                })
+                //console.log(translocEvents)
+                for (var j in translocEvents){
+                  bins[Math.floor(translocEvents[j].Junction/binSize)] = bins[Math.floor(translocEvents[j].Junction/binSize)] + 1/data.length;
+                }
+                //normalize for chrP size. 2.5Mb/5370bp
+                if(i == 21){
+                  bins[0] = bins[0] * 465.55
+                }
+                //normalize for chrR size and extra copies. 2.5Mb/(45306bp*350)
+                if (i == 22){
+                  bins[0] = bins[0] * 0.157658084
+                }
+
+                var histogram = d3.pie()
+                    .sort(null)
+                    .startAngle(pieArray[i].startAngle + 0.006)
+                    .endAngle(pieArray[i].endAngle - 0.006)
+                    .value(function(d) { return binSize });
+                var bin_hist = histogram(bins);
+                //console.log(pieArray[i].data)
+                //console.log(bin_hist)
+
+                //draw historam
+                var h = donut.selectAll()
+                    .data(bin_hist)
+                  .enter().append("g")
+                    .attr("class","arc_hist");
+                h.append("path")
+                  .attr("d", arc_hist)
+                  .style("fill","black");
+
+                //get set of bins over threshold
+                var eventsOverThresh = bin_hist.filter(function(item){
+                  return item.data >= eventThresh/data.length;
+                })
+                //draw curve to each bin over threshold
+                for(var i in eventsOverThresh){
+                  var eventAngle = (eventsOverThresh[i].startAngle + eventsOverThresh[i].endAngle) / 2;
+                  var curve = [
+                    {
+                      x: scale(chrInner) * Math.cos(baitAngle - Math.PI/2) + x(xloc),
+                      y: scale(chrInner) * Math.sin(baitAngle - Math.PI/2) + y(yloc)
+                    },
+                    {
+                      x: x(xloc),
+                      y: y(yloc)
+                    },
+                    {
+                      x: scale(chrInner) * Math.cos(eventAngle - Math.PI/2) + x(xloc),
+                      y: scale(chrInner) * Math.sin(eventAngle - Math.PI/2) + y(yloc)
+                    }
+                  ]
+                  svg.append('path')
+                    .attr('d', chord(curve))
+                    .attr('fill', 'none')
+                    .attr('stroke','black')
+                    .attr('stroke-width','0.5px');
+                }
+              }
+            })
+          })
+        }
+        /*
+        var eventThresh = 5
+        var binSize = 2500000
+        var eventInput = "circosData/WT24.txt"
+        var baitAngle = PPOIangle
+        var histogramMultiplier = 2500
+        var chrInner = 180
+        var chrOuter = 210
+        */
+        DrawCircos("circosData/WT24.txt",250,250,PPOIangle,100,120,2500000,5,2000)
+        DrawCircos("circosData/XR24.txt",500,250,PPOIangle,100,120,2500000,5,2000)
+        DrawCircos("circosData/WTP24.txt",250,600,RAGangle,100,120,2500000,5,2000)
+        DrawCircos("circosData/XR4P24.txt",500,600,RAGangle,100,120,2500000,5,2000)
     </script>
   </body>
 </html>
