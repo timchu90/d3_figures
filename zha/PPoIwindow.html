@@ -34,6 +34,13 @@
 
       //function that draws the heatmap
       var DrawHeatmap = function(input, xloc, yloc, readnum, readThresh, gridH, gridW){
+        //parameters:
+        //input - input file
+        //xloc, yloc - x and y coords for top left of heatmap
+        //readnum - number of total reads in bam file. used to normalize
+        //readThresh - value threshold when displaying signal. values over threshold will show as threshold
+        //gridH, gridW - height and width of each grid in heatmap
+
         d3.tsv(input, function(error, data) {
           if (error) throw error;
           console.log(data)
@@ -73,7 +80,7 @@
               )
             }
           }
-          console.log(reformatData)
+          //console.log(reformatData)
           /*
 
           var PPOIsites = reformatData.filter(function(item){

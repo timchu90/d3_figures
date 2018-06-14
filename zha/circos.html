@@ -35,6 +35,14 @@
         .attr("height", height)
 
       var DrawCircos = function(input,xloc,yloc,baitAngle,chrInner,chrOuter,binSize,eventThresh,histogramMultiplier){
+        //parameters:
+        //input - input file
+        //xloc, yloc - x and y location of center of circos
+        //baitAngle - angle where chords will start
+        //chrInner, chrOuter - inner radius and outer radius of chr band
+        //binSize - siez of bin for histogram
+        //eventThresh - threshold number for each bin in which to draw chord to
+        //histogramMultiplier - flat multiplier to histogram values
 
         var pie = d3.pie()
             .sort(null)
