@@ -45,10 +45,10 @@
       var y = d3.scaleLinear().range([0,height]).domain([1000,0])
 
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
-      var cohorts = ['CUMC_CLL','dbGaP_CLL','ICGC_CLL','Leucegene_AML','TCGA_AML','GEO_Nalm6','MSK_K562','TCGA_KIRC','TCGA_PRAD','TCGA_SARC','TCGA_THYM','TCGA_LIHC','TCGA_BRCA','MSK_MCF7','MSK_T47D','MSK_MCF10A','TCGA_UVM','TCGA_SKCM']
+      var cohorts = ['CUMC_CLL','dbGaP_CLL','ICGC_CLL','Leucegene_AML','TCGA_AML','GEO_Nalm6','GEO_MDS','MSK_K562','TCGA_KIRC','TCGA_PRAD','TCGA_SARC','TCGA_THYM','TCGA_LIHC','TCGA_BRCA','TCGA_BLCA','TCGA_UVM','TCGA_SKCM']
       var colorScale = d3.scaleOrdinal()
         .domain(cohorts)
-        .range(['darkgray','gray','slategray','darkcyan','darkgreen','darkolivegreen','yellowgreen','tan','peachpuff','lightgray','deeppink','indigo','steelblue','darkblue','cadetblue','dodgerblue','indianred','darkorange'])
+        .range(['darkgray','gray','slategray','darkcyan','darkgreen','darkolivegreen','cadetblue','yellowgreen','tan','peachpuff','lightgray','deeppink','indigo','steelblue','darkblue','indianred','darkorange'])
 
       // add the tooltip
       var div = d3.select("body").append("div")
@@ -65,15 +65,15 @@
         .attr('stroke','black')
         .attr('stroke-width','2px')
         .attr('x1', scale(205))
-        .attr('y1', scale(650))
-        .attr('x2', scale(240))
-        .attr('y2', scale(600))
+        .attr('y1', scale(710))
+        .attr('x2', scale(270))
+        .attr('y2', scale(620))
 
       pills.append('rect')
         .attr('fill','firebrick')
         .attr('stroke','darkred')
-        .attr('x', scale(225))
-        .attr('y', scale(650))
+        .attr('x', scale(215))
+        .attr('y', scale(610))
         .attr('width',scale(120))
         .attr('height', scale(45))
         .attr('rx', scale(25))
@@ -83,7 +83,7 @@
         .attr('fill','dodgerblue')
         .attr('stroke','darkblue')
         .attr('x', scale(175))
-        .attr('y', scale(755))
+        .attr('y', scale(710))
         .attr('width',scale(120))
         .attr('height', scale(45))
         .attr('rx', scale(25))
@@ -102,7 +102,7 @@
           ' ' + x + ',' + (y - (hex_h/2) - peak_h)
       }
       //calculate x,y position of hex on circle given degrees
-      var arc_x = x(400);
+      var arc_x = x(430);
       var arc_y = y(130);
       var arc_r = scale(450);
       function calcArc(deg) {
@@ -292,25 +292,28 @@
         });
       }
 
-      donutGen('dataA/E622D.tsv', scale(20), scale(2), scale(12), angles[4], scale(100), 'up', 'left')
-      donutGen('dataA/R625C.tsv', scale(50), scale(5), scale(28), angles[4], scale(190), 'up', 'left')
-      donutGen('dataA/R625H.tsv', scale(60), scale(6), scale(35), angles[4], scale(320), 'up', 'left')
+      donutGen('dataA/E622D.tsv', scale(20), scale(2), scale(12), angles[3], scale(100), 'up', 'left')
+      donutGen('dataA/R625C.tsv', scale(50), scale(5), scale(28), angles[3], scale(190), 'up', 'left')
+      donutGen('dataA/R625H.tsv', scale(60), scale(6), scale(35), angles[3], scale(320), 'up', 'left')
 
-      donutGen('dataA/H662D.tsv', scale(20), scale(2), scale(12), angles[5], scale(100), 'down', 'left')
-      donutGen('dataA/H662Q.tsv', scale(30), scale(3), scale(17), angles[5], scale(170), 'down', 'left')
-      donutGen('dataA/H662R.tsv', scale(20), scale(2), scale(12), angles[5], scale(240), 'down', 'left')
-      donutGen('dataA/K666E.tsv', scale(25), scale(3), scale(14), angles[5], scale(305), 'down', 'left')
-      donutGen('dataA/K666N.tsv', scale(50), scale(5), scale(28), angles[5], scale(400), 'down', 'left')
-      donutGen('dataA/K666T.tsv', scale(30), scale(3), scale(17), angles[5], scale(500), 'down', 'left')
+      donutGen('dataA/H662D.tsv', scale(20), scale(2), scale(12), angles[4], scale(100), 'down', 'left')
+      donutGen('dataA/H662Q.tsv', scale(30), scale(3), scale(17), angles[4], scale(160), 'down', 'left')
+      donutGen('dataA/H662R.tsv', scale(20), scale(2), scale(12), angles[4], scale(220), 'down', 'left')
+      donutGen('dataA/K666E.tsv', scale(25), scale(3), scale(14), angles[4], scale(275), 'down', 'left')
+      donutGen('dataA/K666N.tsv', scale(50), scale(5), scale(28), angles[4], scale(360), 'down', 'left')
+      donutGen('dataA/K666R.tsv', scale(20), scale(2), scale(12), angles[4], scale(440), 'down', 'left')
+      donutGen('dataA/K666T.tsv', scale(30), scale(3), scale(17), angles[4], scale(500), 'down', 'left')
 
-      donutGen('dataA/K700E.tsv', scale(120), scale(12), scale(65), angles[6], scale(265), 'up', 'right')
+      donutGen('dataA/K700E.tsv', scale(120), scale(12), scale(65), angles[5], scale(265), 'up', 'right')
 
-      donutGen('dataA/G742D.tsv', scale(25), scale(3), scale(14), angles[7], scale(100), 'up', 'right')
+      donutGen('dataA/G742D.tsv', scale(25), scale(3), scale(14), angles[6], scale(100), 'up', 'right')
 
-      donutGen('dataA/D781E.tsv', scale(20), scale(2), scale(12), angles[8], scale(100), 'down', 'right')
-      donutGen('dataA/D781G.tsv', scale(25), scale(3), scale(14), angles[8], scale(170), 'down', 'right')
+      donutGen('dataA/D781E.tsv', scale(20), scale(2), scale(12), angles[7], scale(100), 'down', 'right')
+      donutGen('dataA/D781G.tsv', scale(25), scale(3), scale(14), angles[7], scale(170), 'down', 'right')
 
-      donutGen('dataA/D894H.tsv', scale(20), scale(2), scale(12), angles[11], scale(100), 'up', 'right')
+      donutGen('dataA/D894H.tsv', scale(20), scale(2), scale(12), angles[10], scale(100), 'up', 'right')
+      donutGen('dataA/E902G.tsv', scale(20), scale(2), scale(12), angles[10], scale(150), 'up', 'right')
+      donutGen('dataA/E902K.tsv', scale(40), scale(4), scale(24), angles[10], scale(220), 'up', 'right')
 
       //draw the hexes
       angles.forEach(function(a,index){
