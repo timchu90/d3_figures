@@ -28,8 +28,8 @@
       var mm10chr = ['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY',' chrP','chrR']
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
 
-      var RAGangle = 6.25158924242
-      var PPOIangle = 1.76806868207
+      var RAGangle = 6.14896100996
+      var PPOIangle = 1.86584034217
       var svg = d3.select("body").append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -47,7 +47,9 @@
         var pie = d3.pie()
             .sort(null)
             .padAngle(0.01)
-            .value(function(d) { return d.length; });
+            .value(function(d) { return d.length; })
+            .startAngle(0.1)
+            .endAngle(6.18);
 
         var donut = svg.append("g")
           .attr("transform", "translate(" + x(xloc) + "," + y(yloc) + ")")
@@ -69,11 +71,27 @@
                 .attr("class", "arc_chr")
             g.append("path")
               .attr('d',arc_chr)
-              .style('fill','dodgerblue')
+              .style('fill','lightskyblue')
             //callback to next in queue, return with pieArray
+            //draw circles scale
+            var drawScale = function(value){
+              donut.append('circle')
+                .attr('cx',0)
+                .attr('cy',0)
+                .attr('r', scale(chrInner) + scale(histogramMultiplier * Math.log10(value + 1)))
+                .style('fill', 'none')
+                .style('stroke','white');
+            }
+            drawScale(1)
+            drawScale(5)
+            drawScale(20)
+            drawScale(100)
+            drawScale(500)
+
             callback(null, pieArray)
           })
         }
+
 
         var chord = d3.line()
           .x(function(d) { return d.x; })
@@ -83,12 +101,13 @@
         var arc_hist = d3.arc()
           .outerRadius(function(d){
             if(d.data == 0){
-              return scale(chrOuter);
+              return scale(chrInner);
             } else {
-              return scale(chrOuter) + scale(histogramMultiplier * Math.log10(1+d.data))
+              return scale(chrInner) + scale(histogramMultiplier * Math.log10(1000 * d.data + 1))
             }
           })
-          .innerRadius(scale(chrOuter));
+          .innerRadius(scale(chrInner));
+
         //build donut, use angles to generate histograms
         d3.queue()
           .defer(buildDonut,"circosData/mm10prChrLen.txt")
@@ -122,6 +141,7 @@
                     .startAngle(pieArray[i].startAngle + 0.006)
                     .endAngle(pieArray[i].endAngle - 0.006)
                     .value(function(d) { return binSize });
+                    
                 var bin_hist = histogram(bins);
                 //console.log(pieArray[i].data)
                 //console.log(bin_hist)
@@ -175,10 +195,10 @@
         var chrInner = 180
         var chrOuter = 210
         */
-        DrawCircos("circosData/WT24.txt",250,250,PPOIangle,100,120,2500000,5,2000)
-        DrawCircos("circosData/XR24.txt",500,250,PPOIangle,100,120,2500000,5,2000)
-        DrawCircos("circosData/WTP24.txt",250,600,RAGangle,100,120,2500000,5,2000)
-        DrawCircos("circosData/XR4P24.txt",500,600,RAGangle,100,120,2500000,5,2000)
+        DrawCircos("circosData/WT24.txt",150,250,PPOIangle,100,200,2500000,5,37)
+        DrawCircos("circosData/XR24.txt",450,250,PPOIangle,100,200,2500000,5,37)
+        DrawCircos("circosData/WTP24.txt",150,700,RAGangle,100,200,2500000,5,37)
+        DrawCircos("circosData/XR4P24.txt",450,700,RAGangle,100,200,2500000,5,37)
     </script>
   </body>
 </html>

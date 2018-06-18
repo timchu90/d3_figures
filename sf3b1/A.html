@@ -45,10 +45,10 @@
       var y = d3.scaleLinear().range([0,height]).domain([1000,0])
 
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
-      var cohorts = ['CUMC_CLL','dbGaP_CLL','ICGC_CLL','Leucegene_AML','TCGA_AML','GEO_Nalm6','GEO_MDS','MSK_K562','TCGA_KIRC','TCGA_PRAD','TCGA_SARC','TCGA_THYM','TCGA_LIHC','TCGA_BRCA','TCGA_BLCA','TCGA_UVM','TCGA_SKCM']
+      var cohorts = ['CUMC_CLL','dbGaP_CLL','ICGC_CLL','GEO_Nalm6','Leucegene_AML','TCGA_AML','MSK_K562','GEO_MDS','TCGA_UVM','TCGA_SKCM','TCGA_KIRC','TCGA_PRAD','TCGA_SARC','TCGA_THYM','TCGA_LIHC','TCGA_BRCA','TCGA_BLCA']
       var colorScale = d3.scaleOrdinal()
         .domain(cohorts)
-        .range(['darkgray','gray','slategray','darkcyan','darkgreen','darkolivegreen','cadetblue','yellowgreen','tan','peachpuff','lightgray','deeppink','indigo','steelblue','darkblue','indianred','darkorange'])
+        .range(['#E91C24','#ED1C24','#F05029','#FAD405','#FAAA33','#D1DD26','#F2E900','#F68E1E','#4252A3','#40C2D6','#C7C2A6','#FDCE94','#B9C7C2','#009149','#20B24A','#6588BA','#2E2E7B'])
 
       // add the tooltip
       var div = d3.select("body").append("div")
@@ -267,7 +267,7 @@
                 .text(input.slice(6,11))
                 .attr('dx', radius)
                 .attr('dy',  r_in/3 )
-                .attr('font-size', r_in + 1)
+                .attr('font-size', 6)
                 .attr('opacity',0)
                 .transition()
                   .delay(1800)
@@ -281,7 +281,7 @@
                 .style("text-anchor", "end")
                 .attr('dx', radius * -1)
                 .attr('dy',  r_in/3)
-                .attr('font-size', r_in + 1)
+                .attr('font-size', 6)
                 .attr('opacity',0)
                 .transition()
                   .delay(1800)
