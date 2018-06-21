@@ -13,6 +13,9 @@
         z-index: -2;
         height: 100%;
       }
+      body {
+        font-family: sans-serif
+      }
     </style>
   </head>
   <body>
@@ -66,6 +69,32 @@
               .enter().append("g")
                 .attr("class", "arc_chr")
 
+            g.select()
+              .data(pieArray)
+              .enter().append('text')
+              .text(function(d){return d.data.chr})
+              .attr('dx', function(d){
+                if(d.data.chr == "P"){
+                  return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2)) + 10)
+                } else if (d.data.chr == "R") {
+                  return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2)) - 10)
+                } else {
+                return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2)) - 2)
+                }
+              })
+              .attr('dy', function(d){
+                if(d.data.chr == "P"){
+                  return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 3.5)
+                } else if (d.data.chr == "R") {
+                  return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 5)
+                } else {
+                return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 5 )
+                }
+              })
+              .style('font-size',scale(15))
+              .style('fill','black')
+              .style("text-anchor", "middle")
+
             /*
             g.append("path")
               .attr('d',d3.arc()
@@ -79,14 +108,21 @@
               donut.append('circle')
                 .attr('cx',0)
                 .attr('cy',0)
-                .attr('r', scale(chrInner) + scale(histogramMultiplier * Math.log10(end + 1)))
+                .attr('r', scale(chrInner) + scale(histogramMultiplier * Math.log10(end+1)))
                 .style('fill', 'none')
                 .style('stroke','white');
+              donut.append('text')
+                .text(end)
+                .attr('dx', 0)
+                .attr('dy', -1 * (scale(chrInner) + scale(histogramMultiplier * Math.log10(end+1))) + scale(5))
+                .style('font-size',scale(12))
+                .style('fill','black')
+                .style("text-anchor", "middle")
               g.append("path")
                 .attr('d',
                   d3.arc()
-                    .outerRadius(scale(chrInner) + scale(histogramMultiplier * Math.log10(end + 1)))
-                    .innerRadius(scale(chrInner) + scale(histogramMultiplier * Math.log10(start + 1)))
+                    .outerRadius(scale(chrInner) + scale(histogramMultiplier * Math.log10(end+1)))
+                    .innerRadius(scale(chrInner) + scale(histogramMultiplier * Math.log10(start+1)))
                 )
                 .style('fill',color)
             }
@@ -94,7 +130,7 @@
             drawScale(1,5,'#deebf7')
             drawScale(5,25,'#c6dbef')
             drawScale(25,100,'#9ecae1')
-
+            drawScale(100,500,'#6baed6')
 
             callback(null, pieArray)
           })
@@ -106,6 +142,7 @@
           .y(function(d) { return d.y; })
           .curve(d3.curveBasis)
 
+        /*
         var arc_hist = d3.arc()
           .outerRadius(function(d){
             if(d.data == 0){
@@ -115,13 +152,24 @@
             }
           })
           .innerRadius(scale(chrInner));
-
+        */
         var radial = d3.lineRadial()
           .radius(function(d){
             if(d.data == 0){
               return scale(chrInner);
             } else {
               return scale(chrInner) + scale(histogramMultiplier * Math.log10(1000 * d.data + 1))
+            }
+          })
+          .angle(function(d){return (d.startAngle + d.endAngle)/2})
+          .curve(d3.curveLinear)
+
+        var radialBasis = d3.lineRadial()
+          .radius(function(d){
+            if(d.data == 0){
+              return scale(chrInner);
+            } else {
+              return scale(chrInner) + scale(1.3 * histogramMultiplier * Math.log10(1000 * d.data + 1))
             }
           })
           .angle(function(d){return (d.startAngle + d.endAngle)/2})
@@ -132,7 +180,7 @@
           .defer(buildDonut,"circosData/mm10prChrLen.txt")
           .await(function(error, pieArray){
             if (error) throw error;
-            console.log(pieArray)
+            //console.log(pieArray)
             d3.tsv(input, function(error,data){
               // for each chr, build bins, populate with events
               for (var i in pieArray){
@@ -170,9 +218,20 @@
                 var h = donut.append("path")
                     .attr('d',radial(bin_hist))
                     .attr('fill','none')
-                    .attr('stroke','black')
+                    .attr('stroke','red')
                     .attr('stroke-width','1.01px')
+                    .attr('opacity',0.6)
                     .attr("class","radial");
+                /*
+                donut.append("path")
+                    .attr('d',radialBasis(bin_hist))
+                    .attr('fill','none')
+                    .attr('stroke','blue')
+                    .attr('stroke-width','1.01px')
+                    .attr('opacity',0.5)
+                    .attr("class","radial")
+                */
+
 
                 //console.log(radial(bin_hist))
                 /*
@@ -180,10 +239,10 @@
                   .attr("d", radial)
                   .style("stroke","black");
                 */
-
+                //console.log(bin_hist)
                 //get set of bins over threshold
                 var eventsOverThresh = bin_hist.filter(function(item){
-                  return item.data >= eventThresh/data.length;
+                  return 1000 * item.data +1 >= eventThresh +1;
                 })
                 //draw curve to each bin over threshold
                 for(var i in eventsOverThresh){
@@ -221,10 +280,10 @@
         var chrInner = 180
         var chrOuter = 210
         */
-        DrawCircos("circosData/WT24.txt",150,250,PPOIangle,100,200,2500000,5,50)
-        DrawCircos("circosData/XR24.txt",450,250,PPOIangle,100,200,2500000,5,50)
-        DrawCircos("circosData/WTP24.txt",150,700,RAGangle,100,200,2500000,5,50)
-        DrawCircos("circosData/XR4P24.txt",450,700,RAGangle,100,200,2500000,5,50)
+        DrawCircos("circosData/WT24.txt",160,250,PPOIangle,90,235,2500000,5,50)
+        DrawCircos("circosData/XR24.txt",500,250,PPOIangle,90,235,2500000,5,50)
+        DrawCircos("circosData/WTP24.txt",160,750,RAGangle,90,235,2500000,5,50)
+        DrawCircos("circosData/XR4P24.txt",500,750,RAGangle,90,235,2500000,5,50)
     </script>
   </body>
 </html>
