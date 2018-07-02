@@ -15,6 +15,9 @@
         bottom: 0px;
         z-index: -1;
       }
+      body {
+        font-family: sans-serif
+      }
     </style>
   </head>
   <body>
@@ -33,7 +36,7 @@
         .attr("height", height)
 
       //function that draws the heatmap
-      var DrawHeatmap = function(input, xloc, yloc, readnum, readThresh, gridH, gridW){
+      var DrawHeatmap = function(input, xloc, yloc, readnum, readThresh, gridH, gridW, label){
         //parameters:
         //input - input file
         //xloc, yloc - x and y coords for top left of heatmap
@@ -75,12 +78,12 @@
                 {
                   region: regions[i],
                   binNum: j,
-                  binVal: bins[j]
+                  binVal: bins[j] * 1000000
                 }
               )
             }
           }
-          //console.log(reformatData)
+          console.log(reformatData)
 
           /*
           var PPOIsites = reformatData.filter(function(item){
@@ -115,30 +118,25 @@
           console.log(regionsSorted)
           */
 
-          /*
           var regionsSorted = [
-            'chr1:46071100-46081100',
-            'chr1:93147786-93157786',
-            'chr1:113899189-113909189',
-            'chr1:191116008-191126008',
-            'chr3:121244941-121254941',
-            'chr3:138072312-138082312',
-            'chr4:72023087-72033087',
-            'chr5:114847065-114857065',
-            'chr7:120749166-120759166',
-            'chr9:113561737-113571737',
-            'chr10:55567708-55577708',
-            'chr12:80436534-80446534',
-            'chr13:45893844-45903844',
-            'chr14:56689153-56699153',
-            'chr17:6936940-6946940',
-            'chr17:7947365-7957365',
-            'chr17:24661019-24671019',
-            'chrX:116282269-116292269'
-          ]
-          */
-          var regionsSorted = [
-            "chr17:24661019-24671019", "chr12:80436534-80446534", "chr1:191116008-191126008", "chr7:120749166-120759166", "chr5:114847065-114857065", "chr14:56689153-56699153", "chr3:121244941-121254941", "chr1:46071100-46081100", "chr17:7947365-7957365", "chrX:116282269-116292269", "chr17:6936940-6946940", "chr1:113899189-113909189", "chr13:45893844-45903844", "chr3:138072312-138082312", "chr9:113561737-113571737", "chr1:93147786-93157786", "chr10:55567708-55577708", "chr4:72023087-72033087"
+            "chr17:24661019-24671019",
+            "chr12:80436534-80446534",
+            "chr1:191116008-191126008",
+            "chr7:120749166-120759166",
+            "chr5:114847065-114857065",
+            "chr14:56689153-56699153",
+            "chr3:121244941-121254941",
+            "chr1:46071100-46081100",
+            "chr17:7947365-7957365",
+            "chrX:116282269-116292269",
+            "chr17:6936940-6946940",
+            "chr1:113899189-113909189",
+            "chr13:45893844-45903844",
+            "chr3:138072312-138082312",
+            "chr9:113561737-113571737",
+            "chr1:93147786-93157786",
+            "chr10:55567708-55577708",
+            "chr4:72023087-72033087"
           ]
 
           var xScale = d3.scaleBand()
@@ -164,14 +162,24 @@
             .attr('y', function(d) {return yScale(d.region); })
             .attr('class','hmRect')
             .style('stroke','none')
-            .style('fill',function(d) {return colorScale(d.binVal);});
+            .style('fill',function(d) {
+              if(d.binVal < readThresh){
+                return colorScale(d.binVal)
+              } else {
+                return "black"
+              }
+            });
+
+          heatmap.append('text')
+            .text(label)
+            .attr('x', scale(1020))
+            .attr('y', scale(90))
         });
       }
-
-      DrawHeatmap("PPoIwindowData/WTSTI_PPOIreads.txt",10,10,11720120,0.000001,10,10)
-      DrawHeatmap("PPoIwindowData/WTP24_PPOIreads.txt",10,210,22555862,0.000001,10,10)
-      DrawHeatmap("PPoIwindowData/XR4STISTD_PPOIreads.txt",10,410,37815260,0.000001,10,10)
-      DrawHeatmap("PPoIwindowData/XR4P24_PPOIreads.txt",10,610,22058537,0.000001,10,10)
+      DrawHeatmap("PPoIwindowData/WTSTI_PPOIreads.txt",10,10,11720120,4,10,10,"WTSTI")
+      DrawHeatmap("PPoIwindowData/WTP24_PPOIreads.txt",10,210,22555862,4,10,10,"WTP24")
+      DrawHeatmap("PPoIwindowData/XR4STISTD_PPOIreads.txt",10,410,37815260,4,10,10,"XR4STISTD")
+      DrawHeatmap("PPoIwindowData/XR4P24_PPOIreads.txt",10,610,22058537,4,10,10,"XR4P24")
     </script>
   </body>
 </html>

@@ -28,7 +28,7 @@
 
       var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
       var y = d3.scaleLinear().range([0,height]).domain([0,1000])
-      var mm10chr = ['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY',' chrP','chrR']
+      var mm10chr = ['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY','chrP','chrR']
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
 
       var RAGangle = 6.14896100996
@@ -75,18 +75,18 @@
               .text(function(d){return d.data.chr})
               .attr('dx', function(d){
                 if(d.data.chr == "P"){
-                  return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2)) + 10)
+                  return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2))-3)
                 } else if (d.data.chr == "R") {
-                  return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2)) - 10)
+                  return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2))+5)
                 } else {
                 return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2)) - 2)
                 }
               })
               .attr('dy', function(d){
                 if(d.data.chr == "P"){
-                  return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 3.5)
-                } else if (d.data.chr == "R") {
                   return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 5)
+                } else if (d.data.chr == "R") {
+                  return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 3.5)
                 } else {
                 return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 5 )
                 }
@@ -126,11 +126,14 @@
                 )
                 .style('fill',color)
             }
-            drawScale(0,1,'#f7fbff')
-            drawScale(1,5,'#deebf7')
-            drawScale(5,25,'#c6dbef')
-            drawScale(25,100,'#9ecae1')
-            drawScale(100,500,'#6baed6')
+            drawScale(0,5,'#f7fbff')
+            drawScale(5,20,'#deebf7')
+            drawScale(20,100,'#c6dbef')
+            drawScale(100,500,'#9ecae1')
+            drawScale(500,2500,'#6baed6')
+            drawScale(2500,12500,'#4292c6')
+            drawScale(12500,60000,'#2171b5')
+            drawScale(62500,300000,'#08519c')
 
             callback(null, pieArray)
           })
@@ -187,7 +190,9 @@
                 var binNum = Math.floor(pieArray[i].data.length / binSize)
                 var bins = Array.apply(null, Array(binNum)).map(Number.prototype.valueOf,0)
                 //console.log(data.length)
+                console.log(data)
                 var translocEvents = data.filter(function(item){
+                  //console.log(item.Rname)
                   return item.Rname==mm10chr[i]
                 })
                 //console.log(translocEvents)
@@ -196,6 +201,7 @@
                 }
                 //normalize for chrP size. 2.5Mb/5370bp
                 if(i == 21){
+                  console.log(bins[0])
                   bins[0] = bins[0] * 465.55
                 }
                 //normalize for chrR size and extra copies. 2.5Mb/(45306bp*350)
@@ -220,7 +226,7 @@
                     .attr('fill','none')
                     .attr('stroke','red')
                     .attr('stroke-width','1.01px')
-                    .attr('opacity',0.6)
+                    .attr('opacity',0.8)
                     .attr("class","radial");
                 /*
                 donut.append("path")
@@ -272,18 +278,11 @@
           })
         }
         /*
-        var eventThresh = 5
-        var binSize = 2500000
-        var eventInput = "circosData/WT24.txt"
-        var baitAngle = PPOIangle
-        var histogramMultiplier = 2500
-        var chrInner = 180
-        var chrOuter = 210
         */
-        DrawCircos("circosData/WT24.txt",170,250,PPOIangle,90,235,2500000,5,50)
-        DrawCircos("circosData/XR24.txt",510,250,PPOIangle,90,235,2500000,5,50)
-        DrawCircos("circosData/WTP24.txt",170,750,RAGangle,90,235,2500000,5,50)
-        DrawCircos("circosData/XR4P24.txt",510,750,RAGangle,90,235,2500000,5,50)
+        DrawCircos("circosData/WT24.txt",170,250,PPOIangle,90,235,2500000,10,24)
+        DrawCircos("circosData/XR24.txt",510,250,PPOIangle,90,235,2500000,10,24)
+        DrawCircos("circosData/WTP24.txt",170,750,RAGangle,90,235,2500000,10,24)
+        DrawCircos("circosData/XR4P24.txt",510,750,RAGangle,90,235,2500000,10,24)
     </script>
   </body>
 </html>
