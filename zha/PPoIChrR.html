@@ -73,11 +73,11 @@
               )
             }
             console.log(reformatData)
-            var x = d3.scaleLinear().range([0, chartW]).domain([0,100]);
+            var x = d3.scaleLinear().range([0, chartW]).domain([0,100.5]);
             var y = d3.scaleLinear().range([chartH, 0]).domain([0,0.0005]);
 
             var valueline = d3.line()
-              .x(function(d) { return x(d.binNum); })
+              .x(function(d) { return x(parseInt(d.binNum)+1); })
               .y(function(d) { return y(d.binVal); })
               .curve(d3.curveBasis)
 

@@ -33,7 +33,7 @@
         .attr("height", height)
 
       //function that draws the heatmap
-      var DrawLine = function(input1,input2,xloc, yloc,readnum1,readnum2,chartH,chartW){
+      var DrawLine = function(input,xloc, yloc,readnum,chartH,chartW, color){
         //parameters:
         //input - input file
         //xloc, yloc - x and y coords for top left of heatmap
@@ -48,7 +48,7 @@
           d3.tsv(input, function(error, data) {
             var bins = Array.apply(null, Array(100)).map(Number.prototype.valueOf,0)
             if (error) throw error;
-            //console.log(data)
+            console.log(data)
             var regions = d3.set(data.map(function(d) { return d.region; } )).values()
 
             for (var i in regions){
@@ -68,57 +68,43 @@
         }
 
         d3.queue()
-          .defer(dataIntoBins,input1,readnum1)
-          .defer(dataIntoBins,input2,readnum2)
-          .await(function(error, bin1, bin2){
+          .defer(dataIntoBins,input,readnum)
+          .await(function(error, bin){
             var reformatData = []
-            var reformatData2 = []
-            var reformatData3 = []
-            for (var j in bin1){
-              reformatData3.push(
-                {
-                  binNum: j,
-                  binVal: bin1[j]
-                }
-              )
-              reformatData2.push(
-                {
-                  binNum: j,
-                  binVal: bin2[j]
-                }
-              )
+            for (var j in bin){
               reformatData.push(
                 {
                   binNum: j,
-                  binVal: bin1[j] - bin2[j]
+                  binVal: bin[j]
                 }
               )
             }
             console.log(reformatData)
-            var x = d3.scaleLinear().range([0, chartW]).domain([0,100]);
-            var y = d3.scaleLinear().range([chartH, 0]).domain([0,Math.max.apply(Math,reformatData3.map(function(o){return o.binVal;}))]);
+            var x = d3.scaleLinear().range([0, chartW]).domain([0,100.5]);
+            var y = d3.scaleLinear().range([chartH, 0]).domain([0,Math.max.apply(Math,reformatData.map(function(o){return o.binVal;}))]);
 
             var valueline = d3.line()
-              .x(function(d) { return x(d.binNum); })
+              .x(function(d) {return x(parseInt(d.binNum)+1); })
               .y(function(d) { return y(d.binVal); })
               .curve(d3.curveBasis)
 
             linechart.append("path")
               .attr('d',valueline(reformatData))
-              .attr('stroke','black')
-              .attr('fill','none')
-            linechart.append("path")
-              .attr('d',valueline(reformatData2))
-              .attr('stroke','red')
-              .attr('fill','none')
-            linechart.append("path")
-              .attr('d',valueline(reformatData3))
-              .attr('stroke','blue')
+              .attr('stroke',color)
+              .attr('stroke-width','2px')
               .attr('fill','none')
 
           })
       }
-      DrawLine("PPoIwindowData/XR4P24_PPOIreads.txt","PPoIwindowData/XR4STISTD_PPOIreads.txt",0,0,22058537,37815260,scale(250),width)
+      DrawLine("PPoIwindowData/XR4P24_PPOIreads.txt",50,10,22058537,scale(250),width-100, "blue")
+      DrawLine("EndSeqPPOIwindowData/XR4P24_PPOIreads.txt",50,10,25638170,scale(250),width-100, "red")
+
+      svg.append("g")
+          .attr("transform", "translate("+scale(50)+"," + scale(260) + ")")
+          .call(d3.axisBottom(d3.scaleLinear().range([0,width-100]).domain([-5000,5000])));
+      svg.append("g")
+        .attr("transform", "translate("+scale(50)+"," + scale(10) + ")")
+        .call(d3.axisLeft(d3.scaleLinear().range([0,scale(250)]).domain([0.0005,0])));
     </script>
   </body>
 </html>
