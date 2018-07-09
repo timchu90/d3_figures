@@ -81,7 +81,7 @@
             }
             console.log(reformatData)
             var x = d3.scaleLinear().range([0, chartW]).domain([0,100.5]);
-            var y = d3.scaleLinear().range([chartH, 0]).domain([0,Math.max.apply(Math,reformatData.map(function(o){return o.binVal;}))]);
+            var y = d3.scaleLinear().range([chartH, 0]).domain([0,0.000015]);
 
             var valueline = d3.line()
               .x(function(d) {return x(parseInt(d.binNum)+1); })
@@ -93,8 +93,8 @@
               .attr('stroke',color)
               .attr('stroke-width','2px')
               .attr('fill','none')
-
           })
+
       }
       DrawLine("PPoIwindowData/XR4P24_PPOIreads.txt",50,10,22058537,scale(250),width-100, "blue")
       DrawLine("EndSeqPPOIwindowData/XR4P24_PPOIreads.txt",50,10,25638170,scale(250),width-100, "red")
@@ -104,7 +104,7 @@
           .call(d3.axisBottom(d3.scaleLinear().range([0,width-100]).domain([-5000,5000])));
       svg.append("g")
         .attr("transform", "translate("+scale(50)+"," + scale(10) + ")")
-        .call(d3.axisLeft(d3.scaleLinear().range([0,scale(250)]).domain([0.0005,0])));
+        .call(d3.axisLeft(d3.scaleLinear().range([0,scale(250)]).domain([15,0])));
     </script>
   </body>
 </html>

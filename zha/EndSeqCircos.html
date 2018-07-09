@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+
+      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var y = d3.scaleLinear().range([0,height]).domain([0,1000])
+      var mm10chr = ['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY','chrP','chrR']
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
+      var RAGangle = 6.14896100996
+      var PPOIangle = 1.86584034217
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+
+      var DrawCircos = function(input,xloc,yloc,baitAngle,chrInner,chrOuter,binSize,eventThresh,histogramMultiplier){
+        //parameters:
+        //input - input file
+        //xloc, yloc - x and y location of center of circos
+        //baitAngle - angle where chords will start
+        //chrInner, chrOuter - inner radius and outer radius of chr band
+        //binSize - siez of bin for histogram
+        //eventThresh - threshold number for each bin in which to draw chord to
+        //histogramMultiplier - flat multiplier to histogram values
+
+        var pie = d3.pie()
+            .sort(null)
+            .padAngle(0.01)
+            .value(function(d) { return d.length; })
+            .startAngle(0.1)
+            .endAngle(6.18);
+
+        var donut = svg.append("g")
+          .attr("transform", "translate(" + x(xloc) + "," + y(yloc) + ")")
+          .attr('class','donut')
+
+        // function to generate initial circle
+        var buildDonut = function(input, callback){
+          d3.tsv(input, function(error,data){
+            if (error) throw error;
+
+            var pieArray = pie(data);
+            var g = donut.selectAll(".arc_chr")
+                .data(pieArray)
+              .enter().append("g")
+                .attr("class", "arc_chr")
+
+            g.select()
+              .data(pieArray)
+              .enter().append('text')
+              .text(function(d){return d.data.chr})
+              .attr('dx', function(d){
+                if(d.data.chr == "P"){
+                  return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2))-3)
+                } else if (d.data.chr == "R") {
+                  return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2))+5)
+                } else {
+                return scale(chrOuter * Math.cos(((d.startAngle + d.endAngle - Math.PI)/2)) - 2)
+                }
+              })
+              .attr('dy', function(d){
+                if(d.data.chr == "P"){
+                  return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 5)
+                } else if (d.data.chr == "R") {
+                  return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 3.5)
+                } else {
+                return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 5 )
+                }
+              })
+              .style('font-size',scale(15))
+              .style('fill','black')
+              .style("text-anchor", "middle")
+
+            /*
+            g.append("path")
+              .attr('d',d3.arc()
+                  .outerRadius(scale(chrInner+15))
+                  .innerRadius(scale(chrInner)))
+              .style('fill','#f7fbff')
+            */
+            //callback to next in queue, return with pieArray
+            //draw circles scale
+            var drawScale = function(start,end,color){
+              donut.append('circle')
+                .attr('cx',0)
+                .attr('cy',0)
+                .attr('r', scale(chrInner) + scale(histogramMultiplier * end))
+                .style('fill', 'none')
+                .style('stroke','white');
+              donut.append('text')
+                .text(end)
+                .attr('dx', 0)
+                .attr('dy', -1 * (scale(chrInner) + scale(histogramMultiplier * end)) + scale(5))
+                .style('font-size',scale(12))
+                .style('fill','black')
+                .style("text-anchor", "middle")
+              g.append("path")
+                .attr('d',
+                  d3.arc()
+                    .outerRadius(scale(chrInner) + scale(histogramMultiplier * end))
+                    .innerRadius(scale(chrInner) + scale(histogramMultiplier * start))
+                )
+                .style('fill',color)
+            }
+            drawScale(-500,-400,'#a50026')
+            drawScale(-400,-300,'#d73027')
+            drawScale(-300,-200,'#f46d43')
+            drawScale(-200,-100,'#fdae61')
+            drawScale(-100,0,'#fee090')
+            drawScale(0,100,'#e0f3f8')
+            drawScale(100,200,'#abd9e9')
+            drawScale(200,300,'#74add1')
+            drawScale(300,400,'#4575b4')
+            drawScale(400,500,'#313695')
+
+
+            /*
+            drawScale(0,5,'#f7fbff')
+            drawScale(5,20,'#deebf7')
+            drawScale(20,100,'#c6dbef')
+            drawScale(100,500,'#9ecae1')
+            drawScale(500,2500,'#6baed6')
+            drawScale(2500,12500,'#4292c6')
+            drawScale(12500,60000,'#2171b5')
+            drawScale(62500,300000,'#08519c')
+            */
+
+            callback(null, pieArray)
+          })
+        }
+
+
+        var chord = d3.line()
+          .x(function(d) { return d.x; })
+          .y(function(d) { return d.y; })
+          .curve(d3.curveBasis)
+
+        /*
+        var arc_hist = d3.arc()
+          .outerRadius(function(d){
+            if(d.data == 0){
+              return scale(chrInner);
+            } else {
+              return scale(chrInner) + scale(histogramMultiplier * Math.log10(1000 * d.data + 1))
+            }
+          })
+          .innerRadius(scale(chrInner));
+        */
+        var radial = d3.lineRadial()
+          .radius(function(d){
+            if(d.data.diff == 0){
+              return scale(chrInner);
+            } else {
+              return scale(chrInner) + scale(histogramMultiplier *  d.data.diff)
+            }
+          })
+          .angle(function(d){return (d.startAngle + d.endAngle)/2})
+          .curve(d3.curveLinear)
+
+        //build donut, use angles to generate histograms
+        d3.queue()
+          .defer(buildDonut,"EndSeqCircosData/mm10prChrLen.txt")
+          .await(function(error, pieArray){
+            if (error) throw error;
+            //console.log(pieArray)
+            d3.tsv(input, function(error,data){
+              // for each chr, build bins, populate with events
+              console.log(pieArray)
+              for (var i in pieArray){
+
+                //console.log(data.length)
+                //console.log(pieArray[i].data.chr)
+                bins = data.filter(function(item){
+                  return item.chromosome==pieArray[i].data.chr
+                })
+                //console.log(bins)
+                var histogram = d3.pie()
+                    .sort(null)
+                    .startAngle(pieArray[i].startAngle + 0.006)
+                    .endAngle(pieArray[i].endAngle - 0.006)
+                    .value(function(d) { return binSize });
+
+                var bin_hist = histogram(bins);
+                //console.log(pieArray[i].data)
+                console.log(bin_hist)
+
+                //draw historam
+                //console.log(donut)
+                var h = donut.append("path")
+                    .attr('d',radial(bin_hist))
+                    .attr('fill','none')
+                    .attr('stroke','black')
+                    .attr('stroke-width','1.01px')
+                    .attr('opacity',0.8)
+                    .attr("class","radial");
+                /*
+                donut.append("path")
+                    .attr('d',radialBasis(bin_hist))
+                    .attr('fill','none')
+                    .attr('stroke','blue')
+                    .attr('stroke-width','1.01px')
+                    .attr('opacity',0.5)
+                    .attr("class","radial")
+                */
+
+
+                //console.log(radial(bin_hist))
+                /*
+                h.append("path")
+                  .attr("d", radial)
+                  .style("stroke","black");
+                */
+                //console.log(bin_hist)
+                //get set of bins over threshold
+                var eventsOverThresh = bin_hist.filter(function(item){
+                  return 1000 * item.data +1 >= eventThresh +1;
+                })
+                //draw curve to each bin over threshold
+                for(var i in eventsOverThresh){
+                  var eventAngle = (eventsOverThresh[i].startAngle + eventsOverThresh[i].endAngle) / 2;
+                  var curve = [
+                    {
+                      x: scale(chrInner) * Math.cos(baitAngle - Math.PI/2) + x(xloc),
+                      y: scale(chrInner) * Math.sin(baitAngle - Math.PI/2) + y(yloc)
+                    },
+                    {
+                      x: x(xloc),
+                      y: y(yloc)
+                    },
+                    {
+                      x: scale(chrInner) * Math.cos(eventAngle - Math.PI/2) + x(xloc),
+                      y: scale(chrInner) * Math.sin(eventAngle - Math.PI/2) + y(yloc)
+                    }
+                  ]
+                  svg.append('path')
+                    .attr('d', chord(curve))
+                    .attr('fill', 'none')
+                    .attr('stroke','black')
+                    .attr('stroke-width','0.5px');
+                }
+              }
+            })
+          })
+        }
+        /*
+        //parameters:
+        //input - input file
+        //xloc, yloc - x and y location of center of circos
+        //baitAngle - angle where chords will start
+        //chrInner, chrOuter - inner radius and outer radius of chr band
+        //binSize - siez of bin for histogram
+        //eventThresh - threshold number for each bin in which to draw chord to
+        //histogramMultiplier - flat multiplier to histogram values
+        */
+        DrawCircos("EndSeqCircosData/XR4_EndSeq.bedgraph",170,250,PPOIangle,130,200,2500000,10,0.1)
+        DrawCircos("EndSeqCircosData/WT_EndSeq.bedgraph",500,250,PPOIangle,130,200,2500000,10,0.1)
+        DrawCircos("EndSeqCircosData/XR4P24_EndSeq.bedgraph",170,700,PPOIangle,130,200,2500000,10,0.02)
+    </script>
+  </body>
+</html>

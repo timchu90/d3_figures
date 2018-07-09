@@ -98,7 +98,7 @@
           .call(d3.axisBottom(d3.scaleLinear().range([0,width-100]).domain([-5000,5000])));
       svg.append("g")
         .attr("transform", "translate("+scale(50)+"," + scale(10) + ")")
-        .call(d3.axisLeft(d3.scaleLinear().range([0,scale(250)]).domain([0.0005,0])));
+        .call(d3.axisLeft(d3.scaleLinear().range([0,scale(250)]).domain([500,0])));
 
     </script>
   </body>
