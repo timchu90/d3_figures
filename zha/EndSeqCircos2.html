@@ -126,16 +126,12 @@
                 )
                 .style('fill',color)
             }
-            drawScale(-500,-400,'#a50026')
-            drawScale(-400,-300,'#d73027')
-            drawScale(-300,-200,'#f46d43')
-            drawScale(-200,-100,'#fdae61')
-            drawScale(-100,0,'#fee090')
-            drawScale(0,100,'#e0f3f8')
-            drawScale(100,200,'#abd9e9')
-            drawScale(200,300,'#74add1')
-            drawScale(300,400,'#4575b4')
-            drawScale(400,500,'#313695')
+            drawScale(0,500,'#fff5f0')
+            drawScale(500,1000,'#fee0d2')
+            drawScale(1000,1500,'#fcbba1')
+            drawScale(1500,2000,'#fc9272')
+            drawScale(2000,2500,'#fb6a4a')
+            drawScale(2500,3000,'#ef3b2c')
 
 
             /*
@@ -213,7 +209,7 @@
                 var h = donut.append("path")
                     .attr('d',radial(bin_hist))
                     .attr('fill','none')
-                    .attr('stroke','black')
+                    .attr('stroke','darkblue')
                     .attr('stroke-width','1.01px')
                     .attr('opacity',0.8)
                     .attr("class","radial");
@@ -276,8 +272,10 @@
         //eventThresh - threshold number for each bin in which to draw chord to
         //histogramMultiplier - flat multiplier to histogram values
         */
-        DrawCircos("EndSeqCircosData/XR4_EndSeq.bedgraph",170,250,PPOIangle,130,200,2500000,10,0.1)
-        DrawCircos("EndSeqCircosData/WT_EndSeq.bedgraph",500,250,PPOIangle,130,200,2500000,10,0.1)
+        DrawCircos("EndSeqCircosData/XR4STI_EndSeq.bedgraph",170,250,PPOIangle,100,210,2500000,10,0.03)
+        DrawCircos("EndSeqCircosData/XR4P24_EndSeq.bedgraph",510,250,PPOIangle,100,210,2500000,10,0.03)
+        DrawCircos("EndSeqCircosData/WTSTI_EndSeq.bedgraph",170,750,PPOIangle,100,210,2500000,10,0.03)
+        DrawCircos("EndSeqCircosData/WTP24_EndSeq.bedgraph",510,750,PPOIangle,100,210,2500000,10,0.03)
     </script>
   </body>
 </html>

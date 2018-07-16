@@ -33,7 +33,7 @@
         .attr("height", height)
 
       //function that draws the heatmap
-      var DrawLine = function(input,xloc, yloc,readnum,chartH,chartW, color){
+      var DrawLine = function(input,xloc, yloc,readnum,chartH,chartW,yscaleRPM, color){
         //parameters:
         //input - input file
         //xloc, yloc - x and y coords for top left of heatmap
@@ -53,7 +53,7 @@
             var regionEnd = 16545
             for (var j in data){
               if(data[j].position > regionStart && data[j].position < regionEnd){
-                bins[Math.floor((data[j].position-regionStart)/100)] = bins[Math.floor((data[j].position-regionStart)/100)] + 1/readnum;
+                bins[Math.floor((data[j].position-regionStart)/100)] = bins[Math.floor((data[j].position-regionStart)/100)] + 1;
               }
             }
             callback(null,bins)
@@ -68,13 +68,13 @@
               reformatData.push(
                 {
                   binNum: j,
-                  binVal: bin[j]
+                  binVal: bin[j]/readnum
                 }
               )
             }
             console.log(reformatData)
             var x = d3.scaleLinear().range([0, chartW]).domain([0,100.5]);
-            var y = d3.scaleLinear().range([chartH, 0]).domain([0,0.0005]);
+            var y = d3.scaleLinear().range([chartH, 0]).domain([0,yscaleRPM/1000000]);
 
             var valueline = d3.line()
               .x(function(d) { return x(parseInt(d.binNum)+1); })
@@ -88,18 +88,59 @@
               .attr('fill','none')
           })
       }
-      DrawLine("PPoIwindowData/XR4P24_chrR_PPOIreads.txt",50,10,22058537,scale(250),width-100, "#d7191c") //red
-      DrawLine("PPoIwindowData/XR4STISTD_chrR_PPOIreads.txt",50,10,37815260,scale(250),width-100, "#fdae61") //orange
-      DrawLine("PPoIwindowData/WTP24_chrR_PPOIreads.txt",50,10,22555862,scale(250),width-100, "#2c7bb6") //blue
-      DrawLine("PPoIwindowData/WTSTI_chrR_PPOIreads.txt",50,10,11720120,scale(250),width-100, "#abd9e9") //lightblue
+
+      yscaleRPM = 500
+      DrawLine("PPoIwindowData/XR4P24_chrR_PPOIreads.txt",50,10,22058537,scale(250),width-100,yscaleRPM, "#d7191c") //red
+      DrawLine("PPoIwindowData/XR4STISTD_chrR_PPOIreads.txt",50,10,37815260,scale(250),width-100,yscaleRPM, "#fdae61") //orange
+      DrawLine("PPoIwindowData/WTP24_chrR_PPOIreads.txt",50,10,22555862,scale(250),width-100,yscaleRPM, "#2c7bb6") //blue
+      DrawLine("PPoIwindowData/WTSTI_chrR_PPOIreads.txt",50,10,11720120,scale(250),width-100,yscaleRPM, "#abd9e9") //lightblue
+      svg.append("g")
+          .attr("transform", "translate("+scale(50)+"," + scale(260) + ")")
+          .call(d3.axisBottom(d3.scaleLinear().range([0,width-100]).domain([-5000,5000])));
+      svg.append("g")
+        .attr("transform", "translate("+scale(50)+"," + scale(10) + ")")
+        .call(d3.axisLeft(d3.scaleLinear().range([0,scale(250)]).domain([yscaleRPM,0])));
+
+      yscaleRPM = 10000000000
+      DrawLine("PPoIwindowData/XR4P24_chrR_PPOIreads.txt",50,400,1,scale(250),width-100,yscaleRPM, "#d7191c") //red
+      DrawLine("PPoIwindowData/XR4STISTD_chrR_PPOIreads.txt",50,400,1,scale(250),width-100,yscaleRPM, "#fdae61") //orange
+      DrawLine("PPoIwindowData/WTP24_chrR_PPOIreads.txt",50,400,1,scale(250),width-100,yscaleRPM, "#2c7bb6") //blue
+      DrawLine("PPoIwindowData/WTSTI_chrR_PPOIreads.txt",50,400,1,scale(250),width-100,yscaleRPM, "#abd9e9") //lightblue
+
+      svg.append("g")
+          .attr("transform", "translate("+scale(50)+"," + scale(660) + ")")
+          .call(d3.axisBottom(d3.scaleLinear().range([0,width-100]).domain([-5000,5000])));
+      svg.append("g")
+        .attr("transform", "translate("+scale(50)+"," + scale(10) + ")")
+        .call(d3.axisLeft(d3.scaleLinear().range([scale(400),scale(650)]).domain([yscaleRPM,0])));
+
+      /*
+      yscaleRPM = 5
+      DrawLine("EndSeqPPOIwindowData/XR4P24_chrR_PPOIreads.txt",50,10,25638170,scale(250),width-100,yscaleRPM, "#d7191c") //red
+      DrawLine("EndSeqPPOIwindowData/XR4STI_chrR_PPOIreads.txt",50,10,27799754,scale(250),width-100,yscaleRPM, "#fdae61") //orange
+      DrawLine("EndSeqPPOIwindowData/WTP24_chrR_PPOIreads.txt",50,10,28283513,scale(250),width-100,yscaleRPM, "#2c7bb6") //blue
+      DrawLine("EndSeqPPOIwindowData/WTSTI_chrR_PPOIreads.txt",50,10,8347696,scale(250),width-100,yscaleRPM, "#abd9e9") //lightblue
 
       svg.append("g")
           .attr("transform", "translate("+scale(50)+"," + scale(260) + ")")
           .call(d3.axisBottom(d3.scaleLinear().range([0,width-100]).domain([-5000,5000])));
       svg.append("g")
         .attr("transform", "translate("+scale(50)+"," + scale(10) + ")")
-        .call(d3.axisLeft(d3.scaleLinear().range([0,scale(250)]).domain([500,0])));
+        .call(d3.axisLeft(d3.scaleLinear().range([0,scale(250)]).domain([yscaleRPM,0])));
 
+      yscaleRPM = 100000000
+      DrawLine("EndSeqPPOIwindowData/XR4P24_chrR_PPOIreads.txt",50,400,1,scale(250),width-100,yscaleRPM, "#d7191c") //red
+      DrawLine("EndSeqPPOIwindowData/XR4STI_chrR_PPOIreads.txt",50,400,1,scale(250),width-100,yscaleRPM, "#fdae61") //orange
+      DrawLine("EndSeqPPOIwindowData/WTP24_chrR_PPOIreads.txt",50,400,1,scale(250),width-100,yscaleRPM, "#2c7bb6") //blue
+      DrawLine("EndSeqPPOIwindowData/WTSTI_chrR_PPOIreads.txt",50,400,1,scale(250),width-100,yscaleRPM, "#abd9e9") //lightblue
+
+      svg.append("g")
+          .attr("transform", "translate("+scale(50)+"," + scale(660) + ")")
+          .call(d3.axisBottom(d3.scaleLinear().range([0,width-100]).domain([-5000,5000])));
+      svg.append("g")
+        .attr("transform", "translate("+scale(50)+"," + scale(10) + ")")
+        .call(d3.axisLeft(d3.scaleLinear().range([scale(400),scale(650)]).domain([yscaleRPM,0])));
+      */
     </script>
   </body>
 </html>
