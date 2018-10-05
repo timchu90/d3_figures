@@ -1,0 +1,421 @@
+name	taxID	num_of_read	num_of_contigs	longest_contig	len_longest_contig	RPMH
+Neisseria meningitidis LNP21362	1386087	69	1	contig_5443	450	1.91
+Corynebacterium glutamicum	1718	12	3	contig_1522	172	0.33
+Myriangiales sp. A569	1750909	3	1	contig_3393	101	0.08
+Haemophilus parainfluenzae T3T1	862965	1056	10	contig_1504	756	29.26
+Stenotrophomonas rhizophila	216778	2	1	contig_2837	101	0.06
+Acinetobacter pittii	48296	14	3	contig_10505	168	0.39
+Shiraia bambusicola	224420	2	1	contig_9034	100	0.06
+uncultured Frankia sp.	181582	5	2	contig_99	166	0.14
+Bacillus thuringiensis str. Al Hakam	412694	7	2	contig_7561	101	0.19
+Bacteroides fragilis	817	166	1	contig_4806	540	4.6
+Rothia mucilaginosa DY-18	680646	2	1	contig_8191	101	0.06
+Corynebacterium deserti GIMN1.010	931089	2	1	contig_8798	101	0.06
+Deinococcus radiodurans R1	243230	3	1	contig_5700	100	0.08
+Postia placenta Mad-698-R	561896	2	1	contig_7025	100	0.06
+Actinomyces sp. oral taxon 414	712122	14	4	contig_8309	173	0.39
+Cloning vector pLR5-Ppy-luc2	1898664	50	2	contig_6613	451	1.39
+Streptococcus oralis Uo5	927666	4	1	contig_5779	101	0.11
+Hymenobacter sp. APR13	1356852	2	1	contig_3347	100	0.06
+Actinomycetospora sp.	1872135	6	1	contig_6525	214	0.17
+Corynebacterium stationis	1705	221	10	contig_9017	411	6.12
+Corynebacterium ureicelerivorans	401472	22	7	contig_9028	200	0.61
+Tritodynamia horvathi	585954	41	1	contig_8115	183	1.14
+uncultured organism	155900	45	6	contig_559	179	1.25
+[Ruminococcus] torques L2-14	657313	6	1	contig_8856	172	0.17
+bacterium	1869227	353	2	contig_9902	242	9.78
+Corynebacterium humireducens NBRC 106098 = DSM...	1223515	9	3	contig_5558	147	0.25
+Methylorubrum populi	223967	5	2	contig_2491	101	0.14
+Coriobacteriaceae bacterium 68-1-3	1531429	3	1	contig_8536	101	0.08
+Campylobacter jejuni	197	4	1	contig_11202	171	0.11
+Human coronavirus 229E	11137	6	3	contig_1853	101	0.17
+Streptococcus himalayensis	1888195	4	1	contig_7206	143	0.11
+Corynebacterium epidermidicanis	1050174	8	4	contig_8392	101	0.22
+Malassezia sympodialis ATCC 42132	1230383	34	9	contig_566	274	0.94
+Lactobacillus johnsonii	33959	16	1	contig_8612	116	0.44
+Streptococcus mitis	28037	1394	6	contig_6481	1216	38.62
+Staphylococcus lugdunensis	28035	40	1	contig_5006	401	1.11
+uncultured Propionibacterium sp.	218066	101	3	contig_456	192	2.8
+Lactobacillus curvatus	28038	2	1	contig_8776	101	0.06
+Finegoldia magna ATCC 29328	334413	31	3	contig_4130	202	0.86
+Cladosporium cladosporioides	29917	6	1	contig_7015	100	0.17
+Burkholderia sp. CCGE1002	640511	3	1	contig_9026	101	0.08
+Pleurastrum insigne	34115	2	1	contig_9196	101	0.06
+Human rhinovirus sp.	169066	3	1	contig_9673	138	0.08
+Rhinovirus B	147712	6	3	contig_9075	125	0.17
+Corynebacterium resistens DSM 45100	662755	14	4	contig_6375	146	0.39
+Glutamicibacter arilaitensis	256701	6	1	contig_9301	128	0.17
+Corynebacterium diphtheriae HC04	698970	2	1	contig_5610	101	0.06
+uncultured Gemella sp.	254352	22	3	contig_3201	135	0.61
+Corynebacterium ulcerans	65058	947	2	contig_9639	335	26.24
+Acinetobacter sp. TGL-Y2	1407071	4	1	contig_107	198	0.11
+Lactobacillus heilongjiangensis	1074467	83	1	contig_5122	256	2.3
+Corynebacterium kroppenstedtii DSM 44385	645127	4	1	contig_2749	187	0.11
+Clostridium chauvoei	46867	2	1	contig_3493	100	0.06
+Streptococcus constellatus subsp. pharyngis	184250	21	3	contig_10762	134	0.58
+Ezakiella massiliensis	1852374	13	2	contig_5130	166	0.36
+Hymenobacter sp. DG25B	1385664	5	1	contig_4792	101	0.14
+Corynebacterium kutscheri	35755	7	3	contig_8332	160	0.19
+Aerococcus urinae ACS-120-V-Col10a	866775	2097	1	contig_5125	674	58.1
+Cronobacter sakazakii	28141	0	1	contig_5106	106	0.0
+Methylobacterium sp. C1	1479019	8	3	contig_5736	133	0.22
+Rummeliibacillus stabekisii	241244	7	1	contig_10245	128	0.19
+Bacillus muralis	264697	24	3	contig_5405	123	0.66
+Selenomonas sp. oral taxon 920	1884263	0	1	contig_6167	117	0.0
+uncultured Atopobium sp.	274587	7	1	contig_10720	261	0.19
+Acidipropionibacterium acidipropionici ATCC 4875	1171373	8	1	contig_7009	153	0.22
+uncultured Dialister sp.	278064	4	1	contig_11397	105	0.11
+uncultured Sneathia sp.	278067	26	1	contig_945	164	0.72
+Lactobacillus salivarius	1624	10	1	contig_236	265	0.28
+Tylorida ventralis	1654948	7	1	contig_5300	100	0.19
+Pseudomonas denitrificans (nomen rejiciendum)	43306	11	2	contig_8395	139	0.3
+Cloning vector pUC19TpTer	1918677	398	1	contig_6287	1685	11.03
+Anoxybacillus gonensis	198467	3	1	contig_8990	100	0.08
+Castanea sativa	21020	4	1	contig_2829	101	0.11
+Pseudarthrobacter phenanthrenivorans Sphe3	930171	3	1	contig_9237	100	0.08
+Veillonella parvula DSM 2008	479436	654	38	contig_10643	704	18.12
+Pasteurella multocida	747	3	1	contig_9949	104	0.08
+Streptomyces puniciscabiei	164348	4	1	contig_6875	166	0.11
+Telmatoscopus albipunctatus	1255143	3	1	contig_4107	101	0.08
+Nakamurella panacisegetis	1090615	3	1	contig_7415	123	0.08
+Corynebacterium timonense	441500	2	2	contig_1863	106	0.06
+Enterococcus silesiacus	332949	6	1	contig_8025	108	0.17
+Frankia inefficax	298654	4	1	contig_11312	101	0.11
+Neisseria elongata subsp. glycolytica ATCC 29315	546263	241	4	contig_5281	647	6.68
+Staphylococcus sp. KSUM_33	1908468	39	1	contig_3984	309	1.08
+Burkholderia pseudomallei MSHR1153	1437000	24	1	contig_6004	192	0.66
+Streptococcus mitis B6	365659	687	3	contig_1869	736	19.03
+Prevotella scopos JCM 17725	1236518	63	10	contig_2858	173	1.75
+Deinococcus deserti VCD115	546414	3	1	contig_1138	145	0.08
+Corynebacterium sp. NML98-0116	702967	561	4	contig_11076	143	15.54
+Staphylococcus capitis CR01	1296619	13	2	contig_8317	173	0.36
+Micrococcus luteus	1270	29	7	contig_10143	194	0.8
+Dothideomycetes sp. genotype 630 JMUR-2016	1919727	2	1	contig_2240	100	0.06
+Sphingobium sp. SYK-6	627192	2	1	contig_5840	101	0.06
+Dermacoccus nishinomiyaensis	1274	25	5	contig_9703	155	0.69
+Kytococcus sedentarius	1276	2	1	contig_929	100	0.06
+Glyptapanteles flavicoxis bracovirus	451706	3	1	contig_4980	113	0.08
+Pseudomonas vancouverensis	95300	2	1	contig_8394	104	0.06
+Streptococcus parasanguinis	1318	61	2	contig_5120	448	1.69
+Tissierellia bacterium KA00581	1588751	169	1	contig_3822	179	4.68
+Staphylococcus aureus	1280	122	6	contig_796	343	3.38
+Staphylococcus haemolyticus	1283	20	3	contig_668	178	0.55
+Staphylococcus epidermidis	1282	223	5	contig_8316	509	6.18
+Thermoanaerobacter wiegelii Rt8.B1	697303	2	1	contig_2722	127	0.06
+Sporosarcina psychrophila	1476	3	1	contig_9751	108	0.08
+Encheliophis vermiops	1819256	5	1	contig_3818	100	0.14
+Streptococcus parasanguinis FW213	1114965	4	1	contig_237	101	0.11
+Streptococcus salivarius	1304	116	4	contig_8396	420	3.21
+Actinomyces meyeri	52773	49	8	contig_10197	252	1.36
+Streptococcus gordonii	1302	419	10	contig_3720	420	11.61
+Anaerococcus mediterraneensis	1870984	33	6	contig_7547	291	0.91
+Streptococcus mutans	1309	6	1	contig_10874	100	0.17
+Marmoricola scoriae	642780	2	1	contig_11100	101	0.06
+Arthrobacter sp. YC-RL1	1652545	2	1	contig_3023	101	0.06
+Carnobacterium sp. 17-4	208596	2	1	contig_5633	101	0.06
+Neisseria macacae	496	4	1	contig_4033	143	0.11
+Propionibacterium sp. oral taxon 193	671223	453	4	contig_914	195	12.55
+uncultured Neisseria sp.	237778	25	1	contig_4696	204	0.69
+Malassezia globosa CBS 7966	425265	8	3	contig_1155	101	0.22
+Aerococcus viridans	1377	586	3	contig_5998	269	16.23
+Curvibacter putative symbiont of Hydra magnipa...	667019	3	1	contig_11241	173	0.08
+Sphingomonas sp.	28214	3	1	contig_4701	123	0.08
+Salmonella enterica subsp. enterica serovar Ne...	108619	5	1	contig_10497	156	0.14
+Gardnerella vaginalis 409-05	553190	5	2	contig_7674	101	0.14
+uncultured Clostridia bacterium	244328	3	1	contig_3825	179	0.08
+Pseudomonas protegens	380021	2	1	contig_31	101	0.06
+Carnobacterium maltaromaticum ATCC 35586	1087479	13	1	contig_11013	299	0.36
+Corynebacterium efficiens YS-314	196164	17	4	contig_9709	126	0.47
+Rosa roxburghii	74654	5	1	contig_5813	179	0.14
+Bacillus licheniformis WX-02	1126218	545	1	contig_4093	404	15.1
+Delftia tsuruhatensis	180282	14	3	contig_3845	215	0.39
+Corynebacterium halotolerans YIM 70093 = DSM 4...	1121362	7	3	contig_2863	116	0.19
+Corynebacterium propinquum DSM 44285	1121367	18	2	contig_8619	200	0.5
+Prevotella melaninogenica	28132	390	17	contig_6241	1193	10.8
+Prevotella intermedia	28131	255	15	contig_7355	805	7.06
+Klebsiella quasipneumoniae	1463165	81	6	contig_6221	124	2.24
+Corynebacterium jeikeium K411	306537	4	1	contig_8635	100	0.11
+Prevotella ihumii	1917878	14	1	contig_4704	141	0.39
+unidentified	32644	7	1	contig_11003	154	0.19
+Lactobacillus crispatus ST1	748671	2	1	contig_1172	100	0.06
+Sinorhizobium fredii NGR234	394	3	1	contig_2113	123	0.08
+Capnocytophaga sp. oral taxon 323	1705617	14	4	contig_10466	196	0.39
+Corynebacterium diphtheriae	1717	1804	6	contig_6873	508	49.98
+Acidovorax sp.	1872122	8	1	contig_8342	130	0.22
+Corynebacterium pseudodiphtheriticum	37637	891	4	contig_4729	675	24.68
+Caulobacteraceae bacterium OTSz_A_272	1759059	2	1	contig_5661	101	0.06
+Granulicatella adiacens	46124	2	1	contig_323	126	0.06
+Microterricola viridarii	412690	3	1	contig_1498	100	0.08
+uncultured prokaryote	198431	32	2	contig_3938	194	0.89
+Actinomyces naeslundii	1655	871	14	contig_4251	509	24.13
+Corynebacterium simulans	146827	29799	62	contig_1856	1595	825.55
+Megasphaera elsdenii 14-14	1458465	1095	22	contig_8585	727	30.34
+Veillonellaceae bacterium KA00182	1588748	13	1	contig_729	164	0.36
+Enterobacter hormaechei subsp. xiangfangensis	1296536	1	1	contig_5110	102	0.03
+uncultured Sphingomonadaceae bacterium	169976	1	1	contig_10322	125	0.03
+Streptococcus peroris	68891	8	1	contig_4591	141	0.22
+Pelosinus sp. UFO1	484770	2	1	contig_3815	103	0.06
+Corynebacterium doosanense CAU 212 = DSM 45436	558173	3	1	contig_7423	129	0.08
+Stenotrophomonas maltophilia	40324	4	2	contig_11349	101	0.11
+uncultured Mycobacterium sp.	171292	20	1	contig_10492	196	0.55
+Deinococcus gobiensis I-0	745776	2	1	contig_3697	101	0.06
+Atopobium vaginae DSM 15829	525256	91	12	contig_8586	224	2.52
+Rothia dentocariosa ATCC 17931	762948	147	9	contig_4872	389	4.07
+Lachnoclostridium phocaeense	1871021	5	1	contig_10024	163	0.14
+Psychrobacter alimentarius	261164	3	1	contig_4009	142	0.08
+Mesorhizobium australicum WSM2073	754035	2	1	contig_7548	100	0.06
+Corynebacterium uterequi	1072256	575	2	contig_6460	290	15.93
+Lactobacillus jensenii	109790	10	2	contig_5143	253	0.28
+Peptoniphilus sp. ING2-D1G	1912856	51	7	contig_1842	243	1.41
+Castanopsis echidnocarpa	1679278	2	1	contig_2966	106	0.06
+Phascolosoma stephensoni	210803	5	2	contig_144	101	0.14
+Aerococcus christensenii	87541	10	1	contig_10250	182	0.28
+uncultured Veillonella sp.	159268	21	2	contig_728	191	0.58
+Corynebacterium urealyticum DSM 7111	1267754	10	3	contig_9236	146	0.28
+Amycolatopsis methanolica 239	1068978	3	1	contig_1134	101	0.08
+Fusobacterium massiliense	1852365	3	1	contig_3804	122	0.08
+Prevotellaceae bacterium Marseille-P2826	1852368	50	1	contig_9946	351	1.39
+Uloborus glomosus	472976	3	1	contig_5332	112	0.08
+Acinetobacter sp. ADP1	62977	4	1	contig_6992	140	0.11
+uncultured Malassezia	338567	3	1	contig_6171	139	0.08
+Aggregatibacter actinomycetemcomitans NUM4039	1407647	7	1	contig_9637	161	0.19
+Porphyromonas asaccharolytica DSM 20707	879243	12	1	contig_9552	129	0.33
+Bacteroides vulgatus ATCC 8482	435590	278	1	contig_4635	1341	7.7
+Protopolystoma xenopodis	117903	5	1	contig_9937	225	0.14
+Castilleja paramensis	1857654	2	1	contig_1554	101	0.06
+uncultured beta proteobacterium	86027	7	2	contig_2951	184	0.19
+Actinomyces sp. OTU 59	1738465	419	2	contig_4762	205	11.61
+Corynebacterium aurimucosum ATCC 700975	548476	5153	40	contig_8399	854	142.76
+uncultured bacterium BD_contig03259	1626948	33	2	contig_10080	325	0.91
+uncultured Enterococcus sp.	167972	372	1	contig_4642	187	10.31
+Polaribacter sp. Hel1_33_78	1336804	3	1	contig_4640	183	0.08
+Corynebacterium pseudotuberculosis 42/02-A	1087453	2	1	contig_9361	101	0.06
+Actinomyces oris	544580	1433	8	contig_10915	471	39.7
+Lawsonella clevelandensis	1528099	291	11	contig_517	580	8.06
+Streptococcus sp. oral taxon F10	712683	52	1	contig_4588	185	1.44
+Deinococcus swuensis	1182571	4	1	contig_3399	179	0.11
+uncultured Dolosigranulum sp.	311547	605	2	contig_9891	427	16.76
+Pediococcus parvulus	54062	6	1	contig_5142	149	0.17
+Corynebacterium falsenii DSM 44353	1451189	2	1	contig_1267	101	0.06
+Haemophilus influenzae KR494	1334187	2	1	contig_7464	100	0.06
+Corynebacterium testudinoris	136857	24	4	contig_1166	203	0.66
+Staphylococcus sp. KSUM_43	1908476	2	1	contig_7189	114	0.06
+Propionigenium modestum	2333	2	1	contig_4438	117	0.06
+Deinococcus actinosclerus	1768108	6	1	contig_9247	243	0.17
+Actinobacillus pleuropneumoniae serovar 8	754345	4	1	contig_10295	101	0.11
+Corynebacterium camporealensis	161896	13005	50	contig_9088	857	360.29
+Veillonella parvula	29466	38	2	contig_10242	327	1.05
+Corynebacterium lactis RW2-5	1408189	1146	3	contig_4803	391	31.75
+Streptococcus sp. NPS 308	1902136	122	6	contig_5258	256	3.38
+uncultured Klebsiella sp.	284011	7	1	contig_9443	121	0.19
+Confluentimicrobium sp. EMB200-NS6	1609966	2	1	contig_544	101	0.06
+Corynebacterium glutamicum SCgG2	1232383	6	1	contig_8229	139	0.17
+Turicibacter sp. H121	1712675	225	2	contig_5118	291	6.23
+Corynebacterium kroppenstedtii	161879	45	8	contig_8175	192	1.25
+Dialister pneumosintes	39950	12	3	contig_10747	251	0.33
+Streptococcus suis	1307	82	2	contig_5128	272	2.27
+uncultured Parabacteroides sp.	512312	2	1	contig_4626	113	0.06
+Zea mays	4577	4	1	contig_7031	101	0.11
+Rothia mucilaginosa	43675	402	17	contig_6311	389	11.14
+Allium cepa	4679	15	4	contig_9191	127	0.42
+Corynebacterium macginleyi	38290	2	1	contig_4092	101	0.06
+Streptococcus gordonii str. Challis substr. CH1	467705	2	1	contig_3305	101	0.06
+Trebouxia sp. TR9	1825957	5	2	contig_6168	101	0.14
+Citrobacter koseri	545	76	5	contig_5279	370	2.11
+Pantoea agglomerans	549	3	1	contig_5720	100	0.08
+uncultured actinobacterium	152507	276	3	contig_4503	186	7.65
+Streptococcus pneumoniae	1313	141	5	contig_8866	171	3.91
+Selenomonas sputigena ATCC 35185	546271	4	1	contig_7589	149	0.11
+Streptococcus thermophilus	1308	399	4	contig_5259	321	11.05
+Paracoccus chinensis	525640	4	1	contig_9353	100	0.11
+Mycoplasma bovis	28903	4	1	contig_7745	145	0.11
+Gardnerella vaginalis	2702	2757	28	contig_1830	742	76.38
+Pseudonocardia sp. HH130630-07	1690815	2	1	contig_5723	101	0.06
+Aggregatibacter aphrophilus NJ8700	634176	37	2	contig_5449	328	1.03
+Salmonella enterica subsp. enterica serovar Ty...	1029978	4	1	contig_9971	101	0.11
+uncultured Bacteroides sp.	162156	14	2	contig_2013	171	0.39
+Alternaria alternata	5599	2	1	contig_9089	101	0.06
+Modestobacter marinus	477641	2	1	contig_6363	101	0.06
+Moraxella bovoculi	386891	2	1	contig_2415	101	0.06
+Selenomonas sp. oral taxon 478	712538	3	1	contig_1082	101	0.08
+Corynebacterium sp. ATCC 6931	1487956	18	6	contig_6874	153	0.5
+Microlunatus soli	630515	2	1	contig_3027	101	0.06
+Atopobium parvulum	1382	21	3	contig_1885	152	0.58
+Hymenolepis nana	102285	15	1	contig_4987	114	0.42
+Tannerella sp. oral taxon HOT-286	712710	5	1	contig_6852	160	0.14
+Corynebacterium atypicum	191610	60	3	contig_7368	137	1.66
+Staphylococcus agnetis	985762	0	1	contig_6134	103	0.0
+Cutibacterium avidum	33010	18	4	contig_2033	129	0.5
+uncultured Streptococcus sp.	83427	71	3	contig_392	209	1.97
+Gemella sp. oral taxon 928	1785995	233	11	contig_10246	441	6.46
+uncultured Megasphaera sp.	165188	22	2	contig_730	171	0.61
+Chryseobacterium glaciei	1685010	4	2	contig_10048	109	0.11
+Anaerococcus prevotii DSM 20548	525919	65	8	contig_1502	377	1.8
+Ectothiorhodospira sp. BSL-9	1442136	4	1	contig_9809	101	0.11
+uncultured Prevotellaceae bacterium	370804	5	1	contig_9947	239	0.14
+Exiguobacterium sp. AT1b	360911	3	1	contig_1585	101	0.08
+Asticcacaulis excentricus	78587	2	1	contig_11077	101	0.06
+Brugia timori	42155	125	6	contig_892	234	3.46
+Prevotella melaninogenica ATCC 25845	553174	4	1	contig_10445	101	0.11
+[Clostridium] sphenoides JCM 1415	1297793	2	1	contig_11369	100	0.06
+Fusobacterium gastrosuis	1755100	5	2	contig_3966	101	0.14
+Corynebacterium imitans	156978	9	3	contig_1545	103	0.25
+Klebsiella pneumoniae	573	12	4	contig_10891	102	0.33
+Klebsiella oxytoca	571	46	2	contig_5950	287	1.27
+Prevotella sp. oral taxon 299 str. F0039	575614	87	7	contig_9773	522	2.41
+Carnobacterium sp. CP1	1564681	122	2	contig_9818	159	3.38
+Trypanosoma brucei	5691	11	1	contig_1389	290	0.3
+Expression vector GFPuv-reporter	1920042	6	1	contig_7579	126	0.17
+Bacillus subtilis	1423	2	1	contig_1747	100	0.06
+Parastrongyloides trichosuri	131310	1972	1	contig_4495	5424	54.63
+uncultured Lactobacillus sp.	153152	16	2	contig_3338	172	0.44
+[Haemophilus] ducreyi	730	3785	10	contig_7559	333	104.86
+Dolosigranulum pigrum	29394	44	4	contig_6799	257	1.22
+Glaesserella parasuis	738	3	1	contig_10296	152	0.08
+Corynebacterium singulare	161899	4090	47	contig_7572	574	113.31
+Gemella morbillorum	29391	3	1	contig_8167	100	0.08
+Streptococcus sanguinis SK1 = NCTC 7863	888807	61	1	contig_5135	418	1.69
+Bacteroides ovatus V975	1379690	41	1	contig_6240	457	1.14
+Fergusobia sp. UPG M. decora	592161	7	1	contig_8461	197	0.19
+Carnobacterium inhibens subsp. gilichinskyi	1266845	993	1	contig_5126	447	27.51
+Acinetobacter johnsonii XBB1	1242245	28	5	contig_7471	298	0.78
+Vagococcus teuberi	519472	258	2	contig_5553	136	7.15
+Wuchereria bancrofti	6293	4	1	contig_6883	129	0.11
+Cutibacterium acnes HL096PA1	1134454	2	1	contig_10893	100	0.06
+Haemonchus placei	6290	60	6	contig_6271	300	1.66
+Corynebacterium sp. 110393	288144	616	1	contig_5203	366	17.07
+Corynebacterium maris DSM 45190	1224163	11	3	contig_1483	101	0.3
+Corynebacterium marinum DSM 44953	1224162	12	2	contig_10447	127	0.33
+Corynebacterium vitaeruminis DSM 20294	1224164	13	4	contig_1571	159	0.36
+Coriobacterium glomerans PW2	700015	3	1	contig_10444	101	0.08
+Gardnerella vaginalis HMP9231	1009464	16	2	contig_1904	129	0.44
+Corynebacterium argentoratense	42817	1361	1	contig_5419	1040	37.7
+Leptotrichia buccalis	40542	8	4	contig_3389	117	0.22
+Streptococcus cristatus AS 1.3089	1302863	3	1	contig_2131	129	0.08
+uncultured planctomycete	120965	2	1	contig_9595	101	0.06
+Echinaster sepositus	72721	4	1	contig_8129	125	0.11
+Psychrobacter faecalis	180588	2	1	contig_4010	101	0.06
+uncultured Readeriella	1193705	23	1	contig_10575	258	0.64
+Rothia aeria	172042	94	5	contig_21	300	2.6
+Neisseria perflava	33053	80	1	contig_6005	298	2.22
+Bacillus subtilis subsp. subtilis	135461	30	5	contig_4305	296	0.83
+Isoptericola dokdonensis DS-3	1300344	3	1	contig_6921	101	0.08
+Nocardioides dokdonensis FR1436	1300347	6	1	contig_1426	101	0.17
+Microbacterium sp. 1-9	1221565	3	1	contig_2042	101	0.08
+Streptococcus sp. oral taxon 064	712624	1414	12	contig_10134	526	39.17
+Acinetobacter guillouiae	106649	2	1	contig_9782	101	0.06
+Streptococcus agalactiae NEM316	211110	65	1	contig_5451	384	1.8
+uncultured fungus	175245	399	7	contig_6172	637	11.05
+uncultured Basidiomycota	175244	33	1	contig_6170	534	0.91
+bacterium YC-ZSS-LKJ188	1632585	0	1	contig_4761	104	0.0
+Moraxella sp. ALBL_026	1811338	9	1	contig_9973	150	0.25
+Moraxella sp. ALBL_051	1811339	6	1	contig_5268	111	0.17
+Streptococcus sp. A12	1759399	258	2	contig_5113	370	7.15
+Aerococcus sanguinicola	119206	13	1	contig_5009	148	0.36
+TM7 bacterium human oral taxon HOT-870	1540867	2	1	contig_1516	101	0.06
+Porphyromonas gingivalis A7A1-28	1403338	39	3	contig_6415	223	1.08
+Raoultella ornithinolytica	54291	4	1	contig_9904	101	0.11
+Kocuria palustris	71999	34	2	contig_665	144	0.94
+Ustilago maydis	5270	8	1	contig_7664	165	0.22
+Gynuella sunshinyii YC6258	1445510	2	1	contig_1854	101	0.06
+Corynebacterium riegelii	156976	10	4	contig_2184	102	0.28
+Corynebacterium propinquum	43769	375	1	contig_4713	218	10.39
+Bifidobacterium longum subsp. longum	1679	50	1	contig_5387	185	1.39
+Desulfitobacterium dichloroeliminans	233055	36	2	contig_4795	233	1.0
+Arthrobacter sp. ERGS1:01	1704044	5	1	contig_1334	101	0.14
+uncultured eukaryote	100272	265	3	contig_10965	209	7.34
+Diuronotus aspetos	1681188	4	1	contig_9406	101	0.11
+Sneathia sanguinegens	40543	77	4	contig_11284	279	2.13
+Rothia terrae	396015	30	1	contig_8744	136	0.83
+Deinococcus peraridilitoris DSM 19664	937777	2	1	contig_8811	101	0.06
+Corynebacterium accolens	38284	2	1	contig_5870	101	0.06
+Bacteroides dorei	357276	3	1	contig_4636	108	0.08
+Corynebacterium fastidiosum	38287	864	2	contig_4725	348	23.94
+Nocardia nova SH22a	1415166	2	1	contig_7774	101	0.06
+Corynebacterium jeikeium	38289	5	1	contig_8657	100	0.14
+Amoebozoa sp.	1892891	4	1	contig_4086	101	0.11
+Corynebacterium ulcerans FRC11	1006579	4	1	contig_2932	167	0.11
+Fusarium graminearum PH-1	229533	3	1	contig_570	101	0.08
+Enterobacter sp. FY-07	1692238	52	1	contig_6219	112	1.44
+Streptobacillus moniliformis	34105	12	1	contig_3696	105	0.33
+Staphylococcus pseudintermedius	283734	15	2	contig_6135	131	0.42
+Neisseria bacilliformis	267212	4	1	contig_5581	101	0.11
+Streptococcus anginosus	1328	24	2	contig_2424	156	0.66
+Corynebacterium urealyticum DSM 7109	504474	2491	2	contig_5408	686	69.01
+uncultured Candida	644527	3	1	contig_9161	101	0.08
+Phlebiopsis crassa	1647769	7	1	contig_9120	201	0.19
+Acidovorax sp. RAC01	1842533	1	1	contig_5267	101	0.03
+Agrobacterium sp. RAC06	1842536	2	1	contig_2728	101	0.06
+Corynebacterium diphtheriae HC01	698967	822	2	contig_3682	508	22.77
+Corynebacterium diphtheriae PW8	698964	2	1	contig_1418	101	0.06
+Corynebacterium diphtheriae 31A	698962	2	1	contig_7300	101	0.06
+Thermoclostridium stercorarium subsp. leptospa...	1346611	3	1	contig_3172	104	0.08
+Corynebacterium diphtheriae HC02	698968	4	1	contig_8437	137	0.11
+Prevotella disiens	28130	32	3	contig_7304	205	0.89
+uncultured Prevotella sp.	159272	16	2	contig_5191	167	0.44
+Salmonella enterica subsp. enterica serovar Pa...	57046	3	1	contig_5954	152	0.08
+Atopobium fossor	39487	3	1	contig_5599	144	0.08
+uncultured bacterium Contig11	1393376	3	1	contig_5423	122	0.08
+uncultured bacterium	77133	21659	184	contig_10227	1575	600.04
+Staphylococcus condimenti	70255	15	2	contig_2561	168	0.42
+Variovorax paradoxus EPS	595537	3	1	contig_7041	101	0.08
+Pseudomonas putida	303	3	1	contig_30	116	0.08
+Fusobacterium nucleatum subsp. polymorphum	76857	36	6	contig_9036	154	1.0
+Streptomyces sp.	1931	11	1	contig_4499	154	0.3
+Fusobacterium nucleatum subsp. animalis	76859	17	3	contig_4437	247	0.47
+uncultured Bacteroidales bacterium	194843	6	2	contig_6229	164	0.17
+Candidatus Saccharimonas aalborgensis	1332188	2	1	contig_7871	101	0.06
+Gardnerella sp. S494	1647694	56	1	contig_7782	176	1.55
+Geosporobacter ferrireducens	1424294	14	1	contig_6991	312	0.39
+Bifidobacterium animalis subsp. lactis	302911	2	1	contig_1427	101	0.06
+Methylobacterium sp. ALBL_085	1811278	4	1	contig_11087	186	0.11
+Carnobacterium maltaromaticum LMA28	1234679	1800	1	contig_5141	545	49.87
+Olsenella sp. oral taxon 807	712411	11	1	contig_7296	117	0.3
+Corynebacterium mycetoides	38302	6	3	contig_870	101	0.17
+Melanelixia fuliginosa	180412	2	1	contig_8693	101	0.06
+Methylorubrum extorquens AM1	272630	3	1	contig_6710	100	0.08
+Escherichia coli str. K-12 substr. W3110	316407	28	5	contig_762	263	0.78
+Friedmanniella sagamiharensis	546874	50	1	contig_5543	199	1.39
+Pseudomonas frederiksbergensis	104087	2	1	contig_8628	100	0.06
+Lactobacillus delbrueckii subsp. bulgaricus	1585	5	1	contig_4819	131	0.14
+Lactobacillus lindneri	53444	82	1	contig_4786	192	2.27
+Linguatula serrata	646052	2	1	contig_5336	135	0.06
+Nocardia farcinica	37329	1100	1	contig_4789	142	30.47
+Corynebacterium variabile DSM 44702	858619	2	1	contig_2001	101	0.06
+Escherichia coli	562	8	3	contig_5107	133	0.22
+Ichthyosporea sp. ex Tenebrio molitor	1156560	16	1	contig_1291	255	0.44
+Lactobacillus gasseri	1596	41	2	contig_5252	375	1.14
+Lactobacillus plantarum	1590	4	1	contig_2320	102	0.11
+uncultured Alloprevotella sp.	1283315	13	3	contig_9025	126	0.36
+Peptoniphilus harei	54005	14	2	contig_221	204	0.39
+Anaerococcus octavius	54007	10	1	contig_289	141	0.28
+uncultured Rothia sp.	316088	8	1	contig_11010	127	0.22
+Neisseria sp. HMSC06F02	1581124	2	1	contig_4759	104	0.06
+Beutenbergia sp.	1898395	282	1	contig_4755	159	7.81
+Corynebacterium casei LMG S-19264	1285583	2152	16	contig_10198	576	59.62
+Acidipropionibacterium acidipropionici	1748	3	1	contig_1922	100	0.08
+Fusobacterium hwasookii ChDC F300	1307444	7	1	contig_9397	238	0.19
+Campylobacter concisus 13826	360104	12	3	contig_10476	107	0.33
+Cutibacterium acnes	1747	5900	70	contig_1579	797	163.45
+Prevotella denticola F0289	767031	11	2	contig_4643	125	0.3
+Dothideomycetes sp. genotype 46	1180628	2	1	contig_7378	101	0.06
+Moraxella osloensis	34062	82	13	contig_10268	361	2.27
+Trebouxia aggregata	160068	5	2	contig_10684	101	0.14
+Veillonellaceae bacterium DNF00626	1588754	7	2	contig_5778	141	0.19
+Sneathia amnii	187101	1334	20	contig_1879	900	36.96
+Enterococcus rotai	118060	3	1	contig_10390	101	0.08
+Dialister micraerophilus	309120	9	1	contig_10241	102	0.25
+Corynebacterium mustelae	571915	642	2	contig_5914	184	17.79
+Staphylococcus warneri	1292	0	1	contig_3985	105	0.0
+Spirometra erinaceieuropaei	99802	12	4	contig_6266	139	0.33
+uncultured Gardnerella sp.	293424	4	1	contig_465	168	0.11
+Enterococcus faecalis	1351	8	2	contig_1812	198	0.22
+Citrobacter koseri ATCC BAA-895	290338	24	2	contig_5275	301	0.66
+Leptotrichia sp. oral taxon 212	712357	7	3	contig_9011	101	0.19
+Methyloversatilis sp. RAC08	1842540	2	1	contig_5270	112	0.06
+Neisseria meningitidis	487	78	6	contig_5280	241	2.16
+Neisseria gonorrhoeae	485	14	1	contig_6833	182	0.39
+Neisseria cinerea	483	24	1	contig_5265	201	0.66
+uncultured soil bacterium	164851	12	1	contig_3989	270	0.33
+GN02 bacterium human oral taxon HOT-873	1540871	3	1	contig_1141	148	0.08
+Acinetobacter baumannii	470	6	2	contig_10504	148	0.17
