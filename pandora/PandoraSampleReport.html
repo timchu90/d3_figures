@@ -9,7 +9,6 @@
     <div id="chart">
     </div>
     <div id="table">
-
     </div>
     <script>
       var chartDiv = document.getElementById("chart");
@@ -272,9 +271,86 @@
     }
 
     function barTable() {
-      function chart(selection) {
+      var width,
+          cellheight,
+          margin = {top: 10, right: 10, bottom: 10, left: 10}
 
+      function chart(selection) {
+        selection.each(function(data) {
+          console.log(cellheight)
+          var svg = selection.append('svg')
+              .attr('width', width + margin.left + margin.right)
+              .attr('height', (data.length * cellheight) + margin.top + margin.bottom)
+              .attr('overflow','scroll')
+
+          var row = svg.selectAll('g')
+            .data(data)
+            .enter()
+            .append('g')
+              .attr('class','row')
+              .attr('transform', function(d,i){
+                return 'translate(0, ' + ((i * cellheight) + 15)+ ')';
+              })
+
+          var name_col = row.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + scale(20) + ', 0)';
+            })
+            .text(function(d){
+              return d.name
+            });
+
+          var taxid_col = row.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + scale(300) + ', 0)';
+            })
+            .text(function(d){
+              return d.taxID
+            });
+
+          var readnum_col = row.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + scale(400) + ', 0)';
+            })
+            .text(function(d){
+              return d.num_of_read
+            });
+
+          var rpmh_col = row.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + scale(500) + ', 0)';
+            })
+            .text(function(d){
+              return d.RPMH
+            });
+
+          var percentbox_col = row.append('rect')
+            .attr('transform', function(d,i){
+              return 'translate(' + scale(600) + ', -19)';
+            })
+            .attr('height',20)
+            .attr('width', function(d){
+              return d.percentage * 250
+            })
+
+        });
       }
+      chart.width = function(value) {
+          if (!arguments.length) return width;
+          width = value;
+          return chart;
+      };
+      chart.cellheight = function(value) {
+          if (!arguments.length) return cellheight;
+          cellheight = value;
+          return chart;
+      };
+      chart.margin = function(value) {
+          if (!arguments.length) return margin;
+          margin = value;
+          return chart;
+      };
+
       return chart;
     }
 
@@ -287,6 +363,8 @@
       .category('name');
 
     var bartable = barTable()
+      .width(width)
+      .cellheight(20)
 
     d3.tsv('./data/example.txt', function(error, data) {
         if (error) throw error;
@@ -299,11 +377,19 @@
         }
 
         //filter out organisms over thresh
+        for(var i in data){
+          data[i].percentage = data[i].num_of_read / total_num_reads
+        }
+
+        data.sort(function(a, b) {
+            return b.RPMH - a.RPMH ;
+        });
+
         var filteredData = data.filter(function(d) {
-          return d.num_of_read/total_num_reads > 0.015
+          return d.percentage > 0.015
         })
         var underThresh = data.filter(function(d) {
-          return d.num_of_read/total_num_reads <= 0.015
+          return d.percentage <= 0.015
         })
 
         //save organisms under thresh
@@ -330,7 +416,7 @@
 
         d3.select('#table')
           .datum(data)
-          .call(bartable)
+          .call(bartable);
     });
     </script>
   </body>
@@ -360,13 +446,17 @@
         font-style: italic;
     }
     #chart {
-        position: relative;
-        left: 0px;
-        right: 0px;
-        top: 0px;
-        bottom: 0px;
-        z-index: 1;
-        height: 100%;
+      position: relative;
+      left: 0px;
+      right: 0px;
+      top: 0px;
+      bottom: 0px;
+      z-index: 1;
+      height: 100%;
+    }
+    #table {
+      height: 500px;
+      overflow-y: scroll;
     }
   </style>
 </html>
