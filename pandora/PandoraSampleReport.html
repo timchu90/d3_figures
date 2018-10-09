@@ -5,10 +5,10 @@
     <script src="https://d3js.org/d3.v4.min.js"></script>
   </head>
   <body>
-    <h1>PANDORA REPORT</h1>
-    <div id="chart">
-    </div>
-    <div id="table">
+    <div id="wrapper">
+      <h1>PANDORA REPORT</h1>
+      <div id="chart"></div>
+      <div id="table"></div>
     </div>
     <script>
       var chartDiv = document.getElementById("chart");
@@ -277,26 +277,77 @@
 
       function chart(selection) {
         selection.each(function(data) {
-          console.log(cellheight)
+          console.log(data)
           var svg = selection.append('svg')
               .attr('width', width + margin.left + margin.right)
               .attr('height', (data.length * cellheight) + margin.top + margin.bottom)
               .attr('overflow','scroll')
 
-          var row = svg.selectAll('g')
+          var header = svg.append('g')
+            .attr('class','header')
+
+          header.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + scale(20) + ', 15)';
+            })
+            .text("Name");
+
+          header.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + scale(300) + ', 15)';
+            })
+            .text("TaxID");
+
+          header.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + scale(400) + ', 15)';
+            })
+            .text("# of reads");
+
+          header.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + scale(500) + ', 15)';
+            })
+            .text("RPMH");
+
+          var tablebody = svg.append('g')
+            .attr('class','tablebody')
+
+          var row = tablebody.selectAll('g')
             .data(data)
             .enter()
             .append('g')
               .attr('class','row')
               .attr('transform', function(d,i){
-                return 'translate(0, ' + ((i * cellheight) + 15)+ ')';
+
+                return 'translate(0, ' + ((i * cellheight) + 35)+ ')';
               })
+
+          var row_background = row.append('rect')
+            .attr('transform', function(d,i){
+              return 'translate(0, -15)';
+            })
+            .attr('width','100%')
+            .attr('height',20)
+            .style('fill', 'rgb(253, 208, 162)')
+            .style('opacity',0)
+            .on('mouseover',function(d){
+              d3.select(this)
+                .style('opacity',0.9)
+            })
+            .on('mouseout',function(d){
+              d3.select(this)
+                .transition()
+                .duration(100)
+                .style('opacity',0)
+            })
+
 
           var name_col = row.append('text')
             .attr('transform', function(d,i){
               return 'translate(' + scale(20) + ', 0)';
             })
-            .text(function(d){
+            .text(function(d,i){
               return d.name
             });
 
@@ -310,8 +361,9 @@
 
           var readnum_col = row.append('text')
             .attr('transform', function(d,i){
-              return 'translate(' + scale(400) + ', 0)';
+              return 'translate(' + scale(430) + ', 0)';
             })
+            .attr('text-anchor','end')
             .text(function(d){
               return d.num_of_read
             });
@@ -326,12 +378,14 @@
 
           var percentbox_col = row.append('rect')
             .attr('transform', function(d,i){
-              return 'translate(' + scale(600) + ', -19)';
+              return 'translate(' + scale(432) + ', -15)';
             })
             .attr('height',20)
             .attr('width', function(d){
-              return d.percentage * 250
+              return d.percentage * 300
             })
+            .attr('fill','rgb(107, 174, 214)')
+            .attr('stroke','none')
 
         });
       }
@@ -422,40 +476,43 @@
   </body>
   <style>
     body {
-        font-family: 'Roboto', sans-serif;
-        color: #333333;
+      font-family: 'Roboto', sans-serif;
+      color: #333333;
     }
-
     /*Styling for the lines connecting the labels to the slices*/
     polyline{
-        opacity: .3;
-        stroke: black;
-        stroke-width: 1.5px;
-        fill: none;
+      opacity: .3;
+      stroke: black;
+      stroke-width: 1.5px;
+      fill: none;
     }
 
     /* Make the percentage on the text labels bold*/
     .labelName tspan {
-        font-style: normal;
-        font-weight: 700;
+      font-style: normal;
+      font-weight: 700;
     }
 
     /* In biology we generally italicise species names. */
     .labelName {
-        font-size: 0.9em;
-        font-style: italic;
+      font-size: 0.9em;
+      font-style: italic;
+    }
+    #wrapper {
+      display: table;
+      height: 100vh;
     }
     #chart {
-      position: relative;
+      display: table-row;
       left: 0px;
       right: 0px;
       top: 0px;
       bottom: 0px;
       z-index: 1;
-      height: 100%;
     }
     #table {
-      height: 500px;
+      display:table-row;
+      height:100%;
       overflow-y: scroll;
     }
   </style>
