@@ -292,7 +292,6 @@
 
           //loop through object to generate columns
           for (var i in columns){
-            console.log(columns[i].x)
             var headerCol = header.append('g')
               .attr('class','headerCol')
               .attr('transform', 'translate(' + columns[i].x + ', 0)')
@@ -331,7 +330,7 @@
             .attr('transform', function(d,i){
               return 'translate(' + scale(10) + ', -15)';
             })
-            .attr('width','100%')
+            .attr('width','97%')
             .attr('height',20)
             .style('fill', 'rgb(253, 208, 162)')
             .style('opacity',0)
@@ -367,29 +366,47 @@
                 return d.taxID
               });
 
-          var readnum_col = row.append('text')
+          var longestcontigbox_col = row.append('rect')
             .attr('transform', function(d,i){
-              return 'translate(' + (50 + columns[2].x) + ', 0)';
+              return 'translate(' + (5 + columns[2].x) + ', -15)';
             })
-            .attr('text-anchor','end')
+            .attr('height',20)
+            .attr('width', function(d){
+              return d.contig_percentage * scale(95)
+            })
+            .attr('fill','rgb(198, 219, 239)')
+            .attr('stroke','none')
+
+          var longestcontig_col = row.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + (10 + columns[2].x) + ', 0)';
+            })
             .text(function(d){
-              return d.num_of_read
+              return d.len_longest_contig + ' bp'
             });
 
           var percentbox_col = row.append('rect')
             .attr('transform', function(d,i){
-              return 'translate(' + (55 + columns[2].x) + ', -15)';
+              return 'translate(' + (5 + columns[3].x) + ', -15)';
             })
             .attr('height',20)
             .attr('width', function(d){
-              return d.percentage * 300
+              return d.percentage * scale(200)
             })
-            .attr('fill','rgb(107, 174, 214)')
+            .attr('fill','rgb(198, 219, 239)')
             .attr('stroke','none')
+
+          var readnum_col = row.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + (10 + columns[3].x) + ', 0)';
+            })
+            .text(function(d){
+              return d.num_of_read
+            });
 
           var rpmh_col = row.append('text')
             .attr('transform', function(d,i){
-              return 'translate(' + (10 + columns[3].x) + ', 0)';
+              return 'translate(' + (10 + columns[4].x) + ', 0)';
             })
             .text(function(d){
               return d.RPMH
@@ -435,23 +452,29 @@
       .columns([
         {name: 'Name', width: scale(285), x:scale(10)},
         {name: 'TaxID', width: scale(95), x:scale(300)},
-        {name: '# of reads', width: scale(95), x:scale(400)},
-        {name: 'RPMH', width: scale(95), x:scale(500)},
+        {name: 'Longest contig', width: scale(95), x:scale(400)},
+        {name: '# of reads', width: scale(195), x:scale(500)},
+        {name: 'RPMH', width: scale(95), x:scale(700)},
       ])
 
     d3.tsv('./data/example.txt', function(error, data) {
         if (error) throw error;
         //get total number of reads
         var total_num_reads = 0
+        var longest_contig_length = 0
         for(var organism in data) {
           if(data[organism].num_of_read){
             total_num_reads += parseInt(data[organism].num_of_read)
+          }
+          if(parseInt(data[organism].len_longest_contig) > longest_contig_length){
+            longest_contig_length = data[organism].len_longest_contig
           }
         }
 
         //filter out organisms over thresh
         for(var i in data){
           data[i].percentage = data[i].num_of_read / total_num_reads
+          data[i].contig_percentage = data[i].len_longest_contig / longest_contig_length
         }
 
         data.sort(function(a, b) {
