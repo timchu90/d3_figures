@@ -6,7 +6,7 @@
   </head>
   <body>
     <div id="wrapper">
-      <h1>PANDORA REPORT</h1>
+      <h1 style="margin-left:10%; font-size: 40px">Pandora Report</h1>
       <div id="chart"></div>
       <div id="table"></div>
     </div>
@@ -273,43 +273,47 @@
     function barTable() {
       var width,
           cellheight,
-          margin = {top: 10, right: 10, bottom: 10, left: 10}
+          margin = {top: 10, right: 10, bottom: 10, left: 10},
+          columns
 
       function chart(selection) {
         selection.each(function(data) {
           console.log(data)
           var svg = selection.append('svg')
-              .attr('width', width + margin.left + margin.right)
+              .attr('width', '80%')
               .attr('height', (data.length * cellheight) + margin.top + margin.bottom)
               .attr('overflow','scroll')
+              .attr('transform', function(d,i){
+                return 'translate(' + scale(100) + ', 0)';
+              })
 
           var header = svg.append('g')
             .attr('class','header')
 
-          header.append('text')
-            .attr('transform', function(d,i){
-              return 'translate(' + scale(20) + ', 15)';
-            })
-            .text("Name");
+          //loop through object to generate columns
+          for (var i in columns){
+            console.log(columns[i].x)
+            var headerCol = header.append('g')
+              .attr('class','headerCol')
+              .attr('transform', 'translate(' + columns[i].x + ', 0)')
 
-          header.append('text')
-            .attr('transform', function(d,i){
-              return 'translate(' + scale(300) + ', 15)';
-            })
-            .text("TaxID");
+            headerCol.append('rect')
+              .attr('width',columns[i].width)
+              .attr('height',40)
+              .attr('rx',3)
+              .attr('ry',3)
+              .style('fill', 'rgb(253, 174, 107)')
+              .style('opacity',1)
 
-          header.append('text')
-            .attr('transform', function(d,i){
-              return 'translate(' + scale(400) + ', 15)';
-            })
-            .text("# of reads");
+            headerCol.append('text')
+              .attr('transform', function(d,i){
+                return 'translate(10, 30)';
+              })
+              .style('font-weight','bold')
+              .text(columns[i].name);
+          }
 
-          header.append('text')
-            .attr('transform', function(d,i){
-              return 'translate(' + scale(500) + ', 15)';
-            })
-            .text("RPMH");
-
+          //draw table body
           var tablebody = svg.append('g')
             .attr('class','tablebody')
 
@@ -320,12 +324,12 @@
               .attr('class','row')
               .attr('transform', function(d,i){
 
-                return 'translate(0, ' + ((i * cellheight) + 35)+ ')';
+                return 'translate(0, ' + ((i * cellheight) + 60)+ ')';
               })
 
           var row_background = row.append('rect')
             .attr('transform', function(d,i){
-              return 'translate(0, -15)';
+              return 'translate(' + scale(10) + ', -15)';
             })
             .attr('width','100%')
             .attr('height',20)
@@ -342,43 +346,39 @@
                 .style('opacity',0)
             })
 
-
           var name_col = row.append('text')
             .attr('transform', function(d,i){
-              return 'translate(' + scale(20) + ', 0)';
+              return 'translate(' + (10 + columns[0].x) + ', 0)';
             })
             .text(function(d,i){
               return d.name
             });
 
-          var taxid_col = row.append('text')
+          var taxid_col = row.append('a')
             .attr('transform', function(d,i){
-              return 'translate(' + scale(300) + ', 0)';
+              return 'translate(' + (10 + columns[1].x) + ', 0)';
             })
-            .text(function(d){
-              return d.taxID
-            });
+            .attr('href', function(d){
+              return 'https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=' + d.taxID
+            })
+            .attr('target','_blank')
+            .append('text')
+              .text(function(d){
+                return d.taxID
+              });
 
           var readnum_col = row.append('text')
             .attr('transform', function(d,i){
-              return 'translate(' + scale(430) + ', 0)';
+              return 'translate(' + (50 + columns[2].x) + ', 0)';
             })
             .attr('text-anchor','end')
             .text(function(d){
               return d.num_of_read
             });
 
-          var rpmh_col = row.append('text')
-            .attr('transform', function(d,i){
-              return 'translate(' + scale(500) + ', 0)';
-            })
-            .text(function(d){
-              return d.RPMH
-            });
-
           var percentbox_col = row.append('rect')
             .attr('transform', function(d,i){
-              return 'translate(' + scale(432) + ', -15)';
+              return 'translate(' + (55 + columns[2].x) + ', -15)';
             })
             .attr('height',20)
             .attr('width', function(d){
@@ -386,6 +386,14 @@
             })
             .attr('fill','rgb(107, 174, 214)')
             .attr('stroke','none')
+
+          var rpmh_col = row.append('text')
+            .attr('transform', function(d,i){
+              return 'translate(' + (10 + columns[3].x) + ', 0)';
+            })
+            .text(function(d){
+              return d.RPMH
+            });
 
         });
       }
@@ -404,6 +412,11 @@
           margin = value;
           return chart;
       };
+      chart.columns = function(value) {
+          if (!arguments.length) return columns;
+          columns = value;
+          return chart;
+      };
 
       return chart;
     }
@@ -418,7 +431,13 @@
 
     var bartable = barTable()
       .width(width)
-      .cellheight(20)
+      .cellheight(22)
+      .columns([
+        {name: 'Name', width: scale(285), x:scale(10)},
+        {name: 'TaxID', width: scale(95), x:scale(300)},
+        {name: '# of reads', width: scale(95), x:scale(400)},
+        {name: 'RPMH', width: scale(95), x:scale(500)},
+      ])
 
     d3.tsv('./data/example.txt', function(error, data) {
         if (error) throw error;
@@ -514,6 +533,7 @@
       display:table-row;
       height:100%;
       overflow-y: scroll;
+      font-size: 15px;
     }
   </style>
 </html>
