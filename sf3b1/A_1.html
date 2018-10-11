@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      #hex4,#hex6{
+        fill: gold;
+      }
+      body {
+        font-family: sans-serif
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: 120px;
+        height: 40px;
+        padding: 2px;
+        font: 15px sans-serif;
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 2px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+
+      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var y = d3.scaleLinear().range([0,height]).domain([1000,0])
+
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+      var cohorts = ['CUMC_CLL','dbGaP_CLL','ICGC_CLL','GEO_Nalm6','Leucegene_AML','TCGA_AML','MSK_K562','GEO_MDS','TCGA_UVM','TCGA_SKCM','TCGA_KIRC','TCGA_PRAD','TCGA_SARC','TCGA_THYM','TCGA_LIHC','TCGA_BRCA','TCGA_BLCA']
+      var colorScale = d3.scaleOrdinal()
+        .domain(cohorts)
+        .range(['#E91C24','#ED1C24','#F05029','#FAD405','#FAAA33','#D1DD26','#F2E900','#F68E1E','#4252A3','#40C2D6','#C7C2A6','#FDCE94','#B9C7C2','#009149','#20B24A','#6588BA','#2E2E7B'])
+
+      // add the tooltip
+      var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+
+      //calculate x,y position of hex on circle given degrees
+      var arc_x = x(430);
+      var arc_y = y(130);
+      var arc_r = scale(450);
+      function calcArc(deg) {
+        return {
+          x:arc_x + arc_r * Math.cos(deg * (Math.PI / 180)),
+          y:arc_y + arc_r * Math.sin(deg * (Math.PI / 180)),
+        };
+      }
+      //circle for testing
+      /*
+      svg.append('circle')
+        .attr('fill','none')
+        .attr('stroke','black')
+        .attr('cx',arc_x)
+        .attr('cy',arc_y)
+        .attr('r',arc_r)
+        */
+
+      var pie = d3.pie()
+          .sort(null)
+          .value(function(d) { return d.numsample; });
+
+      var backbone_pie = d3.pie()
+          .sort(null)
+          .startAngle(290 * (Math.PI / 180))
+          .endAngle(420 * (Math.PI / 180))
+          .value(function(d) { return d; });
+
+      var backbone_arc = d3.arc()
+        .innerRadius(scale(440))
+        .outerRadius(scale(460))
+
+      var motif_arc = d3.arc()
+        .innerRadius(scale(410))
+        .outerRadius(scale(490))
+        .cornerRadius(10)
+
+      var spine = svg.append('g').attr('class','spine')
+
+      var lines = spine.append('g')
+      //draw donut charts
+
+      var calcDonutUp = function(deg,dist){
+        return {
+          x: dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x ,
+          y: dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y
+        }
+      }
+
+      var calcDonutDown = function(deg,dist){
+        return {
+          x: -1 * dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x  ,
+          y: -1 * dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y
+        }
+      }
+
+      var donutGen = function(input, radius, r_out, r_in, angle, distance, direction, labeldir){
+        d3.tsv(input, function(error,data){
+          if (error) throw error;
+
+          var arc = d3.arc()
+              .outerRadius(radius - r_out)
+              .innerRadius(radius - r_in);
+
+          var biggarc = d3.arc()
+              .outerRadius(radius)
+              .innerRadius(radius - r_in);
+
+          if(direction == 'up'){
+            var donut = svg.append("g")
+              .attr("transform", "translate(" + calcDonutUp(angle,distance).x + "," + calcDonutUp(angle,distance).y + ")")
+              .attr('class','donut')
+            lines.append('line')
+              .attr('x1',calcArc(angle).x)
+              .attr('y1',calcArc(angle).y)
+              .attr('x2', distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x )
+              .attr('y2', distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y )
+              .attr('stroke','black')
+              .attr('stroke-width','1.5px')
+              .attr('opacity',0)
+              .transition()
+                .delay(1200)
+                .duration(500)
+                .attr('opacity',1)
+            spine.append('circle')
+              .attr('cx',distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x)
+              .attr('cy',distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y)
+              .attr('r', radius - r_in)
+              .attr('stroke','none')
+              .attr('fill','white')
+          } else {
+            var donut = svg.append("g")
+              .attr("transform", "translate(" + calcDonutDown(angle,distance).x + "," + calcDonutDown(angle,distance).y + ")")
+              .attr('class','donut')
+            lines.append('line')
+              .attr('x1',calcArc(angle).x)
+              .attr('y1',calcArc(angle).y)
+              .attr('x2', -1 * distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x )
+              .attr('y2', -1 * distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y )
+              .attr('stroke','black')
+              .attr('stroke-width','1.5px')
+              .attr('opacity',0)
+              .transition()
+                .delay(1200)
+                .duration(500)
+                .attr('opacity',1)
+            spine.append('circle')
+              .attr('cx', -1 * distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x)
+              .attr('cy', -1 * distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y)
+              .attr('r', radius - r_in)
+              .attr('stroke','none')
+              .attr('fill','white')
+          }
+
+          var g = donut.selectAll(".arc")
+              .data(pie(data))
+            .enter().append("g")
+              .attr("class", "arc")
+
+          g.append("path")
+            .attr('d',arc)
+            .style('stroke','white')
+            .style('fill', function(d) {return colorScale(d.data.cohort); })
+            .attr('opacity',0)
+            .attr('pointer-events', 'none')
+            .on('mouseover',function(d){
+              d3.select(this)
+                .transition()
+                  .duration(200)
+                  .attr('d',biggarc)
+              div.transition()
+                .duration(100)
+                .style("opacity", .9);
+              div.html("<b>" + d.data.cohort + "</b><br/>" + "size: " + d.data.numsample + "<br/>")
+                .style("left", (d3.event.pageX + 20) + "px")
+                .style("top", (d3.event.pageY - 20) + "px");
+            })
+            .on('mouseout',function(d){
+              d3.select(this)
+                .transition()
+                  .duration(100)
+                  .attr('d',arc)
+              div.transition()
+                .duration(100)
+                .style("opacity",0);
+            })
+            .transition()
+              .delay(1000)
+              .duration(500)
+              .attr('opacity',1)
+            .transition()
+              //transition doesnt work if you hover during reveal.
+              //disable mouse until after
+              .attr('pointer-events','')
+
+            //sample number label
+            donut.append('text')
+              .attr('class','totallabel')
+              .style("text-anchor", "middle")
+              .text(d3.sum(data.map(function(d){ return d.numsample})))
+              .attr('dy', r_in/3)
+              .attr('font-size', r_in + 1)
+              .attr('opacity',0)
+              .transition()
+                .delay(1500)
+                .duration(500)
+                .attr('opacity',1)
+
+            //mutation label
+            if(labeldir == 'right'){
+              donut.append('text')
+                .attr('class','mutlabel')
+                .text(input.slice(8,).split('.')[0])
+                .attr('dx', radius)
+                .attr('dy',  r_in/3 )
+                .attr('font-size', r_in + 1)
+                .attr('opacity',0)
+                .transition()
+                  .delay(1800)
+                  .duration(500)
+                  .attr('opacity',1)
+
+            } else {
+              donut.append('text')
+                .attr('class','mutlabel')
+                .text(input.slice(8,).split('.')[0])
+                .style("text-anchor", "end")
+                .attr('dx', radius * -1)
+                .attr('dy',  r_in/3)
+                .attr('font-size', r_in + 1)
+                .attr('opacity',0)
+                .transition()
+                  .delay(1800)
+                  .duration(500)
+                  .attr('opacity',1)
+            }
+
+        });
+      }
+
+      var getAminoAngle = function(angle){
+        return (angle /221 * 130) +200
+      }
+      donutGen('dataA_1/M1V.tsv', scale(20), scale(2), scale(12), getAminoAngle(1), scale(100), 'up', 'left')
+      donutGen('dataA_1/P7X.tsv', scale(20), scale(2), scale(12), getAminoAngle(7), scale(100), 'up', 'left')
+      donutGen('dataA_1/S26*.tsv', scale(20), scale(2), scale(12), getAminoAngle(26), scale(100), 'up', 'left')
+      donutGen('dataA_1/E35Q.tsv', scale(20), scale(2), scale(12), getAminoAngle(35), scale(100), 'up', 'left')
+      donutGen('dataA_1/P46Q.tsv', scale(20), scale(2), scale(12), getAminoAngle(46), scale(100), 'up', 'left')
+      donutGen('dataA_1/R47L.tsv', scale(20), scale(2), scale(12), getAminoAngle(47), scale(100), 'up', 'left')
+      donutGen('dataA_1/T51I.tsv', scale(20), scale(2), scale(12), getAminoAngle(51), scale(100), 'up', 'left')
+      donutGen('dataA_1/K52E.tsv', scale(20), scale(2), scale(12), getAminoAngle(52), scale(100), 'up', 'left')
+      donutGen('dataA_1/R94C.tsv', scale(20), scale(2), scale(12), getAminoAngle(94), scale(100), 'up', 'left')
+      donutGen('dataA_1/P95H.tsv', scale(20), scale(2), scale(12), getAminoAngle(95), scale(100), 'up', 'left')
+      donutGen('dataA_1/P95_R102del.tsv', scale(20), scale(2), scale(12), getAminoAngle(95), scale(140), 'up', 'left')
+      donutGen('dataA_1/P95L.tsv', scale(20), scale(2), scale(12), getAminoAngle(95), scale(180), 'up', 'left')
+      donutGen('dataA_1/P95R.tsv', scale(20), scale(2), scale(12), getAminoAngle(95), scale(220), 'up', 'left')
+      donutGen('dataA_1/P95T.tsv', scale(20), scale(2), scale(12), getAminoAngle(95), scale(260), 'up', 'left')
+      donutGen('dataA_1/P96PX.tsv', scale(20), scale(2), scale(12), getAminoAngle(95), scale(100), 'down', 'left')
+      donutGen('dataA_1/indel82-99.tsv', scale(20), scale(2), scale(12), getAminoAngle(99), scale(100), 'up', 'left')
+      donutGen('dataA_1/indel92-100.tsv', scale(20), scale(2), scale(12), getAminoAngle(100), scale(100), 'up', 'left')
+      donutGen('dataA_1/indel95-102.tsv', scale(20), scale(2), scale(12), getAminoAngle(102), scale(180), 'up', 'left')
+      donutGen('dataA_1/Y110C.tsv', scale(20), scale(2), scale(12), getAminoAngle(110), scale(100), 'up', 'left')
+      donutGen('dataA_1/R128K.tsv', scale(20), scale(2), scale(12), getAminoAngle(128), scale(100), 'up', 'left')
+      donutGen('dataA_1/S128R.tsv', scale(20), scale(2), scale(12), getAminoAngle(128), scale(100), 'up', 'left')
+      donutGen('dataA_1/R129L.tsv', scale(20), scale(2), scale(12), getAminoAngle(129), scale(100), 'up', 'left')
+      donutGen('dataA_1/S136C.tsv', scale(20), scale(2), scale(12), getAminoAngle(136), scale(100), 'up', 'left')
+      donutGen('dataA_1/S149P.tsv', scale(20), scale(2), scale(12), getAminoAngle(149), scale(100), 'up', 'left')
+      donutGen('dataA_1/R167Q.tsv', scale(20), scale(2), scale(12), getAminoAngle(167), scale(100), 'up', 'left')
+      donutGen('dataA_1/indel173-179.tsv', scale(20), scale(2), scale(12), getAminoAngle(179), scale(100), 'up', 'left')
+      donutGen('dataA_1/S200F.tsv', scale(20), scale(2), scale(12), getAminoAngle(200), scale(100), 'up', 'left')
+      donutGen('dataA_1/R205L.tsv', scale(20), scale(2), scale(12), getAminoAngle(205), scale(100), 'up', 'left')
+      donutGen('dataA_1/K211E.tsv', scale(20), scale(2), scale(12), getAminoAngle(211), scale(100), 'down', 'left')
+      donutGen('dataA_1/E215K.tsv', scale(20), scale(2), scale(12), getAminoAngle(215), scale(150), 'up', 'left')
+      donutGen('dataA_1/A218T.tsv', scale(20), scale(2), scale(12), getAminoAngle(218), scale(100), 'up', 'left')
+
+      var g = svg.selectAll(".backbone_arc")
+          .data(backbone_pie([14,78,25,104]))
+        .enter().append("g")
+          .attr("class", "backbone_arc")
+          .attr('transform','translate(' + arc_x + ',' + arc_y + ')')
+
+      g.append("path")
+        .attr('d', function(d,i){
+          if(i % 2 == 0){
+            return backbone_arc(d)
+          }
+          else{
+            return motif_arc(d)
+          }
+        })
+        .style('fill',function(d,i){
+          if(i % 2 == 0){
+            return 'gray'
+          }
+          else{
+            return 'yellowgreen'
+          }
+        })
+      //legend
+      var legendgroup = svg.append('g')
+
+      var legend = legendgroup.selectAll('g')
+        .data(cohorts)
+        .enter()
+          .append('g')
+          .attr('class', 'legend')
+
+      legend.append('rect')
+        .attr('x', scale(1100))
+        .attr('y', function(d, i) {
+          return (i * scale(30)) + scale(20) ;
+        })
+        .attr('width', scale(20))
+        .attr('height', scale(20))
+        .attr('fill', function(d){return colorScale(d)})
+        .attr('opacity',0)
+        .transition()
+          .delay(2000)
+          .duration(250)
+          .attr('opacity',1)
+
+      legend.append('text')
+        .attr('font-size', scale(20))
+        .attr('x', scale(1125))
+        .attr('y', function(d, i) {
+          return (i * scale(30)) + scale(37);
+        })
+        .text(function(d) {
+          return d;
+        })
+        .attr('opacity',0)
+        .transition()
+          .delay(2000)
+          .duration(500)
+          .attr('opacity',1)
+
+    </script>
+  </body>
+</html>

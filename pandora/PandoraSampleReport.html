@@ -372,7 +372,7 @@
             })
             .attr('height',20)
             .attr('width', function(d){
-              return d.contig_percentage * scale(95)
+              return d.contig_percentage * scale(90)
             })
             .attr('fill','rgb(198, 219, 239)')
             .attr('stroke','none')
@@ -403,6 +403,17 @@
             .text(function(d){
               return d.num_of_read
             });
+
+          var rpmh_col = row.append('rect')
+            .attr('transform', function(d,i){
+              return 'translate(' + (5 + columns[4].x) + ', -15)';
+            })
+            .attr('height',20)
+            .attr('width', function(d){
+              return d.rpmh_percentage * scale(90)
+            })
+            .attr('fill','rgb(198, 219, 239)')
+            .attr('stroke','none')
 
           var rpmh_col = row.append('text')
             .attr('transform', function(d,i){
@@ -462,6 +473,7 @@
         //get total number of reads
         var total_num_reads = 0
         var longest_contig_length = 0
+        var max_rpmh = 0
         for(var organism in data) {
           if(data[organism].num_of_read){
             total_num_reads += parseInt(data[organism].num_of_read)
@@ -469,12 +481,16 @@
           if(parseInt(data[organism].len_longest_contig) > longest_contig_length){
             longest_contig_length = data[organism].len_longest_contig
           }
+          if(parseInt(data[organism].RPMH) > max_rpmh){
+            max_rpmh = data[organism].RPMH
+          }
         }
 
         //filter out organisms over thresh
         for(var i in data){
           data[i].percentage = data[i].num_of_read / total_num_reads
           data[i].contig_percentage = data[i].len_longest_contig / longest_contig_length
+          data[i].rpmh_percentage = data[i].RPMH / max_rpmh
         }
 
         data.sort(function(a, b) {
