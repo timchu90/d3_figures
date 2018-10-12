@@ -248,7 +248,7 @@
       //init parameters of arc and gene
       var startAngle = 280
       var endAngle = 420
-      var geneLength = 221
+      var geneLength = 240
 
       //use pie function to specify the gene arc
       var backbone_pie = d3.pie()
@@ -263,45 +263,38 @@
       }
 
       //draw donuts
-      donutGen('dataA_1/M1V.tsv', scale(20), scale(2), scale(12), getAminoAngle(1), scale(80), 'up', 'left')
-      donutGen('dataA_1/P7X.tsv', scale(20), scale(2), scale(12), getAminoAngle(7), scale(80), 'down', 'right')
-      donutGen('dataA_1/S26*.tsv', scale(20), scale(2), scale(12), getAminoAngle(26), scale(80), 'up', 'left')
-      donutGen('dataA_1/E35Q.tsv', scale(20), scale(2), scale(12), getAminoAngle(35), scale(80), 'down', 'right')
-      donutGen('dataA_1/P46Q.tsv', scale(20), scale(2), scale(12), getAminoAngle(46), scale(80), 'up', 'left')
-      donutGen('dataA_1/R47L.tsv', scale(20), scale(2), scale(12), getAminoAngle(47), scale(160), 'down', 'right')
-      donutGen('dataA_1/T51I.tsv', scale(20), scale(2), scale(12), getAminoAngle(51), scale(120), 'up', 'left')
-      donutGen('dataA_1/K52E.tsv', scale(20), scale(2), scale(12), getAminoAngle(52), scale(100), 'down', 'right')
-      donutGen('dataA_1/R94C.tsv', scale(20), scale(2), scale(12), getAminoAngle(94), scale(80), 'down', 'left')
-      donutGen('dataA_1/P95H.tsv', scale(50), scale(2), scale(30), getAminoAngle(95), scale(110), 'up', 'left')
-      donutGen('dataA_1/P95L.tsv', scale(30), scale(2), scale(20), getAminoAngle(95), scale(200), 'up', 'left')
-      donutGen('dataA_1/P95R.tsv', scale(25), scale(2), scale(16), getAminoAngle(95), scale(260), 'up', 'left')
-      donutGen('dataA_1/P95T.tsv', scale(20), scale(2), scale(12), getAminoAngle(95), scale(310), 'up', 'left')
-      donutGen('dataA_1/P95_R102del.tsv', scale(20), scale(2), scale(12), getAminoAngle(95), scale(355), 'up', 'left')
-      donutGen('dataA_1/P96PX.tsv', scale(20), scale(2), scale(12), getAminoAngle(95), scale(120), 'down', 'left')
-      donutGen('dataA_1/indel82-99.tsv', scale(20), scale(2), scale(12), getAminoAngle(99), scale(165), 'down', 'left')
-      donutGen('dataA_1/indel92-100.tsv', scale(20), scale(2), scale(12), getAminoAngle(100), scale(205), 'down', 'left')
-      donutGen('dataA_1/indel95-102.tsv', scale(24), scale(2), scale(15), getAminoAngle(102), scale(170), 'up', 'right')
-      donutGen('dataA_1/Y110C.tsv', scale(20), scale(2), scale(12), getAminoAngle(110), scale(60), 'up', 'right')
-      donutGen('dataA_1/R128K.tsv', scale(20), scale(2), scale(12), getAminoAngle(128), scale(70), 'up', 'left')
-      donutGen('dataA_1/S128R.tsv', scale(20), scale(2), scale(12), getAminoAngle(128), scale(110), 'up', 'left')
-      donutGen('dataA_1/R129L.tsv', scale(20), scale(2), scale(12), getAminoAngle(129), scale(100), 'down', 'left')
-      donutGen('dataA_1/S136C.tsv', scale(20), scale(2), scale(12), getAminoAngle(136), scale(95), 'up', 'right')
-      donutGen('dataA_1/S149P.tsv', scale(20), scale(2), scale(12), getAminoAngle(149), scale(80), 'down', 'left')
-      donutGen('dataA_1/R167Q.tsv', scale(20), scale(2), scale(12), getAminoAngle(167), scale(80), 'up', 'left')
-      donutGen('dataA_1/indel173-179.tsv', scale(20), scale(2), scale(12), getAminoAngle(179), scale(80), 'down', 'left')
-      donutGen('dataA_1/S200F.tsv', scale(20), scale(2), scale(12), getAminoAngle(200), scale(80), 'up', 'left')
-      donutGen('dataA_1/R205L.tsv', scale(20), scale(2), scale(12), getAminoAngle(205), scale(110), 'up', 'right')
-      donutGen('dataA_1/K211E.tsv', scale(20), scale(2), scale(12), getAminoAngle(211), scale(80), 'down', 'left')
-      donutGen('dataA_1/E215K.tsv', scale(20), scale(2), scale(12), getAminoAngle(215), scale(130), 'down', 'left')
-      donutGen('dataA_1/A218T.tsv', scale(20), scale(2), scale(12), getAminoAngle(218), scale(100), 'up', 'left')
+      donutGen('dataA_2/G10A.tsv', scale(20), scale(2), scale(12), getAminoAngle(10), scale(80), 'up', 'left')
+      donutGen('dataA_2/I24T.tsv', scale(20), scale(2), scale(12), getAminoAngle(24), scale(80), 'down', 'right')
+      donutGen('dataA_2/H29N.tsv', scale(20), scale(2), scale(12), getAminoAngle(29), scale(80), 'up', 'left')
+      donutGen('dataA_2/S34F.tsv', scale(60), scale(2), scale(33), getAminoAngle(34), scale(180), 'down', 'right')
+      donutGen('dataA_2/S34Y.tsv', scale(20), scale(2), scale(12), getAminoAngle(34), scale(270), 'down', 'right')
+      donutGen('dataA_2/Q56E.tsv', scale(20), scale(2), scale(12), getAminoAngle(56), scale(80), 'up', 'left')
+      donutGen('dataA_2/Q75H.tsv', scale(20), scale(2), scale(12), getAminoAngle(75), scale(80), 'up', 'left')
+      donutGen('dataA_2/D107H.tsv', scale(20), scale(2), scale(12), getAminoAngle(107), scale(80), 'up', 'left')
+      donutGen('dataA_2/G111V.tsv', scale(20), scale(2), scale(12), getAminoAngle(111), scale(80), 'down', 'left')
+      donutGen('dataA_2/R119S.tsv', scale(20), scale(2), scale(12), getAminoAngle(119), scale(100), 'up', 'left')
+      donutGen('dataA_2/E124K.tsv', scale(20), scale(2), scale(12), getAminoAngle(124), scale(80), 'down', 'right')
+      donutGen('dataA_2/R133C.tsv', scale(20), scale(2), scale(12), getAminoAngle(133), scale(80), 'up', 'left')
+      donutGen('dataA_2/R133H.tsv', scale(20), scale(2), scale(12), getAminoAngle(133), scale(125), 'up', 'left')
+      donutGen('dataA_2/R156H.tsv', scale(25), scale(2), scale(15), getAminoAngle(156), scale(80), 'up', 'left')
+      donutGen('dataA_2/Q157P.tsv', scale(25), scale(2), scale(15), getAminoAngle(157), scale(80), 'down', 'right')
+      donutGen('dataA_2/Q157R.tsv', scale(22), scale(2), scale(14), getAminoAngle(157), scale(130), 'down', 'right')
+      donutGen('dataA_2/T164A.tsv', scale(20), scale(2), scale(12), getAminoAngle(164), scale(80), 'up', 'right')
+      donutGen('dataA_2/G166V.tsv', scale(20), scale(2), scale(12), getAminoAngle(166), scale(120), 'up', 'right')
+      donutGen('dataA_2/G216R.tsv', scale(20), scale(2), scale(12), getAminoAngle(216), scale(80), 'up', 'right')
+
 
       //draw gene arc
       var g = svg.selectAll(".backbone_arc")
           .data(backbone_pie([
-            {length:14, color:'gray', innerRadius: scale(440), outerRadius: scale(460), cornerRadius: 0, text:''},
-            {length:78, color:'firebrick', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'RRM'},
+            {length:12, color:'gray', innerRadius: scale(440), outerRadius: scale(460), cornerRadius: 0, text:''},
+            {length:28, color:'forestgreen', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'ZnF1'},
             {length:25, color:'gray', innerRadius: scale(440), outerRadius: scale(460), cornerRadius: 0, text:''},
-            {length:104, color:'yellowgreen', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'RS domain'}
+            {length:82, color:'dodgerblue', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'UHM'},
+            {length:2, color:'gray', innerRadius: scale(440), outerRadius: scale(460), cornerRadius: 0, text:''},
+            {length:27, color:'forestgreen', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'ZnF2'},
+            {length:2, color:'gray', innerRadius: scale(440), outerRadius: scale(460), cornerRadius: 0, text:''},
+            {length:62, color:'firebrick', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'RS domain'}
           ]))
         .enter().append("g")
           .attr("class", "gene_arc")
