@@ -45,10 +45,10 @@
       var y = d3.scaleLinear().range([0,height]).domain([1000,0])
 
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
-      var cohorts = ['TCGA_AML','TCGA_LUAD','TCGA_UCEC','TCGA_UVM','TCGA_SKCM','TCGA_BRCA','TCGA_BLCA','UK_MDS']
+      var cohorts = ['TCGA_AML','TCGA_LUAD','TCGA_UCEC','TCGA_UVM','TCGA_SKCM','TCGA_BRCA','TCGA_BLCA','TCGA_PAAD','UK_MDS']
       var colorScale = d3.scaleOrdinal()
         .domain(cohorts)
-        .range(['#D1DD26','#FAD405','#F68E1E','#4252A3','#40C2D6','#6588BA','#2E2E7B','#B9C7C2'])
+        .range(['#D1DD26','#FAD405','#F68E1E','#4252A3','#40C2D6','#6588BA','#2E2E7B','#20B24A','#B9C7C2'])
 
       // add the tooltip
       var div = d3.select("body").append("div")
@@ -221,7 +221,7 @@
                 .text(input.slice(8,).split('.')[0])
                 .attr('dx', radius)
                 .attr('dy',  r_in/3 )
-                .attr('font-size', r_in + 1)
+                .attr('font-size', r_in+1)
                 .attr('opacity',0)
                 .transition()
                   .delay(1800)
@@ -235,7 +235,7 @@
                 .style("text-anchor", "end")
                 .attr('dx', radius * -1)
                 .attr('dy',  r_in/3)
-                .attr('font-size', r_in + 1)
+                .attr('font-size', r_in+1)
                 .attr('opacity',0)
                 .transition()
                   .delay(1800)
@@ -264,19 +264,19 @@
 
       //draw donuts
       donutGen('dataA_2/G10A.tsv', scale(20), scale(2), scale(12), getAminoAngle(10), scale(80), 'up', 'left')
-      donutGen('dataA_2/I24T.tsv', scale(20), scale(2), scale(12), getAminoAngle(24), scale(80), 'down', 'right')
-      donutGen('dataA_2/H29N.tsv', scale(20), scale(2), scale(12), getAminoAngle(29), scale(80), 'up', 'left')
-      donutGen('dataA_2/S34F.tsv', scale(60), scale(2), scale(33), getAminoAngle(34), scale(180), 'down', 'right')
-      donutGen('dataA_2/S34Y.tsv', scale(20), scale(2), scale(12), getAminoAngle(34), scale(270), 'down', 'right')
+      donutGen('dataA_2/I24T.tsv', scale(20), scale(2), scale(12), getAminoAngle(24), scale(60), 'up', 'left')
+      donutGen('dataA_2/H29N.tsv', scale(20), scale(2), scale(12), getAminoAngle(29), scale(100), 'up', 'left')
+      donutGen('dataA_2/S34F.tsv', scale(60), scale(2), scale(33), getAminoAngle(34), scale(120), 'down', 'right')
+      donutGen('dataA_2/S34Y.tsv', scale(20), scale(2), scale(12), getAminoAngle(34), scale(210), 'down', 'right')
       donutGen('dataA_2/Q56E.tsv', scale(20), scale(2), scale(12), getAminoAngle(56), scale(80), 'up', 'left')
       donutGen('dataA_2/Q75H.tsv', scale(20), scale(2), scale(12), getAminoAngle(75), scale(80), 'up', 'left')
       donutGen('dataA_2/D107H.tsv', scale(20), scale(2), scale(12), getAminoAngle(107), scale(80), 'up', 'left')
       donutGen('dataA_2/G111V.tsv', scale(20), scale(2), scale(12), getAminoAngle(111), scale(80), 'down', 'left')
       donutGen('dataA_2/R119S.tsv', scale(20), scale(2), scale(12), getAminoAngle(119), scale(100), 'up', 'left')
       donutGen('dataA_2/E124K.tsv', scale(20), scale(2), scale(12), getAminoAngle(124), scale(80), 'down', 'right')
-      donutGen('dataA_2/R133C.tsv', scale(20), scale(2), scale(12), getAminoAngle(133), scale(80), 'up', 'left')
+      donutGen('dataA_2/R133C.tsv', scale(20), scale(2), scale(12), getAminoAngle(133), scale(60), 'up', 'right')
       donutGen('dataA_2/R133H.tsv', scale(20), scale(2), scale(12), getAminoAngle(133), scale(125), 'up', 'left')
-      donutGen('dataA_2/R156H.tsv', scale(25), scale(2), scale(15), getAminoAngle(156), scale(80), 'up', 'left')
+      donutGen('dataA_2/R156H.tsv', scale(25), scale(2), scale(15), getAminoAngle(156), scale(110), 'up', 'left')
       donutGen('dataA_2/Q157P.tsv', scale(25), scale(2), scale(15), getAminoAngle(157), scale(80), 'down', 'right')
       donutGen('dataA_2/Q157R.tsv', scale(22), scale(2), scale(14), getAminoAngle(157), scale(130), 'down', 'right')
       donutGen('dataA_2/T164A.tsv', scale(20), scale(2), scale(12), getAminoAngle(164), scale(80), 'up', 'right')
@@ -287,14 +287,14 @@
       //draw gene arc
       var g = svg.selectAll(".backbone_arc")
           .data(backbone_pie([
-            {length:12, color:'gray', innerRadius: scale(440), outerRadius: scale(460), cornerRadius: 0, text:''},
-            {length:28, color:'forestgreen', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'ZnF1'},
-            {length:25, color:'gray', innerRadius: scale(440), outerRadius: scale(460), cornerRadius: 0, text:''},
-            {length:82, color:'dodgerblue', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'UHM'},
-            {length:2, color:'gray', innerRadius: scale(440), outerRadius: scale(460), cornerRadius: 0, text:''},
-            {length:27, color:'forestgreen', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'ZnF2'},
-            {length:2, color:'gray', innerRadius: scale(440), outerRadius: scale(460), cornerRadius: 0, text:''},
-            {length:62, color:'firebrick', innerRadius: scale(410), outerRadius: scale(490), cornerRadius: 35, text:'RS domain'}
+            {length:12, color:'gray', innerRadius: scale(445), outerRadius: scale(455), cornerRadius: 0, text:''},
+            {length:28, color:'forestgreen', innerRadius: scale(420), outerRadius: scale(480), cornerRadius: 35, text:'ZnF1'},
+            {length:25, color:'gray', innerRadius: scale(445), outerRadius: scale(455), cornerRadius: 0, text:''},
+            {length:82, color:'dodgerblue', innerRadius: scale(420), outerRadius: scale(480), cornerRadius: 35, text:'UHM'},
+            {length:2, color:'gray', innerRadius: scale(445), outerRadius: scale(455), cornerRadius: 0, text:''},
+            {length:27, color:'forestgreen', innerRadius: scale(420), outerRadius: scale(480), cornerRadius: 35, text:'ZnF2'},
+            {length:2, color:'gray', innerRadius: scale(445), outerRadius: scale(455), cornerRadius: 0, text:''},
+            {length:62, color:'firebrick', innerRadius: scale(420), outerRadius: scale(480), cornerRadius: 35, text:'RS domain'}
           ]))
         .enter().append("g")
           .attr("class", "gene_arc")
@@ -315,8 +315,8 @@
         })
 
       g.append('text')
-        .attr('dy',scale(45))
-        .attr('dx',scale(-5))
+        .attr('dy',scale(40))
+        .attr('dx',scale(0))
         .style('font-size',scale(20))
         .style('fill','white')
         .append('textPath')
