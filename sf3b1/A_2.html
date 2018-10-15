@@ -302,16 +302,24 @@
 
       g.append("path")
         .attr('id',function(d){return d.data.text})
-        .attr('d', function(d){
+        .style('fill',function(d){
+          return d.data.color
+        })
+        .transition()
+        .duration(500)
+        .delay(function(d, i) {
+          return i * 250;
+        })
+        .attrTween('d', function(d) {
           var arc = d3.arc()
             .innerRadius(d.data.innerRadius)
             .outerRadius(d.data.outerRadius)
             .cornerRadius(d.data.cornerRadius)
-
-          return arc(d)
-        })
-        .style('fill',function(d){
-          return d.data.color
+          var i = d3.interpolate(d.startAngle+0.01, d.endAngle);
+          return function(t) {
+            d.endAngle = i(t);
+            return arc(d);
+          }
         })
 
       g.append('text')
@@ -320,6 +328,8 @@
         .style('font-size',scale(20))
         .style('fill','white')
         .append('textPath')
+        .transition()
+        .delay(2500)
           .attr('xlink:href', function(d){return '#'+d.data.text})
           .style('text-anchor','middle')
           .attr('startOffset','25%')
