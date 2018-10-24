@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      #hex4,#hex6{
+        fill: gold;
+      }
+      body {
+        font-family: sans-serif
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: center;
+        right: 10%;
+        bottom: 10%;
+        width: 20%;
+        height: 15%;
+        padding: 2px;
+        font: 30px sans-serif;
+        border: 0px;
+        border-radius: 2px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+
+      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var y = d3.scaleLinear().range([0,height]).domain([1000,0])
+
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
+      // add the tooltip
+      var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+
+      //center and radius of gene arc
+      var arc_x = x(400);
+      var arc_y = y(400);
+      var arc_r = scale(450);
+      function calcArc(deg) {
+        return {
+          x:arc_x + arc_r * Math.cos(deg * (Math.PI / 180)),
+          y:arc_y + arc_r * Math.sin(deg * (Math.PI / 180)),
+        };
+      }
+      //circle for testing
+      /*
+      svg.append('circle')
+        .attr('fill','none')
+        .attr('stroke','black')
+        .attr('cx',arc_x)
+        .attr('cy',arc_y)
+        .attr('r',arc_r)
+        */
+
+      var pie = d3.pie()
+          .sort(null)
+          .value(function(d) { return d.numsample; });
+
+      var spine = svg.append('g').attr('class','spine')
+
+      var lines = spine.append('g')
+      //draw donut charts
+
+      var calcDonutUp = function(deg,dist){
+        return {
+          x: dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x ,
+          y: dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y
+        }
+      }
+
+      var calcDonutDown = function(deg,dist){
+        return {
+          x: -1 * dist * Math.cos(deg * (Math.PI/180)) + calcArc(deg).x  ,
+          y: -1 * dist * Math.sin(deg * (Math.PI/180)) + calcArc(deg).y
+        }
+      }
+
+      var nodeGen = function(input, angle, direction, labeldir, distance = scale(60), radius = scale(10), font = scale(20)){
+
+        angle = getAminoAngle(angle)
+
+        if(direction == 'up'){
+          var donut = svg.append("g")
+            .attr("transform", "translate(" + calcDonutUp(angle,distance).x + "," + calcDonutUp(angle,distance).y + ")")
+            .attr('class','donut')
+          lines.append('line')
+            .attr('x1',calcArc(angle).x)
+            .attr('y1',calcArc(angle).y)
+            .attr('x2', distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x )
+            .attr('y2', distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y )
+            .attr('stroke','black')
+            .attr('stroke-width','1.5px')
+            .attr('opacity',0)
+            .transition()
+              .delay(2000)
+              .duration(500)
+              .attr('opacity',1)
+          spine.append('circle')
+            .attr('cx',distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x)
+            .attr('cy',distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y)
+            .attr('r', radius)
+            .attr('stroke','none')
+            .attr('fill','green')
+        } else {
+          var donut = svg.append("g")
+            .attr("transform", "translate(" + calcDonutDown(angle,distance).x + "," + calcDonutDown(angle,distance).y + ")")
+            .attr('class','donut')
+          lines.append('line')
+            .attr('x1',calcArc(angle).x)
+            .attr('y1',calcArc(angle).y)
+            .attr('x2', -1 * distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x )
+            .attr('y2', -1 * distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y )
+            .attr('stroke','black')
+            .attr('stroke-width','1.5px')
+            .attr('opacity',0)
+            .transition()
+              .delay(2000)
+              .duration(500)
+              .attr('opacity',1)
+          spine.append('circle')
+            .attr('cx', -1 * distance * Math.cos(angle * (Math.PI/180)) + calcArc(angle).x)
+            .attr('cy', -1 * distance * Math.sin(angle * (Math.PI/180)) + calcArc(angle).y)
+            .attr('r', radius)
+            .attr('stroke','none')
+            .attr('fill','green')
+        }
+
+          //mutation label
+          if(labeldir == 'right'){
+            donut.append('text')
+              .attr('class','mutlabel')
+              .text(input)
+              .attr('dx', (radius + 1))
+              .attr('dy',  font/3 )
+              .attr('font-size', font)
+              .attr('opacity',0)
+              .transition()
+                .delay(1800)
+                .duration(500)
+                .attr('opacity',1)
+
+          } else {
+            donut.append('text')
+              .attr('class','mutlabel')
+              .text(input)
+              .style("text-anchor", "end")
+              .attr('dx', (radius + 1) * -1)
+              .attr('dy',  font/3)
+              .attr('font-size', font)
+              .attr('opacity',0)
+              .transition()
+                .delay(1800)
+                .duration(500)
+                .attr('opacity',1)
+          }
+      }
+      //init parameters of arc and gene
+      var startAngle = 280
+      var endAngle = 420
+      var geneLength = 403
+
+      //use pie function to specify the gene arc
+      var backbone_pie = d3.pie()
+          .sort(null)
+          .startAngle(startAngle * (Math.PI / 180))
+          .endAngle(endAngle * (Math.PI / 180))
+          .value(function(d) { return d.length; });
+
+      //function to calculate amino acid positions in relation to arc
+      var getAminoAngle = function(angle){
+        return (angle /geneLength * (endAngle - startAngle)) + startAngle - 90
+      }
+
+      var domainInnerRadius = scale(420)
+      var domainOuterRadius = scale(480)
+      var geneInnerRadius = scale(445)
+      var geneOuterRadius = scale(455)
+
+      //draw nodes
+      nodeGen('Y68H', 68,'up', 'left')
+      nodeGen('N69Y', 69,'down', 'right')
+      nodeGen('F90S', 90, 'up', 'left')
+      nodeGen('H93Y', 93, 'down', 'right')
+      nodeGen('D107Y', 107, 'up', 'left')
+      nodeGen('R130*', 130, 'up', 'left')
+      nodeGen('G132D', 132, 'down', 'right')
+      nodeGen('K147*', 147, 'up', 'left')
+      nodeGen('R173C', 173, 'up', 'left')
+      nodeGen('R233*', 233, 'up', 'left')
+      nodeGen('L247fs*9', 247, 'down', 'left')
+      nodeGen('D252Y', 252, 'up', 'right', scale(65))
+      nodeGen('N276fs*13', 276, 'up', 'right')
+      nodeGen('L295fs', 295, 'down', 'left')
+      nodeGen('T319fs*1', 319, 'up', 'right')
+
+
+      //draw gene arc
+      var g = svg.selectAll(".backbone_arc")
+          .data(backbone_pie([
+            {length:14, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''},
+            {length:171, color:'yellowgreen', innerRadius: domainInnerRadius, outerRadius: domainOuterRadius, cornerRadius: 35, text:'Phosphatase'},
+            {length:5, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''},
+            {length:160, color:'firebrick', innerRadius: domainInnerRadius, outerRadius: domainOuterRadius, cornerRadius: 35, text:'C2'},
+            {length:53, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''}
+          ]))
+        .enter().append("g")
+          .attr("class", "gene_arc")
+          .attr('transform','translate(' + arc_x + ',' + arc_y + ')')
+
+      g.append("path")
+        .attr('id',function(d){return d.data.text})
+        .style('fill',function(d){
+          return d.data.color
+        })
+        .transition()
+        .duration(500)
+        .delay(function(d, i) {
+          return i * 500;
+        })
+        .attrTween('d', function(d) {
+          var arc = d3.arc()
+            .innerRadius(d.data.innerRadius)
+            .outerRadius(d.data.outerRadius)
+            .cornerRadius(d.data.cornerRadius)
+          var i = d3.interpolate(d.startAngle+0.1, d.endAngle);
+          return function(t) {
+            d.endAngle = i(t);
+            return arc(d);
+          }
+        })
+
+      g.append('text')
+        .attr('dy',scale(40))
+        .attr('dx',scale(0))
+        .style('font-size',scale(20))
+        .style('fill','white')
+        .append('textPath')
+        .transition()
+        .delay(2500)
+          .attr('xlink:href', function(d){return '#'+d.data.text})
+          .style('text-anchor','middle')
+          .attr('startOffset','25%')
+          .text(function(d){return d.data.text})
+
+      svg.append('text')
+        .attr('x',x(325))
+        .attr('y',y(600))
+        .style('font-size',scale(40))
+        .style('fill','black')
+        .text('PTEN')
+
+    </script>
+  </body>
+</html>
