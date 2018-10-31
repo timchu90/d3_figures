@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -1;
+      }
+      body {
+        font-family: sans-serif
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
+      //array of colors to paint heatmap with
+      colors = d3.schemeBlues[9]
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+
+      //function that draws the heatmap
+      var DrawHeatmap = function(input, xloc, yloc, readnum, readThresh, gridH, gridW, label){
+        //parameters:
+        //input - input file
+        //xloc, yloc - x and y coords for top left of heatmap
+        //readnum - number of total reads in bam file. used to normalize
+        //readThresh - value threshold when displaying signal. values over threshold will show as threshold
+        //gridH, gridW - height and width of each grid in heatmap
+
+        d3.tsv(input, function(error, data) {
+          if (error) throw error;
+          //console.log(data)
+
+          var heatmap = svg.append("g")
+            .attr("transform",
+                  "translate(" +  scale(xloc) + "," + scale(yloc) + ")");
+
+          var regions = d3.set(data.map(function(d) { return d.region; } )).values()
+
+          reformatData = []
+          //largestBin = 0;
+
+          for (var i in regions){
+            //console.log(regions[i])
+            bins = Array.apply(null, Array(100)).map(Number.prototype.valueOf,0)
+            var reads = data.filter(function(item){
+              return item.region==regions[i]
+            })
+            regionStart = regions[i].split(':')[1].split('-')[0]
+            for (var j in reads){
+              if(reads[j].position > regionStart){
+                bins[Math.floor((reads[j].position-regionStart)/100)] = bins[Math.floor((reads[j].position-regionStart)/100)] + 1/readnum;
+              }
+            }
+            for (var j in bins){
+              /*
+              if(bins[j]>largestBin){
+                largestBin = bins[j]
+              }*/
+              reformatData.push(
+                {
+                  region: regions[i],
+                  binNum: j,
+                  binVal: bins[j] * 1000000
+                }
+              )
+            }
+          }
+          console.log(reformatData)
+
+          /*
+          var PPOIsites = reformatData.filter(function(item){
+            return item.binNum==49
+          })
+          */
+          /*
+          var PPOIsites = []
+          for(var i in regions){
+            var regionfilter = reformatData.filter(function(item){
+              return item.region==regions[i]
+            })
+            var total = 0
+            console.log(regionfilter)
+            for(var j in regionfilter){
+              total = total + regionfilter[j].binVal
+            }
+            PPOIsites.push({region:regions[i],binVal:total})
+          }
+          function comparePPOIsites(a,b) {
+            if (a.binVal < b.binVal)
+              return 1;
+            if (a.binVal > b.binVal)
+              return -1;
+            return 0;
+          }
+
+          PPOIsites.sort(comparePPOIsites)
+          console.log(PPOIsites)
+
+          var regionsSorted = PPOIsites.map(a => a.region)
+          console.log(regionsSorted)
+          */
+
+          var regionsSorted = [
+            "chr17:24661019-24671019",
+            "chr12:80436534-80446534",
+            "chr1:191116008-191126008",
+            "chr7:120749166-120759166",
+            "chr5:114847065-114857065",
+            "chr14:56689153-56699153",
+            "chr3:121244941-121254941",
+            "chr1:46071100-46081100",
+            "chr17:7947365-7957365",
+            "chrX:116282269-116292269",
+            "chr17:6936940-6946940",
+            "chr1:113899189-113909189",
+            "chr13:45893844-45903844",
+            "chr3:138072312-138082312",
+            "chr9:113561737-113571737",
+            "chr1:93147786-93157786",
+            "chr10:55567708-55577708",
+            "chr4:72023087-72033087"
+          ]
+
+          var xScale = d3.scaleBand()
+            .domain(new Array(100).fill().map((d, i) => i + 0))
+            .range([0, 100 * scale(gridW)]);
+
+          var yScale = d3.scaleBand()
+            .domain(regionsSorted)
+            .range([0,18 * scale(gridH)]);
+
+          var colorScale = d3.scaleQuantile()
+            .domain([0,readThresh])
+            .range(colors)
+
+          var elem = heatmap.selectAll('g')
+            .data(reformatData)
+            .enter()
+
+          elem.append('rect')
+            .attr('width', scale(gridW))
+            .attr('height', scale(gridH))
+            .attr('x', function(d) {return xScale(d.binNum); })
+            .attr('y', function(d) {return yScale(d.region); })
+            .attr('class','hmRect')
+            .style('stroke','none')
+            .style('fill',function(d) {
+              if(d.binVal < readThresh){
+                return colorScale(d.binVal)
+              } else {
+                return "black"
+              }
+            });
+
+          heatmap.append('text')
+            .text(label)
+            .attr('x', scale(gridW * 100 + 20))
+            .attr('y', scale(gridH * 9))
+        });
+      }
+
+      var threshold = 0.5
+      var gridHW = 7
+
+      /*
+      4OHT8402P24.mm10pr.sorted.rmdup.bam
+      22031283
+      4OHT8402P5.mm10pr.sorted.rmdup.bam
+      26158802
+      4OHT8402STI.mm10pr.sorted.rmdup.bam
+      27697339
+      6369P24.mm10pr.sorted.rmdup.bam
+      40334601
+      6369P5.mm10pr.sorted.rmdup.bam
+      40177951
+      6369STI.mm10pr.sorted.rmdup.bam
+      23144449
+      6900P5.mm10pr.sorted.rmdup.bam
+      19723221
+      6900STI.mm10pr.sorted.rmdup.bam
+      18639951
+      XRCC4P24.mm10pr.sorted.rmdup.bam
+      37488671
+      XRCC4P5.mm10pr.sorted.rmdup.bam
+      37930534
+      XRCC4STI.mm10pr.sorted.rmdup.bam
+      28553440
+
+      4OHT8402P24.dm6.sorted.rmdup.bam
+      7186360
+      4OHT8402P5.dm6.sorted.rmdup.bam
+      2291111
+      4OHT8402STI.dm6.sorted.rmdup.bam
+      3406928
+      6369P24.dm6.sorted.rmdup.bam
+      480098
+      6369P5.dm6.sorted.rmdup.bam
+      5208393
+      6369STI.dm6.sorted.rmdup.bam
+      231398
+      6900P5.dm6.sorted.rmdup.bam
+      3987503
+      6900STI.dm6.sorted.rmdup.bam
+      43401
+      XRCC4P24.dm6.sorted.rmdup.bam
+      2292439
+      XRCC4P5.dm6.sorted.rmdup.bam
+      3857303
+      XRCC4STI.dm6.sorted.rmdup.bam
+      1338005
+      */
+      DrawHeatmap("PPoIwindowData2/4OHT8402STI_PPOIreads.txt",10,10,27697339,threshold,gridHW,gridHW,"40HT8402_STI")
+      DrawHeatmap("PPoIwindowData2/4OHT8402P5_PPOIreads.txt",10,160,26158802,threshold,gridHW,gridHW,"40HT8402_P5")
+      DrawHeatmap("PPoIwindowData2/4OHT8402P24_PPOIreads.txt",10,310,22031283,threshold,gridHW,gridHW,"40HT8402_P24")
+
+      DrawHeatmap("PPoIwindowData2/4OHT8402P5_R1_PPOIreads.txt",1000,160,42072379,threshold,gridHW,gridHW,"40HT8402_R1_P5")
+      DrawHeatmap("PPoIwindowData2/4OHT8402P24_R1_PPOIreads.txt",1000,310,39495372,threshold,gridHW,gridHW,"40HT8402_R1_P24")
+
+      DrawHeatmap("PPoIwindowData2/6369STI_PPOIreads.txt",10,460,23144449,threshold,gridHW,gridHW,"6369_STI")
+      DrawHeatmap("PPoIwindowData2/6369P5_PPOIreads.txt",10,610,40177951,threshold,gridHW,gridHW,"6369_P5")
+      DrawHeatmap("PPoIwindowData2/6369P24_PPOIreads.txt",10,760,40334601,threshold,gridHW,gridHW,"6369_P24")
+
+      /*
+      DrawHeatmap("PPoIwindowData2/XRCC4STI_PPOIreads.txt",1000,10,28553440,threshold,gridHW,gridHW,"XRCC4_PSTI")
+      DrawHeatmap("PPoIwindowData2/XRCC4P5_PPOIreads.txt",1000,160,37930534,threshold,gridHW,gridHW,"XRCC4_P5")
+      DrawHeatmap("PPoIwindowData2/XRCC4P24_PPOIreads.txt",1000,310,37488671,threshold,gridHW,gridHW,"XRCC4_P24")
+      */
+
+      DrawHeatmap("PPoIwindowData2/6900STI_PPOIreads.txt",1000,460,18639951,threshold,gridHW,gridHW,"6900_STI")
+      DrawHeatmap("PPoIwindowData2/6900P5_PPOIreads.txt",1000,610,19723221,threshold,gridHW,gridHW,"6900_P5")
+      DrawHeatmap("PPoIwindowData2/6900P24_PPOIreads.txt",1000,760,26047659,threshold,gridHW,gridHW,"6900_P24")
+
+    </script>
+  </body>
+</html>
