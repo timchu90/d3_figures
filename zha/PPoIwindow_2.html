@@ -36,7 +36,16 @@
         .attr("height", height)
 
       //function that draws the heatmap
-      var DrawHeatmap = function(input, xloc, yloc, readnum, readThresh, gridH, gridW, label){
+      var DrawHeatmap = function(
+        input,
+        xloc,
+        yloc,
+        readnum,
+        readThresh,
+        gridH,
+        gridW,
+        label)
+        {
         //parameters:
         //input - input file
         //xloc, yloc - x and y coords for top left of heatmap
@@ -177,9 +186,6 @@
         });
       }
 
-      var threshold = 0.5
-      var gridHW = 7
-
       /*
       4OHT8402P24.mm10pr.sorted.rmdup.bam
       22031283
@@ -227,26 +233,27 @@
       XRCC4STI.dm6.sorted.rmdup.bam
       1338005
       */
-      DrawHeatmap("PPoIwindowData2/4OHT8402STI_PPOIreads.txt",10,10,27697339,threshold,gridHW,gridHW,"40HT8402_STI")
-      DrawHeatmap("PPoIwindowData2/4OHT8402P5_PPOIreads.txt",10,160,26158802,threshold,gridHW,gridHW,"40HT8402_P5")
-      DrawHeatmap("PPoIwindowData2/4OHT8402P24_PPOIreads.txt",10,310,22031283,threshold,gridHW,gridHW,"40HT8402_P24")
+      var threshold = 0.5
+      var gridHW = 5
 
-      DrawHeatmap("PPoIwindowData2/4OHT8402P5_R1_PPOIreads.txt",1000,160,42072379,threshold,gridHW,gridHW,"40HT8402_R1_P5")
-      DrawHeatmap("PPoIwindowData2/4OHT8402P24_R1_PPOIreads.txt",1000,310,39495372,threshold,gridHW,gridHW,"40HT8402_R1_P24")
+      DrawHeatmap("PPoIwindowData2/6369STI_PPOIreads.txt",10,10,23144449,threshold,gridHW,gridHW,"6369_STI")
+      DrawHeatmap("PPoIwindowData2/6369P5_PPOIreads.txt",10,160,40177951,threshold,gridHW,gridHW,"6369_P5")
+      DrawHeatmap("PPoIwindowData2/6369P24_PPOIreads.txt",10,310,40334601,threshold,gridHW,gridHW,"6369_P24")
 
-      DrawHeatmap("PPoIwindowData2/6369STI_PPOIreads.txt",10,460,23144449,threshold,gridHW,gridHW,"6369_STI")
-      DrawHeatmap("PPoIwindowData2/6369P5_PPOIreads.txt",10,610,40177951,threshold,gridHW,gridHW,"6369_P5")
-      DrawHeatmap("PPoIwindowData2/6369P24_PPOIreads.txt",10,760,40334601,threshold,gridHW,gridHW,"6369_P24")
+      DrawHeatmap("PPoIwindowData2/XRCC4STI_PPOIreads.txt",1500,10,28553440,threshold,gridHW,gridHW,"XRCC4_STI")
+      DrawHeatmap("PPoIwindowData2/XRCC4P5_PPOIreads.txt",1500,160,37930534,threshold,gridHW,gridHW,"XRCC4_P5")
+      DrawHeatmap("PPoIwindowData2/XRCC4P24_PPOIreads.txt",1500,310,37488671,threshold,gridHW,gridHW,"XRCC4_P24")
 
-      /*
-      DrawHeatmap("PPoIwindowData2/XRCC4STI_PPOIreads.txt",1000,10,28553440,threshold,gridHW,gridHW,"XRCC4_PSTI")
-      DrawHeatmap("PPoIwindowData2/XRCC4P5_PPOIreads.txt",1000,160,37930534,threshold,gridHW,gridHW,"XRCC4_P5")
-      DrawHeatmap("PPoIwindowData2/XRCC4P24_PPOIreads.txt",1000,310,37488671,threshold,gridHW,gridHW,"XRCC4_P24")
-      */
+      DrawHeatmap("PPoIwindowData2/6900STI_PPOIreads.txt",750,10,18639951,threshold,gridHW,gridHW,"6900_STI")
+      DrawHeatmap("PPoIwindowData2/6900P5_PPOIreads.txt",750,160,19723221,threshold,gridHW,gridHW,"6900_P5")
+      DrawHeatmap("PPoIwindowData2/6900P24_PPOIreads.txt",750,310,26047659,threshold,gridHW,gridHW,"6900_P24")
 
-      DrawHeatmap("PPoIwindowData2/6900STI_PPOIreads.txt",1000,460,18639951,threshold,gridHW,gridHW,"6900_STI")
-      DrawHeatmap("PPoIwindowData2/6900P5_PPOIreads.txt",1000,610,19723221,threshold,gridHW,gridHW,"6900_P5")
-      DrawHeatmap("PPoIwindowData2/6900P24_PPOIreads.txt",1000,760,26047659,threshold,gridHW,gridHW,"6900_P24")
+      DrawHeatmap("PPoIwindowData2/4OHT8402STI_PPOIreads.txt",10,460,27697339,threshold,gridHW,gridHW,"TKO_STI")
+      DrawHeatmap("PPoIwindowData2/4OHT8402P5_PPOIreads.txt",10,610,26158802,threshold,gridHW,gridHW,"TKO_P5")
+      DrawHeatmap("PPoIwindowData2/4OHT8402P24_PPOIreads.txt",10,760,22031283,threshold,gridHW,gridHW,"TKO_P24")
+
+      DrawHeatmap("PPoIwindowData2/4OHT8402P5_R1_PPOIreads.txt",750,610,42072379,threshold,gridHW,gridHW,"TKOrep2_P5")
+      DrawHeatmap("PPoIwindowData2/4OHT8402P24_R1_PPOIreads.txt",750,760,39495372,threshold,gridHW,gridHW,"TKOrep2_P24")
 
     </script>
   </body>
