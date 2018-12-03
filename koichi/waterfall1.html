@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -100;
+
+      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var y = d3.scaleLinear().range([0,height-100]).domain([5,-2])
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+      var margin = {top: 20, right: 20, bottom: 70, left: 40}
+
+      var testscale = d3.scaleLinear().range([0,height-100]).domain([0,7])
+
+      var yAxis = d3.axisLeft()
+
+
+      var mut_scale = d3.scaleOrdinal()
+        .domain([0,7])
+        .range(['#9ecae1','#fcbba1','#fc9272','#fb6a4a','#ef3b2c','#cb181d','#99000d'])
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+      d3.tsv("data/AraC.txt", function(error,data){
+        if (error) throw error;
+
+        var numOfGenes = data.length
+        var columnWidth = 3
+        var highlightWidth = 3
+        var xPos = 0
+
+        var bars = svg.selectAll('rect')
+          .data(data)
+          .enter()
+          .append('g')
+
+        var columns = bars.append('rect')
+          .attr('fill',function(d,i){
+            if(i < 15 || i >= numOfGenes -15){
+              return 'dodgerblue'
+            }
+            else{
+              return '#9ecae1'
+            }
+          })
+          .attr('height', function(d){return testscale(Math.abs(d.lfc))})
+          .attr('width',function(d,i){
+            if(i < 15 || i >= numOfGenes -15){
+              return scale(highlightWidth)
+            }
+            else{
+              return scale(columnWidth)
+            }
+          })
+          .attr('y', function(d){
+            if(Math.sign(d.lfc) == 1){
+              return y(0) - testscale(d.lfc);
+            } else {
+              return y(0);
+            }
+          })
+          .attr('transform',function(d,i){
+            var returnPos = xPos
+            if(i < 15 || i >= numOfGenes -15){
+              xPos = xPos + highlightWidth
+            }
+            else{
+              xPos = xPos + columnWidth
+            }
+            return "translate(" + scale(returnPos) + ")"
+          })
+
+        xPos = 0
+        bars.append('text')
+          .text(function(d){return d.gene_name})
+          .attr('fill',function(d,i){
+            if(i < 15 || i >= numOfGenes-15){
+              return 'black'
+            }
+            else{
+              return 'none'
+            }
+          })
+          .attr('text-anchor',function(d){
+            if(Math.sign(d.lfc) == 1){
+              return "start"
+            }
+            else {
+              return "end"
+            }
+          })
+          .attr('font-size',scale(15))
+          .attr('dx',function(d,i){
+            if(i < 15 ){
+              return scale(15)
+            }
+            else if (i >= numOfGenes-15){
+              return scale(-15)
+            }
+            else {
+              return scale(0)
+            }
+          })
+          .attr('y',function(d,i){
+            if(i < 15 ){
+              return y(4) + scale(15) * i
+            }
+            else if (i >= numOfGenes-15){
+              return y(4) + scale(15) * (numOfGenes - i)
+            }
+            else {
+              return y(0)
+            }
+          })
+          .attr('transform',function(d,i){
+            var returnPos = xPos
+            if(i < 15 || i >= numOfGenes-15){
+              xPos = xPos + highlightWidth
+            }
+            else{
+              xPos = xPos + columnWidth
+            }
+            return "translate(" + scale(returnPos) + ")"
+          })
+
+          bars.append('line')
+            .attr('x1',function(d,i){return scale(i * 3 + 1.5)})
+            .attr('y1',function(d,i){
+              if(i < 15 ){
+                return y(d.lfc)
+              }
+              else {
+                return y(0)
+              }
+            })
+            .attr('x2',function(d,i){return scale(i * 3 + 1.5)})
+            .attr('y2',function(d,i){
+              if(i < 15 ){
+                return y(4) + scale(15) * i - scale(7.5)
+              }
+              else if (i >= numOfGenes-15){
+                return y(4) + scale(15) * (numOfGenes - i) - scale(7.5)
+              }
+              else {
+                return y(0)
+              }
+            })
+            .attr('stroke-width',0.5)
+            .attr('stroke',function(d,i){
+              if(i < 15 || i >= numOfGenes-15){
+                return 'black'
+              }
+              else {
+                return 'none'
+              }
+            })
+
+          bars.append('line')
+            .attr('x1',function(d,i){return scale(i * 3 + 1.5)})
+            .attr('y1',function(d,i){
+              if(i < 15 ){
+                return y(4) + scale(15) * i - scale(7.5)
+              }
+              else if (i >= numOfGenes-15){
+                return y(4) + scale(15) * (numOfGenes - i) - scale(7.5)
+              }
+              else {
+                return y(0)
+              }
+            })
+            .attr('x2',function(d,i){
+              if(i < 15 ){
+                return scale(i * 3 + 15)
+              }
+              else if (i >= numOfGenes-15){
+                return scale(i * 3 - 15)
+              }
+              else {
+                return y(0)
+              }
+            })
+            .attr('y2',function(d,i){
+              if(i < 15 ){
+                return y(4) + scale(15) * i - scale(7.5)
+              }
+              else if (i >= numOfGenes-15){
+                return y(4) + scale(15) * (numOfGenes - i) - scale(7.5)
+              }
+              else {
+                return y(0)
+              }
+            })
+            .attr('stroke-width',0.5)
+            .attr('stroke',function(d,i){
+              if(i < 15 || i >= numOfGenes-15){
+                return 'black'
+              }
+              else {
+                return 'none'
+              }
+            })
+
+          svg.append("g")
+           .attr("class", "y")
+           .call(d3.axisLeft(y))
+      })
+    </script>
+  </body>
+</html>
