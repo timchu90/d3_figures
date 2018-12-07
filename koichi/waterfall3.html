@@ -23,15 +23,15 @@
     </div>
     <script>
       var chartDiv = document.getElementById("chart");
-      var width = chartDiv.clientWidth -20;
+      var width = chartDiv.clientWidth -10;
       var height = chartDiv.clientHeight -100;
 
       var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
-      var y = d3.scaleLinear().range([0,height-100]).domain([5,-2])
+      var y = d3.scaleLinear().range([0,height-100]).domain([4,-2])
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
       var margin = {top: 20, right: 20, bottom: 70, left: 40}
 
-      var testscale = d3.scaleLinear().range([0,height-100]).domain([0,7])
+      var testscale = d3.scaleLinear().range([0,height-100]).domain([0,y.domain()[0] - y.domain()[1] ])
 
       var yAxis = d3.axisLeft()
 
@@ -47,12 +47,12 @@
         .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")");
 
-      d3.tsv("data/AraC.txt", function(error,data){
+      d3.tsv("data/VCR.txt", function(error,data){
         if (error) throw error;
 
         var numOfGenes = data.length
-        var columnWidth = 3
-        var highlightWidth = 3
+        var columnWidth = 1000/numOfGenes
+        var highlightWidth = 1000/numOfGenes
         var xPos = 0
 
         var bars = svg.selectAll('rect')
@@ -150,11 +150,11 @@
           })
 
           bars.append('line')
-            .attr('x1',function(d,i){return scale(i * 3 + 1.5)})
+            .attr('x1',function(d,i){return scale(i * columnWidth + (columnWidth/2))})
             .attr('y1',function(d,i){
               return y(d.lfc)
             })
-            .attr('x2',function(d,i){return scale(i * 3 + 1.5)})
+            .attr('x2',function(d,i){return scale(i * columnWidth + (columnWidth/2))})
             .attr('y2',function(d){
               if(Math.sign(d.lfc) == 1){
                 return y(d.lfc) - scale(107.5)
@@ -174,7 +174,7 @@
             })
 
           bars.append('line')
-            .attr('x1',function(d,i){return scale(i * 3 + 1.5)})
+            .attr('x1',function(d,i){return scale(i * columnWidth + (columnWidth/2))})
             .attr('y1',function(d){
               if(Math.sign(d.lfc) == 1){
                 return y(d.lfc) - scale(107.5)
@@ -185,10 +185,10 @@
             })
             .attr('x2',function(d,i){
               if(Math.sign(d.lfc) == 1){
-                return scale(i * 3 + 15)
+                return scale(i * columnWidth + 15)
               }
               else {
-                return scale(i * 3 - 15)
+                return scale(i * columnWidth - 15)
               }
             })
             .attr('y2',function(d){
