@@ -47,7 +47,7 @@
         .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")");
 
-      d3.tsv("data/VCR.txt", function(error,data){
+      d3.tsv("data/6MP.txt", function(error,data){
         if (error) throw error;
 
         var numOfGenes = data.length
