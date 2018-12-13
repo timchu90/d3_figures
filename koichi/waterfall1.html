@@ -47,8 +47,14 @@
         .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")");
 
-      d3.tsv("data/6MP.txt", function(error,data){
+      d3.tsv("data/VCR.txt", function(error,data){
         if (error) throw error;
+
+        data = data.filter(function(d){
+          if(d.lfc > 0.5 || d.lfc < -0.5){
+            return d
+          }
+        })
 
         var numOfGenes = data.length
         var columnWidth = 1000/numOfGenes
@@ -150,7 +156,7 @@
           bars.append('line')
             .attr('x1',function(d,i){return scale(i * columnWidth + (columnWidth/2))})
             .attr('y1',function(d,i){
-              if(i < 15 ){
+              if(Math.sign(d.lfc) == 1){
                 return y(d.lfc)
               }
               else {
