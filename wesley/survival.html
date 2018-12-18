@@ -9,14 +9,12 @@
       }
       .line {
         stroke-width: 2px;
-        stroke: dodgerblue;
         opacity: 1;
         pointer-events: none;
         fill: none;
       }
       .area {
         opacity: 0.5;
-        fill: steelblue;
       }
       .axis {
         stroke: black;
@@ -46,20 +44,31 @@
       var width = chartDiv.clientHeight - margin.left - margin.right + 150;
       var height = chartDiv.clientHeight - margin.top - margin.bottom - 50;
       var x = d3.scaleLinear()
-                .range([0, width - margin.right])
-                .domain([0, 12]);
+        .range([0, width - margin.right])
+        .domain([0, 12]);
       var y = d3.scaleLinear()
-                .range([height, 0])
-                .domain([0, 2]);
-
+        .range([height, 0])
+        .domain([0, 2]);
       var scaleX = d3.scaleLinear()
-                .range([0, height])
-                .domain([0, 1000]);
+        .range([0, height])
+        .domain([0, 1000]);
       var scaleY = d3.scaleLinear()
-                .range([height,0])
-                .domain([0, 1000]);
+        .range([height,0])
+        .domain([0, 1000]);
 
+      var colorScale = d3.scaleOrdinal()
+        .range(['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928'])
+        .domain([0,1,2,3,4,5,6,7,8,9,10,11]);
+
+
+      //CUSTOMIZATION VARIABLES
       var tiltFactor = 0.05
+      var xdiff = 100
+      var ydiff = 100
+      var xshift = 250
+      var yshift = 450
+
+
       var valueline = d3.line()
         .curve(d3.curveBasis)
         .x(function(d,i) { return x(i); })
@@ -133,10 +142,10 @@
               ]
           }
       ]
-      var xdiff = 100
-      var ydiff = 100
-      var yshift = 250
-      var xshift = 50
+      //sort data by largest area to smallest
+      data.sort(function(a,b){
+        return b.dose.reduce(function(a, b) { return a + b; }, 0) - a.dose.reduce(function(a, b) { return a + b; }, 0)
+      })
 
       var paths = svg.selectAll('paths')
         .data(data)
@@ -144,11 +153,10 @@
         .append('g')
           .attr('class','paths')
           .attr('transform',function(d,i){
-            return "translate(" + scaleX(xdiff * i + xshift) + "," + scaleX(-ydiff * i - yshift) + ")"
+            return "translate(" + scaleX(-xdiff * i + xshift) + "," + scaleX(ydiff * i - yshift) + ")"
           })
 
       //X axis
-
       svg.append("line")
         .attr('x1', x(0))
         .attr('x2', x(8))
@@ -156,7 +164,7 @@
         .attr('y2',y(tiltFactor * -8))
         .style('stroke','black')
         .attr('transform',function(d,i){
-          return "translate(" + scaleX(xdiff * i - 50 + xshift) + "," + scaleX(-ydiff * i - yshift + 50) + ")"
+          return "translate(" + scaleX(-xdiff * i - 250 + xshift) + "," + scaleX(ydiff * i - yshift + 250) + ")"
         })
       for (i = 0; i < 9; i++) {
         svg.append("line")
@@ -166,7 +174,7 @@
           .attr('y2',y(tiltFactor * -1 * i) - scaleX(15))
           .style('stroke','black')
           .attr('transform',function(d,i){
-            return "translate(" + scaleX(xdiff * i - 50 + xshift) + "," + scaleX(-ydiff * i - yshift + 50) + ")"
+            return "translate(" + scaleX(-xdiff * i - 250 + xshift) + "," + scaleX(ydiff * i - yshift + 250) + ")"
           })
       }
 
@@ -191,11 +199,12 @@
         .attr("id", function(d){return d.id})
         .attr("class", "line")
         .attr("d", function(d){return valueline(d.dose)})
+        .style("stroke",function(d,i){console.log(colorScale(i));return colorScale(i)})
 
       paths.append('path')
         .attr("class", "area")
         .attr("d", function(d){return area(d.dose)})
-
+        .style("fill",function(d,i){console.log(colorScale(i));return colorScale(i)})
         .on("mouseover", function(d,i) {
           //highlight on mouseover
           d3.select("#areaSelection").remove()
@@ -204,16 +213,23 @@
             .attr('id',"areaSelection")
             .attr("d",area(d.dose))
             .attr('transform',
-              "translate(" + scaleX(xdiff * i+ xshift) + "," + scaleX(-ydiff * i - yshift) + ")"
+              "translate(" + scaleX(-xdiff * i+ xshift) + "," + scaleX(ydiff * i - yshift) + ")"
             )
             .on("mouseout",function(d){
               d3.select("#areaSelection").remove()
             })
         })
 
-      paths.append('text')
-        .attr("class",'')
 
+      paths.append('text')
+        .attr("class",'celllabel')
+        .text(function(d){
+          return d.cellline
+        })
+        .attr("x",x(8.25))
+        .attr("y",y(tiltFactor * -8.25))
+        .attr('font-size', scaleX(30))
+        .attr('transform', 'rotate(' + (tiltFactor * 250) + ','+ x(8.5) + ',' + y(tiltFactor * -8.5) +')')
     </script>
   </body>
 </html>
