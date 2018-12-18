@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      body {
+        font: 10px sans-serif;
+      }
+      .line {
+        stroke-width: 2px;
+        stroke: dodgerblue;
+        opacity: 1;
+        pointer-events: none;
+        fill: none;
+      }
+      .area {
+        opacity: 0.5;
+        fill: steelblue;
+      }
+      .axis {
+        stroke: black;
+        stroke-width: 0px;
+        opacity: 0.25;
+
+      }
+      #areaSelection {
+        fill: #F44336;
+        opacity: .9;
+      }
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart"></div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var margin = {top: 20, right: 15, bottom: 45, left: 50}
+      var width = chartDiv.clientHeight - margin.left - margin.right + 150;
+      var height = chartDiv.clientHeight - margin.top - margin.bottom - 50;
+      var x = d3.scaleLinear()
+                .range([0, width - margin.right])
+                .domain([0, 12]);
+      var y = d3.scaleLinear()
+                .range([height, 0])
+                .domain([0, 2]);
+
+      var scaleX = d3.scaleLinear()
+                .range([0, height])
+                .domain([0, 1000]);
+      var scaleY = d3.scaleLinear()
+                .range([height,0])
+                .domain([0, 1000]);
+
+      var tiltFactor = 0.05
+      var valueline = d3.line()
+        .curve(d3.curveBasis)
+        .x(function(d,i) { return x(i); })
+        .y(function(d,i) { return y(d - (tiltFactor * i)); })
+
+      var area = d3.area()
+        .x(function(d,i) { return x(i); })
+        .y1(function(d,i) { return y(d - (tiltFactor * i)); })
+        .y0(function(d,i){return y(tiltFactor * i * -1)})
+        .curve(d3.curveBasis)
+
+      var zeroline = d3.line()
+        .curve(d3.curveBasis)
+        .x(function(d) { return x(d.x); })
+        .y(function(d) { return y(d.y * 0); })
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.right + margin.left - 20)
+        .attr("height", height + margin.top + margin.bottom )
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+      var data = [
+          {
+              "id": 23117,
+              "cellline": 437,
+              "drug": 40,
+              "dose": [
+                  0.98796,
+                  0.98632,
+                  0.96879,
+                  0.94042,
+                  0.8614,
+                  0.65382,
+                  0.49175,
+                  0.18123,
+                  0.09155
+              ]
+          },
+          {
+              "id": 63127,
+              "cellline": 603,
+              "drug": 40,
+              "dose": [
+                  0.97261,
+                  0.96823,
+                  0.936,
+                  0.89142,
+                  0.80996,
+                  0.64931,
+                  0.50282,
+                  0.32053,
+                  0.24654
+              ]
+          },
+          {
+              "id": 137354,
+              "cellline": 433,
+              "drug": 40,
+              "dose": [
+                  0.97912,
+                  0.97426,
+                  0.94694,
+                  0.90433,
+                  0.80767,
+                  0.59587,
+                  0.43343,
+                  0.21925,
+                  0.14631
+              ]
+          }
+      ]
+      var xdiff = 100
+      var ydiff = 100
+      var yshift = 250
+      var xshift = 50
+
+      var paths = svg.selectAll('paths')
+        .data(data)
+        .enter()
+        .append('g')
+          .attr('class','paths')
+          .attr('transform',function(d,i){
+            return "translate(" + scaleX(xdiff * i + xshift) + "," + scaleX(-ydiff * i - yshift) + ")"
+          })
+
+      //X axis
+
+      svg.append("line")
+        .attr('x1', x(0))
+        .attr('x2', x(8))
+        .attr('y1',y(0))
+        .attr('y2',y(tiltFactor * -8))
+        .style('stroke','black')
+        .attr('transform',function(d,i){
+          return "translate(" + scaleX(xdiff * i - 50 + xshift) + "," + scaleX(-ydiff * i - yshift + 50) + ")"
+        })
+      for (i = 0; i < 9; i++) {
+        svg.append("line")
+          .attr('x1', x(i))
+          .attr('x2', x(i) + scaleX(15))
+          .attr('y1', y(tiltFactor * -1 * i))
+          .attr('y2',y(tiltFactor * -1 * i) - scaleX(15))
+          .style('stroke','black')
+          .attr('transform',function(d,i){
+            return "translate(" + scaleX(xdiff * i - 50 + xshift) + "," + scaleX(-ydiff * i - yshift + 50) + ")"
+          })
+      }
+
+      //X and Y axis for every dosage
+      paths.append('line')
+        .attr('x1', x(0))
+        .attr('x2', x(8))
+        .attr('y1',y(0))
+        .attr('y2',y(tiltFactor * -8))
+        .attr('class','axis')
+
+      paths.append('line')
+        .attr('x1', x(0))
+        .attr('x2', x(0))
+        .attr('y1',y(0))
+        .attr('y2',y(1))
+        .attr('class','axis')
+
+
+      //line and area and label for dosage
+      paths.append('path')
+        .attr("id", function(d){return d.id})
+        .attr("class", "line")
+        .attr("d", function(d){return valueline(d.dose)})
+
+      paths.append('path')
+        .attr("class", "area")
+        .attr("d", function(d){return area(d.dose)})
+
+        .on("mouseover", function(d,i) {
+          //highlight on mouseover
+          d3.select("#areaSelection").remove()
+          svg.append('path')
+            .attr("class", "area")
+            .attr('id',"areaSelection")
+            .attr("d",area(d.dose))
+            .attr('transform',
+              "translate(" + scaleX(xdiff * i+ xshift) + "," + scaleX(-ydiff * i - yshift) + ")"
+            )
+            .on("mouseout",function(d){
+              d3.select("#areaSelection").remove()
+            })
+        })
+
+      paths.append('text')
+        .attr("class",'')
+
+    </script>
+  </body>
+</html>
