@@ -13,6 +13,10 @@
         pointer-events: none;
         fill: none;
       }
+      .lineSelection {
+        stroke: black;
+        stroke-width: 3px;
+      }
       .area {
         opacity: 0.5;
       }
@@ -68,7 +72,6 @@
       var xshift = 250
       var yshift = 450
 
-
       var valueline = d3.line()
         .curve(d3.curveBasis)
         .x(function(d,i) { return x(i); })
@@ -80,10 +83,16 @@
         .y0(function(d,i){return y(tiltFactor * i * -1)})
         .curve(d3.curveBasis)
 
+      var zeroarea = d3.area()
+        .x(function(d,i) { return x(i); })
+        .y1(function(d,i){return y(tiltFactor * i * -1)})
+        .y0(function(d,i){return y(tiltFactor * i * -1)})
+        .curve(d3.curveBasis)
+
       var zeroline = d3.line()
         .curve(d3.curveBasis)
-        .x(function(d) { return x(d.x); })
-        .y(function(d) { return y(d.y * 0); })
+        .x(function(d,i) { return x(i); })
+        .y(function(d,i){return y(tiltFactor * i * -1)})
 
       var svg = d3.select("body").append("svg")
         .attr("width", width + margin.right + margin.left - 20)
@@ -198,16 +207,23 @@
       paths.append('path')
         .attr("id", function(d){return d.id})
         .attr("class", "line")
-        .attr("d", function(d){return valueline(d.dose)})
+        .attr("d", function(d){return zeroline(d.dose)})
         .style("stroke",function(d,i){console.log(colorScale(i));return colorScale(i)})
+        .transition()
+          .duration(1000)
+          .attr("d", function(d){return valueline(d.dose)})
 
       paths.append('path')
         .attr("class", "area")
-        .attr("d", function(d){return area(d.dose)})
+        .attr("d", function(d){return zeroarea(d.dose)})
         .style("fill",function(d,i){console.log(colorScale(i));return colorScale(i)})
         .on("mouseover", function(d,i) {
           //highlight on mouseover
           d3.select("#areaSelection").remove()
+          d3.selectAll(".lineSelection").remove()
+          d3.selectAll(".circleSelection").remove()
+          d3.selectAll(".textSelection").remove()
+
           svg.append('path')
             .attr("class", "area")
             .attr('id',"areaSelection")
@@ -217,8 +233,44 @@
             )
             .on("mouseout",function(d){
               d3.select("#areaSelection").remove()
+              d3.selectAll(".lineSelection").remove()
+              d3.selectAll(".circleSelection").remove()
+              d3.selectAll(".textSelection").remove()
             })
+          for (j = 0; j < 9; j++) {
+            svg.append("line")
+              .attr('class','lineSelection')
+              .attr('x1', x(j))
+              .attr('x2', x(j))
+              .attr('y1', y(tiltFactor * -1 * j))
+              .attr('y2',y(d.dose[j] - (tiltFactor * j)))
+              .attr('transform',
+                "translate(" + scaleX(-xdiff * i + xshift) + "," + scaleX(ydiff * i - yshift) + ")"
+              )
+            svg.append('circle')
+              .attr('class','circleSelection')
+              .attr('cx', x(j))
+              .attr('cy', y(d.dose[j] - (tiltFactor * j)))
+              .attr('r', scaleX(7.5))
+              .style('stroke','black')
+              .style('fill','black')
+              .attr('transform',
+                "translate(" + scaleX(-xdiff * i + xshift) + "," + scaleX(ydiff * i - yshift) + ")"
+              )
+            svg.append('text')
+              .attr('class','textSelection')
+              .attr('x', x(j) + scaleX(15))
+              .attr('y', y(d.dose[j] - (tiltFactor * j)))
+              .text(d.dose[j])
+              .style('font-size', scaleX(15))
+              .attr('transform',
+                "translate(" + scaleX(-xdiff * i + xshift) + "," + scaleX(ydiff * i - yshift) + ")"
+              )
+          }
         })
+        .transition()
+          .duration(1000)
+          .attr("d", function(d){return area(d.dose)})
 
 
       paths.append('text')
