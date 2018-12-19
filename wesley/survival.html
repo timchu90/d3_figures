@@ -16,6 +16,12 @@
       .lineSelection {
         stroke: black;
         stroke-width: 3px;
+        pointer-events: none;
+      }
+      .circleSelection{
+        stroke: black;
+        fill: black;
+        pointer-events: none;
       }
       .area {
         opacity: 0.5;
@@ -243,20 +249,28 @@
               .attr('x1', x(j))
               .attr('x2', x(j))
               .attr('y1', y(tiltFactor * -1 * j))
-              .attr('y2',y(d.dose[j] - (tiltFactor * j)))
+              .attr('y2',y(tiltFactor * -1 * j))
               .attr('transform',
                 "translate(" + scaleX(-xdiff * i + xshift) + "," + scaleX(ydiff * i - yshift) + ")"
               )
+              .transition()
+                .ease(d3.easeElasticOut.amplitude(1.2).period(0.4))
+                .duration(1200)
+                .delay(j*25)
+                .attr('y2',y(d.dose[j] - (tiltFactor * j)))
             svg.append('circle')
               .attr('class','circleSelection')
               .attr('cx', x(j))
-              .attr('cy', y(d.dose[j] - (tiltFactor * j)))
+              .attr('cy', y(tiltFactor * -1 * j))
               .attr('r', scaleX(7.5))
-              .style('stroke','black')
-              .style('fill','black')
               .attr('transform',
                 "translate(" + scaleX(-xdiff * i + xshift) + "," + scaleX(ydiff * i - yshift) + ")"
               )
+              .transition()
+                .ease(d3.easeElasticOut.amplitude(1.2).period(0.4))
+                .duration(1200)
+                .delay(j*25)
+                .attr('cy', y(d.dose[j] - (tiltFactor * j)))
             svg.append('text')
               .attr('class','textSelection')
               .attr('x', x(j) + scaleX(15))
@@ -271,7 +285,6 @@
         .transition()
           .duration(1000)
           .attr("d", function(d){return area(d.dose)})
-
 
       paths.append('text')
         .attr("class",'celllabel')
