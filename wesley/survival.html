@@ -73,10 +73,8 @@
 
       //CUSTOMIZATION VARIABLES
       var tiltFactor = 0.05
-      var xdiff = 100
-      var ydiff = 100
-      var xshift = 250
-      var yshift = 450
+      var xshift = 300
+      var yshift = 500
 
       var valueline = d3.line()
         .curve(d3.curveBasis)
@@ -157,6 +155,10 @@
               ]
           }
       ]
+
+      var xdiff = 275 / (data.length - 1)
+      var ydiff = 275 / (data.length - 1)
+
       //sort data by largest area to smallest
       data.sort(function(a,b){
         return b.dose.reduce(function(a, b) { return a + b; }, 0) - a.dose.reduce(function(a, b) { return a + b; }, 0)
@@ -179,7 +181,7 @@
         .attr('y2',y(tiltFactor * -8))
         .style('stroke','black')
         .attr('transform',function(d,i){
-          return "translate(" + scaleX(-xdiff * i - 250 + xshift) + "," + scaleX(ydiff * i - yshift + 250) + ")"
+          return "translate(" + scaleX(-xdiff * i - 325 + xshift) + "," + scaleX(ydiff * i - yshift + 325) + ")"
         })
       for (i = 0; i < 9; i++) {
         svg.append("line")
@@ -189,7 +191,7 @@
           .attr('y2',y(tiltFactor * -1 * i) - scaleX(15))
           .style('stroke','black')
           .attr('transform',function(d,i){
-            return "translate(" + scaleX(-xdiff * i - 250 + xshift) + "," + scaleX(ydiff * i - yshift + 250) + ")"
+            return "translate(" + scaleX(-xdiff * i - 325 + xshift) + "," + scaleX(ydiff * i - yshift + 325) + ")"
           })
       }
 
