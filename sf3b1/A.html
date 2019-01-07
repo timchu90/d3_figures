@@ -22,11 +22,12 @@
       div.tooltip {
         position: absolute;
         text-align: center;
-        width: 120px;
-        height: 40px;
+        left: 50%;
+        bottom: 5%;
+        width: 20%;
+        height: 15%;
         padding: 2px;
-        font: 15px sans-serif;
-        background: lightsteelblue;
+        font: 25px sans-serif;
         border: 0px;
         border-radius: 2px;
         pointer-events: none;
@@ -226,8 +227,6 @@
                 .duration(100)
                 .style("opacity", .9);
               div.html("<b>" + d.data.cohort + "</b><br/>" + "size: " + d.data.numsample + "<br/>")
-                .style("left", (d3.event.pageX + 20) + "px")
-                .style("top", (d3.event.pageY - 20) + "px");
             })
             .on('mouseout',function(d){
               d3.select(this)

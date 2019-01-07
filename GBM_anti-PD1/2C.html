@@ -42,7 +42,7 @@
       var width = chartDiv.clientWidth -20;
       var height = chartDiv.clientHeight -20;
 
-      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var x = d3.scaleLinear().range([0,width]).domain([0,1000])
       var y = d3.scaleLinear().range([0,height]).domain([1000,0])
 
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
@@ -57,9 +57,9 @@
         .attr("height", height)
 
       //center and radius of gene arc
-      var arc_x = x(400);
-      var arc_y = y(400);
-      var arc_r = scale(450);
+      var arc_x = x(500);
+      var arc_y = y(0);
+      var arc_r = scale(800);
       function calcArc(deg) {
         return {
           x:arc_x + arc_r * Math.cos(deg * (Math.PI / 180)),
@@ -99,7 +99,7 @@
         }
       }
 
-      var nodeGen = function(input, angle, direction, labeldir, distance = scale(60), radius = scale(10), font = scale(20)){
+      var nodeGen = function(input, angle, direction, labeldir, distance = scale(80), radius = scale(15), font = scale(25)){
 
         angle = getAminoAngle(angle)
 
@@ -195,10 +195,10 @@
         return (angle /geneLength * (endAngle - startAngle)) + startAngle - 90
       }
 
-      var domainInnerRadius = scale(420)
-      var domainOuterRadius = scale(480)
-      var geneInnerRadius = scale(445)
-      var geneOuterRadius = scale(455)
+      var domainInnerRadius = arc_r - scale(30)
+      var domainOuterRadius = arc_r + scale(30)
+      var geneInnerRadius = arc_r - scale(5)
+      var geneOuterRadius = arc_r + scale(5)
 
       //draw nodes
       nodeGen('Y68H', 68,'up', 'left')
@@ -246,7 +246,7 @@
             .innerRadius(d.data.innerRadius)
             .outerRadius(d.data.outerRadius)
             .cornerRadius(d.data.cornerRadius)
-          var i = d3.interpolate(d.startAngle+0.1, d.endAngle);
+          var i = d3.interpolate(d.startAngle+0.01, d.endAngle);
           return function(t) {
             d.endAngle = i(t);
             return arc(d);
@@ -256,7 +256,7 @@
       g.append('text')
         .attr('dy',scale(40))
         .attr('dx',scale(0))
-        .style('font-size',scale(20))
+        .style('font-size',scale(25))
         .style('fill','white')
         .append('textPath')
         .transition()
@@ -267,9 +267,10 @@
           .text(function(d){return d.data.text})
 
       svg.append('text')
-        .attr('x',x(325))
-        .attr('y',y(600))
-        .style('font-size',scale(40))
+        .attr('x',x(500))
+        .attr('y',y(500))
+        .attr('text-anchor','middle')
+        .style('font-size',scale(80))
         .style('fill','black')
         .text('PTEN')
 

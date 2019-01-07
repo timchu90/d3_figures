@@ -13,9 +13,6 @@
         z-index: -2;
         height: 100%;
       }
-      #hex4,#hex6{
-        fill: gold;
-      }
       body {
         font-family: sans-serif
       }
@@ -42,7 +39,7 @@
       var width = chartDiv.clientWidth -20;
       var height = chartDiv.clientHeight -20;
 
-      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var x = d3.scaleLinear().range([0,width]).domain([0,1000])
       var y = d3.scaleLinear().range([0,height]).domain([1000,0])
 
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
@@ -59,7 +56,7 @@
       //center and radius of gene arc
       var arc_x = x(500);
       var arc_y = y(500);
-      var arc_r = scale(200);
+      var arc_r = scale(325);
       function calcArc(deg) {
         return {
           x:arc_x + arc_r * Math.cos(deg * (Math.PI / 180)),
@@ -123,6 +120,11 @@
             .attr('r', radius)
             .attr('stroke','none')
             .attr('fill','green')
+            .attr('opacity',0)
+            .transition()
+              .delay(1800)
+              .duration(500)
+              .attr('opacity',1)
         } else {
           var donut = svg.append("g")
             .attr("transform", "translate(" + calcDonutDown(angle,distance).x + "," + calcDonutDown(angle,distance).y + ")")
@@ -145,6 +147,11 @@
             .attr('r', radius)
             .attr('stroke','none')
             .attr('fill','green')
+            .attr('opacity',0)
+            .transition()
+              .delay(1800)
+              .duration(500)
+              .attr('opacity',1)
         }
 
           //mutation label
@@ -194,31 +201,31 @@
       }
 
       //draw donuts
-      donutGen('Y68H', scale(10), scale(0), scale(20), getAminoAngle(68), scale(60) , 'up', 'right')
-      donutGen('N69Y', scale(10), scale(2), scale(20), getAminoAngle(69), scale(60), 'down', 'left')
-      donutGen('F90S', scale(10), scale(2), scale(20), getAminoAngle(90), scale(60), 'up', 'right')
-      donutGen('H93Y', scale(10), scale(2), scale(20), getAminoAngle(93), scale(60), 'down', 'left')
-      donutGen('D107Y', scale(10), scale(2), scale(20), getAminoAngle(107), scale(60), 'up', 'right')
-      donutGen('R130*', scale(10), scale(2), scale(20), getAminoAngle(130), scale(60), 'up', 'right')
-      donutGen('G132D', scale(10), scale(2), scale(20), getAminoAngle(132), scale(60), 'down', 'left')
-      donutGen('K147*', scale(10), scale(2), scale(20), getAminoAngle(147), scale(60), 'up', 'right')
-      donutGen('R173C', scale(10), scale(2), scale(20), getAminoAngle(173), scale(60), 'up', 'right')
-      donutGen('R233*', scale(10), scale(2), scale(20), getAminoAngle(233), scale(60), 'up', 'left')
-      donutGen('L247fs*9', scale(10), scale(2), scale(20), getAminoAngle(247), scale(60), 'down', 'right')
-      donutGen('D252Y', scale(10), scale(2), scale(20), getAminoAngle(252), scale(65), 'up', 'left')
-      donutGen('N276fs*13', scale(10), scale(2), scale(20), getAminoAngle(276), scale(60), 'up', 'left')
-      donutGen('L295fs', scale(10), scale(2), scale(20), getAminoAngle(295), scale(60), 'down', 'right')
-      donutGen('T319fs*1', scale(10), scale(2), scale(20), getAminoAngle(319), scale(60), 'up', 'left')
+      donutGen('Y68H', scale(15), scale(0), scale(35), getAminoAngle(68), scale(80) , 'up', 'right')
+      donutGen('N69Y', scale(15), scale(2), scale(35), getAminoAngle(69), scale(80), 'down', 'left')
+      donutGen('F90S', scale(15), scale(2), scale(35), getAminoAngle(90), scale(80), 'up', 'right')
+      donutGen('H93Y', scale(15), scale(2), scale(35), getAminoAngle(93), scale(80), 'down', 'left')
+      donutGen('D107Y', scale(15), scale(2), scale(35), getAminoAngle(107), scale(80), 'up', 'right')
+      donutGen('R130*', scale(15), scale(2), scale(35), getAminoAngle(130), scale(80), 'up', 'right')
+      donutGen('G132D', scale(15), scale(2), scale(35), getAminoAngle(132), scale(80), 'down', 'left')
+      donutGen('K147*', scale(15), scale(2), scale(35), getAminoAngle(147), scale(80), 'up', 'right')
+      donutGen('R173C', scale(15), scale(2), scale(35), getAminoAngle(173), scale(80), 'up', 'right')
+      donutGen('R233*', scale(15), scale(2), scale(35), getAminoAngle(233), scale(80), 'up', 'left')
+      donutGen('L247fs*9', scale(15), scale(2), scale(35), getAminoAngle(247), scale(80), 'down', 'right')
+      donutGen('D252Y', scale(15), scale(2), scale(35), getAminoAngle(252), scale(80), 'up', 'left')
+      donutGen('N276fs*13', scale(15), scale(2), scale(35), getAminoAngle(276), scale(80), 'up', 'left')
+      donutGen('L295fs', scale(15), scale(2), scale(35), getAminoAngle(295), scale(80), 'down', 'right')
+      donutGen('T319fs*1', scale(15), scale(2), scale(35), getAminoAngle(319), scale(80), 'up', 'left')
 
 
       //draw gene arc
       var g = svg.selectAll(".backbone_arc")
           .data(backbone_pie([
-            {length:14, color:'gray', innerRadius: scale(195), outerRadius: scale(205), cornerRadius: 0, text:''},
-            {length:171, color:'yellowgreen', innerRadius: scale(185), outerRadius: scale(215), cornerRadius: 35, text:'Phosphatase'},
-            {length:5, color:'gray', innerRadius: scale(195), outerRadius: scale(205), cornerRadius: 0, text:''},
-            {length:160, color:'firebrick', innerRadius: scale(185), outerRadius: scale(215), cornerRadius: 35, text:'C2'},
-            {length:53, color:'gray', innerRadius: scale(195), outerRadius: scale(205), cornerRadius: 0, text:''}
+            {length:14, color:'gray', innerRadius: arc_r - scale(5), outerRadius: arc_r + scale(5), cornerRadius: 0, text:''},
+            {length:171, color:'yellowgreen', innerRadius:  arc_r - scale(25), outerRadius: arc_r + scale(25), cornerRadius: 35, text:'Phosphatase'},
+            {length:5, color:'gray', innerRadius: arc_r - scale(5), outerRadius: arc_r + scale(5), cornerRadius: 0, text:''},
+            {length:160, color:'firebrick', innerRadius: arc_r - scale(25), outerRadius: arc_r + scale(25), cornerRadius: 35, text:'C2'},
+            {length:53, color:'gray', innerRadius: arc_r - scale(5), outerRadius: arc_r + scale(5), cornerRadius: 0, text:''}
           ]))
         .enter().append("g")
           .attr("class", "gene_arc")
@@ -247,9 +254,9 @@
         })
 
       g.append('text')
-        .attr('dy',scale(40))
+        .attr('dy',scale(35))
         .attr('dx',scale(0))
-        .style('font-size',scale(20))
+        .style('font-size',scale(35))
         .style('fill','white')
         .append('textPath')
         .transition()
@@ -262,7 +269,7 @@
       svg.append('text')
         .attr('x',x(50))
         .attr('y',y(900))
-        .style('font-size',scale(40))
+        .style('font-size',scale(60))
         .style('fill','black')
         .text('PTEN')
 
