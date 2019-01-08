@@ -26,7 +26,7 @@
       var width = chartDiv.clientWidth -20;
       var height = chartDiv.clientHeight -20;
 
-      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var x = d3.scaleLinear().range([0,width]).domain([0,1000])
       var y = d3.scaleLinear().range([0,height]).domain([0,1000])
       var mm10chr = ['chr1','chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10','chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chrX','chrY','chrP','chrR']
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
@@ -91,7 +91,7 @@
                 return scale(chrOuter * Math.sin(((d.startAngle + d.endAngle - Math.PI)/2)) + 5 )
                 }
               })
-              .style('font-size',scale(15))
+              .style('font-size',scale(20))
               .style('fill','black')
               .style("text-anchor", "middle")
 
@@ -115,7 +115,7 @@
                 .text(end)
                 .attr('dx', 0)
                 .attr('dy', -1 * (scale(chrInner) + scale(histogramMultiplier * end)) + scale(5))
-                .style('font-size',scale(12))
+                .style('font-size',scale(15))
                 .style('fill','black')
                 .style("text-anchor", "middle")
               g.append("path")
@@ -276,8 +276,7 @@
         //eventThresh - threshold number for each bin in which to draw chord to
         //histogramMultiplier - flat multiplier to histogram values
         */
-        DrawCircos("EndSeqCircosData/XR4_EndSeq.bedgraph",170,250,PPOIangle,130,200,2500000,10,0.1)
-        DrawCircos("EndSeqCircosData/WT_EndSeq.bedgraph",500,250,PPOIangle,130,200,2500000,10,0.1)
+        DrawCircos("EndSeqCircosData/WT_EndSeq.bedgraph",500,500,PPOIangle,300,425,2500000,10,0.2)
     </script>
   </body>
 </html>

@@ -27,7 +27,6 @@
         width: 20%;
         height: 15%;
         padding: 2px;
-        font: 25px sans-serif;
         border: 0px;
         border-radius: 2px;
         pointer-events: none;
@@ -42,7 +41,7 @@
       var width = chartDiv.clientWidth -20;
       var height = chartDiv.clientHeight -20;
 
-      var x = d3.scaleLinear().range([0,height*1.5]).domain([0,1000])
+      var x = d3.scaleLinear().range([0,width]).domain([0,1000])
       var y = d3.scaleLinear().range([0,height]).domain([1000,0])
 
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
@@ -54,42 +53,53 @@
       // add the tooltip
       var div = d3.select("body").append("div")
         .attr("class", "tooltip")
+        .attr("font-size",scale(60))
         .style("opacity", 0);
 
       var svg = d3.select("body").append("svg")
         .attr("width", width)
         .attr("height", height)
 
+      //calculate x,y position of hex on circle given degrees
+      var arc_x = x(430);
+      var arc_y = y(130);
+      var arc_r = scale(450);
+      function calcArc(deg) {
+        return {
+          x:arc_x + arc_r * Math.cos(deg * (Math.PI / 180)),
+          y:arc_y + arc_r * Math.sin(deg * (Math.PI / 180)),
+        };
+      }
       //draw pills
       var pills = svg.append('g')
       pills.append('line')
         .attr('stroke','black')
         .attr('stroke-width','2px')
-        .attr('x1', scale(205))
-        .attr('y1', scale(710))
-        .attr('x2', scale(270))
-        .attr('y2', scale(620))
+        .attr('x1', calcArc(205).x)
+        .attr('y1', calcArc(205).y)
+        .attr('x2', calcArc(215).x)
+        .attr('y2', calcArc(215).y)
 
       pills.append('rect')
         .attr('fill','firebrick')
         .attr('stroke','darkred')
-        .attr('x', scale(215))
-        .attr('y', scale(610))
+        .attr('x', calcArc(205).x - scale(20))
+        .attr('y', calcArc(205).y - scale(20))
         .attr('width',scale(120))
         .attr('height', scale(45))
         .attr('rx', scale(25))
         .attr('ry', scale(25))
-        .attr('transform','rotate(115,' + scale(225) + ',' + scale(650) + ')')
+        .attr('transform','rotate(115,' + calcArc(205).x + ',' + calcArc(205).y + ')')
       pills.append('rect')
         .attr('fill','dodgerblue')
         .attr('stroke','darkblue')
-        .attr('x', scale(175))
-        .attr('y', scale(710))
+        .attr('x', calcArc(190).x - scale(20))
+        .attr('y',calcArc(190).y - scale(15))
         .attr('width',scale(120))
         .attr('height', scale(45))
         .attr('rx', scale(25))
         .attr('ry', scale(25))
-        .attr('transform','rotate(100,' + scale(175) + ',' + scale(755) + ')')
+        .attr('transform','rotate(100,' + calcArc(190).x + ',' + calcArc(190).y + ')')
       //calculate points to generate hex using center x,y
       var hex_h = scale(60);
       var hex_w = scale(43);
@@ -102,16 +112,7 @@
           ' ' + (x + (hex_w/2)) + ',' + (y-(hex_h/2)) +
           ' ' + x + ',' + (y - (hex_h/2) - peak_h)
       }
-      //calculate x,y position of hex on circle given degrees
-      var arc_x = x(430);
-      var arc_y = y(130);
-      var arc_r = scale(450);
-      function calcArc(deg) {
-        return {
-          x:arc_x + arc_r * Math.cos(deg * (Math.PI / 180)),
-          y:arc_y + arc_r * Math.sin(deg * (Math.PI / 180)),
-        };
-      }
+
       //circle for testing
       /*
       svg.append('circle')
@@ -338,7 +339,7 @@
           .attr('class', 'legend')
 
       legend.append('rect')
-        .attr('x', scale(1100))
+        .attr('x', x(885))
         .attr('y', function(d, i) {
           return (i * scale(30)) + scale(20) ;
         })
@@ -353,7 +354,7 @@
 
       legend.append('text')
         .attr('font-size', scale(20))
-        .attr('x', scale(1125))
+        .attr('x', x(885) + scale(25))
         .attr('y', function(d, i) {
           return (i * scale(30)) + scale(37);
         })

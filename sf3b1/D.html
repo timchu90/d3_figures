@@ -8,19 +8,19 @@
         font: 10px sans-serif;
       }
       .dotRed {
-        fill: red;
+        fill: firebrick;
       }
       .dotGray {
         fill: lightgray;
       }
       .dotBlue {
-        fill: blue;
+        fill: dodgerblue;
       }
       .dotWhite {
         fill: white;
+        display: none;
       }
       .dot {
-        stroke: #000;
         opacity: 0.7;
       }
       .line {
@@ -34,14 +34,12 @@
       }
       div.tooltip {
         position: absolute;
-        text-align: center;
+        top: 0;
+        text-align: left;
         width: 120px;
         height: 56px;
         padding: 2px;
         font: 12px sans-serif;
-        background: lightsteelblue;
-        border: 0px;
-        border-radius: 8px;
         pointer-events: none;
       }
       #chart {
@@ -59,29 +57,27 @@
     <script>
       var chartDiv = document.getElementById("chart");
       var strokeWidth = 1;
-      var margin = {top: 20, right: 20, bottom: 45, left: 50}
-      var width = chartDiv.clientHeight - margin.left - margin.right + 150;
-      var height = chartDiv.clientHeight - margin.top - margin.bottom - 50;
+      var margin = {top: 20, right: 20, bottom: 50, left: 50}
+      var width = chartDiv.clientWidth - margin.left - margin.right;
+      var height = chartDiv.clientHeight - margin.top - margin.bottom ;
       /*
       width = 960 - margin.left - margin.right,
       height = 700 - margin.top - margin.bottom;
       */
-      var x = d3.scaleLinear().range([0, width - margin.right]);
-      var y = d3.scaleLinear().range([0, height]);
+
+      var scale = d3.scaleLinear().range([0, height]).domain([0,1000]);
+      var x = d3.scaleLinear().range([0, width - scale(75)]).domain([-0.65,0.65]);
+      var y = d3.scaleLinear().range([0, height - scale(75)]).domain([18,-0.5]);
 
       var svg = d3.select("body").append("svg")
-        .attr("width", width + margin.right + margin.left - 20)
-        .attr("height", height + margin.top + margin.bottom )
+        .attr("width", chartDiv.clientWidth-20)
+        .attr("height", chartDiv.clientHeight-20)
       .append("g")
         .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")");
 
       d3.csv("dataD.csv", function(error, data) {
         if (error) throw error;
-
-        // Scale the range of the data
-        x.domain([-0.65,0.65]);
-        y.domain([18,-0.5]);
 
         // lines
         svg.append("line")
@@ -98,37 +94,6 @@
           .text("q = 0.05")
           .style("text-anchor", "end")
 
-        data.forEach(function(d) {
-          if(d.Genename == "Not known") {
-            d.Genename = "unknown";
-          }
-          if(d.color != "backgroud") {
-            if(d.yaxis > 11) {
-              svg.append("text")
-                .attr("x", x(d.xaxis))
-                .attr("y", y(d.yaxis)-10)
-                .attr("class", "name")
-                .style("text-anchor", "middle")
-                .text(d.Genename);
-            } else if (d.yaxis > 9){
-              if (d.xaxis > 0.1 || d.xaxis < -0.1) {
-                svg.append("text")
-                  .attr("x", x(d.xaxis))
-                  .attr("y", y(d.yaxis)-10)
-                  .attr("class", "name")
-                  .style("text-anchor", "middle")
-                  .text(d.Genename);
-              }
-            } else if (d.xaxis > 0.28 || d.xaxis < -0.28){
-              svg.append("text")
-                .attr("x", x(d.xaxis))
-                .attr("y", y(d.yaxis)-10)
-                .attr("class", "name")
-                .style("text-anchor", "middle")
-                .text(d.Genename);
-            }
-          }
-        })
         // add the tooltip
         var div = d3.select("body").append("div")
           .attr("class", "tooltip")
@@ -144,6 +109,7 @@
         var dot = elemEnter.append("circle")
             .on("mouseover", function(d) {
               svg.selectAll("circle")
+                .attr('stroke-width',0)
                 .transition()
                 .duration(200)
                 .style("opacity", 0.2);
@@ -160,6 +126,7 @@
               d3.select(this)
                 .transition()
                 .duration(200)
+                .attr('stroke','black')
                 .attr("stroke-width", strokeWidth * 2)
                 .style("opacity", 1);
               svg.append("text")
@@ -174,7 +141,7 @@
                 .duration(200)
                 .style("opacity", 0);
               d3.select(this)
-                .attr("stroke-width", strokeWidth);
+                .attr("stroke-width", 0);
               svg.selectAll("circle")
                 .transition()
                 .duration(200)
@@ -196,6 +163,7 @@
             .attr("cx", function(d) { return x(0); })
             .attr("cy", function(d) { return y(0); })
               .transition()
+              .delay(function(d,i){return i * 0.5})
               .duration(2000)
               .attr("cx", function(d) { return x(d.xaxis); })
               .attr("cy", function(d) { return y(d.yaxis); })
@@ -211,6 +179,37 @@
               }
             });
 
+          data.forEach(function(d) {
+            if(d.Genename == "Not known") {
+              d.Genename = "unknown";
+            }
+            if(d.color != "backgroud") {
+              if(d.yaxis > 11) {
+                svg.append("text")
+                  .attr("x", x(d.xaxis))
+                  .attr("y", y(d.yaxis)-10)
+                  .attr("class", "name")
+                  .style("text-anchor", "middle")
+                  .text(d.Genename);
+              } else if (d.yaxis > 9){
+                if (d.xaxis > 0.1 || d.xaxis < -0.1) {
+                  svg.append("text")
+                    .attr("x", x(d.xaxis))
+                    .attr("y", y(d.yaxis)-10)
+                    .attr("class", "name")
+                    .style("text-anchor", "middle")
+                    .text(d.Genename);
+                }
+              } else if (d.xaxis > 0.28 || d.xaxis < -0.28){
+                svg.append("text")
+                  .attr("x", x(d.xaxis))
+                  .attr("y", y(d.yaxis)-10)
+                  .attr("class", "name")
+                  .style("text-anchor", "middle")
+                  .text(d.Genename);
+              }
+            }
+          })
       //name transition
         svg.selectAll(".name")
           .attr("opacity",0)
@@ -221,7 +220,7 @@
 
         // Add the X Axis
         svg.append("g")
-            .attr("transform", "translate(0," + height + ")")
+            .attr("transform", "translate(0," + (height - scale(75)) + ")")
             .call(d3.axisBottom(x));
 
         svg.append("text")
@@ -229,7 +228,7 @@
           .text("diff_PSI")
           .attr("transform",
                 "translate(" + (width/2) + " ," +
-                               (height + margin.top + 20) + ")");
+                               (height - scale(75) + 40) + ")");
 
         // Add the Y Axis
         svg.append("g")
