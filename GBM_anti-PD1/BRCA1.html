@@ -181,10 +181,14 @@
       //init parameters of arc and gene
       var startAngle = 280
       var endAngle = 420
-      var geneLength = 403
+      var geneLength = 1863
 
       //use pie function to specify the gene arc
-      var 3
+      var backbone_pie = d3.pie()
+          .sort(null)
+          .startAngle(startAngle * (Math.PI / 180))
+          .endAngle(endAngle * (Math.PI / 180))
+          .value(function(d) { return d.length; });
 
       //function to calculate amino acid positions in relation to arc
       var getAminoAngle = function(angle){
@@ -197,31 +201,44 @@
       var geneOuterRadius = arc_r + scale(5)
 
       //draw nodes
-      nodeGen('Y68H', 68,'up', 'left')
-      nodeGen('N69Y', 69,'down', 'right')
-      nodeGen('F90S', 90, 'up', 'left')
-      nodeGen('H93Y', 93, 'down', 'right')
-      nodeGen('D107Y', 107, 'up', 'left')
-      nodeGen('R130*', 130, 'up', 'left')
-      nodeGen('G132D', 132, 'down', 'right')
-      nodeGen('K147*', 147, 'up', 'left')
-      nodeGen('R173C', 173, 'up', 'left')
-      nodeGen('R233*', 233, 'up', 'left')
-      nodeGen('L247fs*9', 247, 'down', 'left')
-      nodeGen('D252Y', 252, 'up', 'right', scale(65))
-      nodeGen('N276fs*13', 276, 'up', 'right')
-      nodeGen('L295fs', 295, 'down', 'left')
-      nodeGen('T319fs*1', 319, 'up', 'right')
+      nodeGen('D1578H', 1578,'up', 'left')
+      nodeGen('C903Wfs*97', 903,'down', 'right')
+      nodeGen('Q1811L', 1811, 'up', 'left')
+      nodeGen('D366N', 366, 'down', 'right')
+      nodeGen('T688Vfs*12', 688, 'up', 'left')
+      nodeGen('X27_splice', 27, 'up', 'left')
+      nodeGen('Q1408*', 1408, 'down', 'right')
+      nodeGen('R1751*', 1751, 'up', 'left')
+      nodeGen('D2E', 2, 'up', 'left')
+      nodeGen('X1559_splice*', 1559, 'up', 'left')
+      nodeGen('I1068F', 1068, 'down', 'left')
+      nodeGen('P1614Qfs*19', 1614, 'up', 'right')
+      nodeGen('D1344H', 1344, 'up', 'right')
+      nodeGen('E720*', 720, 'down', 'left')
+      nodeGen('E9Q', 9, 'up', 'right')
+      nodeGen('E272*', 272, 'up', 'right')
+      nodeGen('L1098I', 1098, 'up', 'right')
+      nodeGen('E23Sfs*8', 23, 'up', 'right')
+      nodeGen('Q139*', 139, 'up', 'right')
+      nodeGen('X1760_splice', 1760, 'up', 'right')
+      nodeGen('E1304Dfs*3', 1304, 'up', 'right')
+      nodeGen('V83F', 83, 'up', 'right')
+      nodeGen('S915C', 915, 'up', 'right')
+      nodeGen('Q934*', 934, 'up', 'right')
+      nodeGen('E1419K', 1419, 'up', 'right')
+      nodeGen('G1788V', 1788, 'up', 'right')
 
 
       //draw gene arc
       var g = svg.selectAll(".backbone_arc")
           .data(backbone_pie([
-            {length:14, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''},
-            {length:171, color:'yellowgreen', innerRadius: domainInnerRadius, outerRadius: domainOuterRadius, cornerRadius: 35, text:'Phosphatase'},
-            {length:5, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''},
-            {length:160, color:'firebrick', innerRadius: domainInnerRadius, outerRadius: domainOuterRadius, cornerRadius: 35, text:'C2'},
-            {length:53, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''}
+            {length:24, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''},
+            {length:40, color:'yellowgreen', innerRadius: domainInnerRadius, outerRadius: domainOuterRadius, cornerRadius: 35, text:''},
+            {length:1598, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''},
+            {length:61, color:'firebrick', innerRadius: domainInnerRadius, outerRadius: domainOuterRadius, cornerRadius: 35, text:''},
+            {length:34, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''},
+            {length:85, color:'firebrick', innerRadius: domainInnerRadius, outerRadius: domainOuterRadius, cornerRadius: 35, text:''},
+            {length:21, color:'gray', innerRadius: geneInnerRadius, outerRadius: geneOuterRadius, cornerRadius: 0, text:''}
           ]))
         .enter().append("g")
           .attr("class", "gene_arc")

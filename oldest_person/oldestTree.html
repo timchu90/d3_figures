@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: left;
+        left: 5%;
+        top: 5%;
+        width: 20%;
+        height: 15%;
+        padding: 2px;
+        border: 0px;
+        border-radius: 2px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+
+      var x = d3.scaleLinear().range([0,width]).domain([0,1000])
+      var y = d3.scaleLinear().range([0,height]).domain([0,1000])
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
+      var ethnicityScale = d3.scaleOrdinal()
+        .domain(['W','B','EA','O','H','M'])
+        .range(['#66c2a5','#fc8d62','#8da0cb','#8da0cb','#e78ac3','#a6d854'])
+
+      var colorScale = d3.scaleOrdinal()
+        .domain(['White','Black','East Asian','Hispanic','Multiethnic'])
+        .range(['#66c2a5','#fc8d62','#8da0cb','#e78ac3','#a6d854'])
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+
+      // add the tooltip
+      var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .attr("font-size",scale(60))
+        .style("opacity", 0);
+
+      //draw initial circle
+      svg.append('circle')
+        .attr('fill','#FAEBD7')
+        .attr('cx',x(500))
+        .attr('cy',y(500))
+        .attr('r',scale(470))
+        .attr('stroke','#8B4513')
+        .attr('stroke-width',scale(20))
+
+      //draw bark
+      var pie = d3.pie()
+        .sort(null)
+        .value(function(d){return d})
+        .padAngle(0.01)
+        .startAngle(0)
+        .endAngle(2 * Math.PI)
+      var barc = d3.arc()
+        .cornerRadius(5)
+        .innerRadius(scale(465))
+        .outerRadius(scale(495))
+      var barkArray = [2,4,7,3,7,9,3,4,2,5,8,7,8,2]
+      var bark = svg.selectAll('.bark')
+          .data(pie(barkArray))
+        .enter().append('g')
+          .attr('class','bark')
+          .attr('transform','translate(' + x(500) + ',' + y(500) +')')
+      bark.append('path')
+        .attr('d',barc)
+        .attr('fill','#8B4513')
+
+      //draw year scales -- done manually due to ring padding and laziness
+      svg.append('circle')
+        .attr('fill','none')
+        .attr('cx',x(500))
+        .attr('cy',y(500))
+        .attr('stroke','black')
+        .attr('stroke-width',scale(1))
+        .attr('r',scale(46))
+      svg.append('text')
+        .text(1960)
+        .attr('x',x(500))
+        .attr('y',y(500))
+        .attr('dy',scale(-50))
+        .attr('text-anchor','end')
+        .attr('font-size',scale(10))
+      svg.append('circle')
+        .attr('fill','none')
+        .attr('cx',x(500))
+        .attr('cy',y(500))
+        .attr('stroke','black')
+        .attr('stroke-width',scale(1))
+        .attr('r',scale(107))
+      svg.append('text')
+        .text(1970)
+        .attr('x',x(500))
+        .attr('y',y(500))
+        .attr('dy',scale(-111))
+        .attr('text-anchor','end')
+        .attr('font-size',scale(10))
+      svg.append('circle')
+        .attr('fill','none')
+        .attr('cx',x(500))
+        .attr('cy',y(500))
+        .attr('stroke','black')
+        .attr('stroke-width',scale(1))
+        .attr('r',scale(175))
+      svg.append('text')
+        .text(1980)
+        .attr('x',x(500))
+        .attr('y',y(500))
+        .attr('dy',scale(-178))
+        .attr('text-anchor','end')
+        .attr('font-size',scale(10))
+      svg.append('circle')
+        .attr('fill','none')
+        .attr('cx',x(500))
+        .attr('cy',y(500))
+        .attr('stroke','black')
+        .attr('stroke-width',scale(1))
+        .attr('r',scale(238))
+      svg.append('text')
+        .text(1990)
+        .attr('x',x(500))
+        .attr('y',y(500))
+        .attr('dy',scale(-241))
+        .attr('text-anchor','end')
+        .attr('font-size',scale(10))
+      svg.append('circle')
+        .attr('fill','none')
+        .attr('cx',x(500))
+        .attr('cy',y(500))
+        .attr('stroke','black')
+        .attr('stroke-width',scale(1))
+        .attr('r',scale(296))
+      svg.append('text')
+        .text(2000)
+        .attr('x',x(500))
+        .attr('y',y(500))
+        .attr('dy',scale(-299))
+        .attr('text-anchor','end')
+        .attr('font-size',scale(10))
+      svg.append('circle')
+        .attr('fill','none')
+        .attr('cx',x(500))
+        .attr('cy',y(500))
+        .attr('stroke','black')
+        .attr('stroke-width',scale(1))
+        .attr('r',scale(380))
+      svg.append('text')
+        .text(2010)
+        .attr('x',x(500))
+        .attr('y',y(500))
+        .attr('dy',scale(-383))
+        .attr('text-anchor','end')
+        .attr('font-size',scale(10))
+
+      //draw legend
+      var legendgroup = svg.append('g')
+
+      var legend = legendgroup.selectAll('g')
+        .data(['White','Black','East Asian','Hispanic','Multiethnic'])
+        .enter()
+          .append('g')
+          .attr('class', 'legend')
+
+      legend.append('rect')
+        .attr('x', x(885))
+        .attr('y', function(d, i) {
+          return (i * scale(30)) + scale(20) ;
+        })
+        .attr('width', scale(20))
+        .attr('height', scale(20))
+        .attr('fill', function(d){return colorScale(d)})
+        .attr('opacity',1)
+
+      legend.append('text')
+        .attr('font-size', scale(15))
+        .attr('x', x(885) + scale(25))
+        .attr('y', function(d, i) {
+          return (i * scale(30)) + scale(37);
+        })
+        .text(function(d) {
+          return d;
+        })
+        .attr('opacity',1)
+
+      legendgroup.append('text')
+        .attr('x',x(885))
+        .attr('y',y(190))
+        .attr('font-size',scale(12))
+        .text('Ring Length = Age')
+
+      legendgroup.append('text')
+        .attr('x',x(885))
+        .attr('y',y(210))
+        .attr('font-size',scale(12))
+        .text('Ring Thickness = Reign')
+
+      legendgroup.append('text')
+        .attr('x',x(885))
+        .attr('y',y(230))
+        .attr('font-size',scale(12))
+        .text('Hover to view additional details')
+
+      //start drawing actual data
+      d3.tsv('OldestPerson.txt', function(error,data){
+        if (error) throw error;
+
+        //tweak vars
+        var ringPadding = 2 //padding inbetween rings
+        var reignMultiplier = 5 //multiplier to ReignLength
+
+        var maxAge = 0 //max age for comparing ages
+        var reignTotal = 10 //running total of reigns used to determine inner/outerRadius
+        for (i = 0; i < data.length; i++){
+          if( (data[i].AgeYears * 365) + parseInt(data[i].AgeDays) > maxAge ){
+            maxAge = (data[i].AgeYears * 365 + parseInt(data[i].AgeDays))
+          }
+          data[i].runningReign = reignTotal
+          reignTotal = data[i].runningReign + parseFloat(data[i].ReignLength) * reignMultiplier + ringPadding
+        }
+        console.log(reignTotal)
+        maxAge = maxAge + 1000
+
+        var rings = svg.selectAll('.treeRing')
+          .data(data)
+          .enter().append('g')
+            .attr('transform','translate(' + x(500) + ',' + y(500) +')')
+
+        rings.append('path')
+          .attr('class','treeRing')
+          .attr('opacity',1)
+          .attr('pointer-events', 'none')
+          .attr('fill',function(d){return ethnicityScale(d.Race)})
+          .on('mouseover',function(d){
+            d3.selectAll('.treeRing')
+              .transition()
+              .duration(100)
+              .attr('opacity',0.25)
+            d3.select(this)
+            .transition()
+            .duration(100)
+              .attr('opacity',1)
+            tooltip.transition()
+              .duration(100)
+              .style('opacity',0.9)
+            tooltip.html(
+              '<b>' + d.Name + ' (' + d.Sex + ')' +
+              '</b><br><i>' + d.Birthplace +
+              '</i><br>' + d.AgeYears + ' Years ' + d.AgeDays + ' Days Old' +
+              '<br>Reign: ' + d.ReignYears + ' Years ' + d.ReignDays + ' Days' +
+              '<br>Died ' + d.Died
+            )
+          })
+          .on('mouseout',function(d){
+            d3.selectAll('.treeRing')
+              .transition()
+              .duration(500)
+              .attr('opacity',1)
+          })
+          .transition()
+            .delay(function(d,i){return i*25})
+            .duration(1500)
+            .attrTween('d', function(d){
+              var i = d3.interpolate(0.01,(((d.AgeYears * 365) + parseInt(d.AgeDays))/maxAge) * 2 * Math.PI);
+              return function(t) {
+                var arc = d3.arc()
+                  .cornerRadius(2)
+                  .innerRadius(scale(d.runningReign))
+                  .outerRadius(scale(d.runningReign + parseFloat(d.ReignLength) * reignMultiplier))
+                  .startAngle(0.01)
+                  .endAngle(i(t))
+                return arc(d);
+              }
+            })
+          .transition()
+            .delay(function(d,i){return (65-i)*26})
+            //transition doesnt work if you hover during reveal.
+            //disable mouse until after
+            .attr('pointer-events','')
+      })
+    </script>
+  </body>
+</html>
