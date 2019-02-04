@@ -14,13 +14,11 @@
         height: 100%;
       }
       body {
-        font-family: sans-serif
+        font-family: sans-serif;
       }
       .line {
         stroke-width: 1px;
-        opacity: 1;
-        pointer-events: none;
-        fill: none;
+        opacity: 0.5;
       }
     </style>
   </head>
@@ -36,48 +34,130 @@
       var xScale = d3.scaleLinear().range([0,width]).domain([0,1000])
       var yScale = d3.scaleLinear().range([0,height]).domain([0,1000])
       var x = d3.scaleLinear().range([0,width]).domain([-20,20])
-      var y = d3.scaleLinear().range([height,0]).domain([9,-3])
+      var y = d3.scaleLinear().range([height,0]).domain([-20,20])
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+      var relativeScale = d3.scaleLinear().range([0,50]).domain([0,1500])
+      var colorScale = d3.scaleLinear()
+        .range(['#c6dbef','#08306b'])
+        .domain([0,25])
+      var radius = 3
 
-      var line = d3.line()
-        .curve(d3.curveBasis)
+      var line = d3.area()
+        .curve(d3.curveBasisClosed)
         .x(function(d,i){
+           i = i+1
           var correctedX;
           if(i < 3) {
-            correctedX = i
+            correctedX = i * radius/3
           }
           else if (i < 9){
-            correctedX = 6-i
+            correctedX = (6-i) * radius/3
           }
           else {
-            correctedX = i-12
+            correctedX = (i-12) * radius/3
           }
-          console.log('x:' + correctedX)
-          return x(correctedX )
+          return x(correctedX)
         })
-        .y(function(d,i){
+        .y1(function(d,i){
+           i = i+1
+          var multiplier, x
           if(i > 3 && i < 10){
-            var multiplier = -1
-            var x = 6-i
+            multiplier = -1
+            x = (6-i) * radius/3
           }
           else if (i > 9){
-            var multiplier = 1
-            var x = i - 12
+            multiplier = 1
+            x = (i-12) * radius/3
           }
           else{
-            var multiplier = 1
-            var x = i
+            multiplier = 1
+            x = i * radius/3
           }
-          //console.log(x)
-          var radius = 3
-          console.log('y: '+multiplier * (Math.sqrt(Math.pow(radius,2) - Math.pow(x,2))))
-          //return y(d) - y(100 * multiplier * (Math.sqrt(Math.pow(radius,2) - Math.pow(x,2))-radius));
-          return y(multiplier * (Math.sqrt(Math.pow(radius,2) - Math.pow(x,2)))-radius);
+          return y(multiplier * (Math.sqrt(Math.pow(radius,2) - Math.pow(x,2)))-radius) - relativeScale(d);
          })
+         .y0(function(d,i){
+            i = i+1
+           var multiplier, x
+           if(i > 3 && i < 10){
+             multiplier = -1
+             x = (6-i) * radius/3
+           }
+           else if (i > 9){
+             multiplier = 1
+             x = (i-12) * radius/3
+           }
+           else{
+             multiplier = 1
+             x = i * radius/3
+           }
+           return y(multiplier * (Math.sqrt(Math.pow(radius,2) - Math.pow(x,2)))-radius);
+          })
+
+      var zeroline = d3.area()
+       .curve(d3.curveBasisClosed)
+       .x(function(d,i){
+         i = i+1
+         var correctedX;
+         if(i < 3) {
+           correctedX = i * radius/3
+         }
+         else if (i < 9){
+           correctedX = (6-i) * radius/3
+         }
+         else {
+           correctedX = (i-12) * radius/3
+         }
+         return x(correctedX)
+       })
+       .y1(function(d,i){
+          i = i+1
+         if(i > 3 && i < 10){
+           var multiplier = -1
+           var x = (6-i) * radius/3
+         }
+         else if (i > 9){
+           var multiplier = 1
+           var x = (i-12) * radius/3
+         }
+         else{
+           var multiplier = 1
+           var x = i * radius/3
+         }
+         return y(multiplier * (Math.sqrt(Math.pow(radius,2) - Math.pow(x,2)))-radius);
+      })
+      .y0(function(d,i){
+         i = i+1
+        var multiplier, x
+        if(i > 3 && i < 10){
+          multiplier = -1
+          x = (6-i) * radius/3
+        }
+        else if (i > 9){
+          multiplier = 1
+          x = (i-12) * radius/3
+        }
+        else{
+          multiplier = 1
+          x = i * radius/3
+        }
+        return y(multiplier * (Math.sqrt(Math.pow(radius,2) - Math.pow(x,2)))-radius);
+       })
 
       var svg = d3.select('body').append('svg')
         .attr("width", width)
         .attr("height", height)
+
+      var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
+
+      for(month in months){
+        svg.append('text')
+          .text(months[month])
+          .attr('text-anchor','middle')
+          .attr('x',xScale(500))
+          .attr('y',yScale(470))
+          .attr('dx',xScale(Math.sin(((-30*month)+165) * (Math.PI / 180)) * 350))
+          .attr('dy',yScale(Math.cos(((-30*month)+165) * (Math.PI / 180)) * 400))
+      }
 
       d3.tsv('rainData.txt', function(error,data){
         if (error) throw error;
@@ -91,12 +171,37 @@
           .enter()
           .append('g')
             .attr('class','rings')
-            .attr('transform','translate(' + xScale(0) + ',' + yScale(500)+ ')')
+            .attr('transform','translate(' + xScale(0) + ',' + yScale(-70)+ ')')
 
         rings.append('path')
           .attr('class','line')
-          .attr('d',function(d,i){index = i; return line(d.y)})
-          .attr('stroke','black')
+          .attr('d',function(d,i){radius = (i+1)*2/4; return zeroline(d.y)})
+          .attr('transform',function(d,i){ return'translate(' + xScale(0) + ',' + yScale(-12 * i)+ ')'})
+          .attr('stroke',function(d,i){return colorScale(i)})
+          .attr('fill',function(d,i){return colorScale(i)})
+          .on('mouseover',function(d,i){
+            d3.selectAll('.line')
+              .transition()
+              .duration(200)
+              .attr('d',function(d,i){radius = (i+1)*2/4; return zeroline(d.y)})
+            d3.select(this)
+            .transition()
+            .duration(200)
+              .attr('opacity',1)
+              .attr('d',function(d){radius = (i+1)*2/4; return line(d.y)})
+          })
+          .transition()
+            .duration(500)
+            .delay(function(d,i){return i*100})
+            .attr('d',function(d,i){radius = (i+1)*2/4; return line(d.y)})
+
+        svg.on('click',function(d,i){
+          d3.selectAll('.line')
+            .transition()
+            .duration(200)
+            .attr('d',function(d,i){radius = (i+1)*2/4; return line(d.y)})
+        })
+
       })
     </script>
   </body>
