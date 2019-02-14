@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: left;
+        left: 5%;
+        top: 5%;
+        width: 20%;
+        height: 15%;
+        padding: 2px;
+        border: 0px;
+        border-radius: 2px;
+        pointer-events: none;
+      }
+      .drugLabel {
+        paint-order: stroke;
+        stroke-linecap: butt;
+        stroke-linejoin: miter;
+      }
+      .Acute {
+        fill: #fdb462;
+      }
+      .Chronic {
+        fill: #ffffb3;
+        font-size:0px;
+      }
+      .Intravenous {
+        fill: #fb8072;
+        font-size:0px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth - 20;
+      var height = chartDiv.clientHeight - 20;
+
+      var x = d3.scaleLinear().range([0,width]).domain([0,12])
+      var y = d3.scaleLinear().range([0,height]).domain([0,21.5])
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
+      var xaxis = d3.scaleLinear().range([0,x(9)]).domain([0,9])
+
+      var harm = ["Acute", "Chronic", "Intravenous"];
+      var classScale = d3.scaleOrdinal()
+        .domain(['NA','C','B','A'])
+        .range(['#b15928','#4daf4a','#377eb8','#984ea3'])
+
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+
+      svg.append('g')
+        .attr('transform','translate(' + 120 +',' + y(20) +')')
+        .call(d3.axisBottom(xaxis))
+
+      //start drawing actual data
+      d3.tsv('drugHarm.txt', function(error,data){
+        if (error) throw error;
+
+        var layers = d3.stack()
+          .keys(harm)(data)
+
+        var layer = svg.selectAll('.layer')
+          .data(layers)
+          .enter().append('g')
+          .attr('class',function(d){return d.key})
+
+        var bar = layer.selectAll('rect')
+          .data(function(d){return d})
+          .enter()
+
+        var harmBar = bar.append('rect')
+          .attr('class','bar')
+          .attr('x', function(d) {return x(d[0]) + 120})
+          .attr('y', function(d,i) {return y(i + 0.35) })
+          .attr('width', function(d) { return x(d[1]) - x(d[0]) })
+          .attr('height', scale(12))
+          .attr('rx',scale(3))
+          .attr('ry',scale(3))
+          .attr('stroke','dimgray')
+
+        var drugLabel = bar.append('text')
+          .text(function(d){return d.data.Drug})
+          .attr('class','drugLabel')
+          .attr('x', 110)
+          .attr('y', function(d,i) {return y(i + 0.4)})
+          .attr('fill',function(d) {return classScale(d.data.Class)})
+          .attr('text-anchor','end')
+          .attr('font-size',scale(20))
+
+        var pleasureBar = svg.selectAll('.pBar')
+          .data(data)
+          .enter().append('rect')
+            .attr('class','bar')
+            .attr('x', 120)
+            .attr('y', function(d,i) {return y(i)})
+            .attr('fill','#d9d9d9')
+            .attr('width', function(d) {return x(d.Pleasure * 3)})
+            .attr('height', scale(12))
+            .attr('rx',scale(3))
+            .attr('ry',scale(3))
+            .attr('stroke','dimgray')
+      })
+    </script>
+  </body>
+</html>

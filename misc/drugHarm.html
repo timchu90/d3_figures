@@ -19,14 +19,28 @@
       div.tooltip {
         position: absolute;
         text-align: left;
-        left: 5%;
-        top: 5%;
-        width: 20%;
-        height: 15%;
         padding: 2px;
         border: 0px;
         border-radius: 2px;
         pointer-events: none;
+        background: white;
+
+      }
+      .drugLabel {
+        paint-order: stroke;
+        stroke-linecap: butt;
+        stroke-linejoin: miter;
+      }
+      .Acute {
+        fill: #fdb462;
+      }
+      .Chronic {
+        fill: #ffffb3;
+        font-size:0px;
+      }
+      .Intravenous {
+        fill: #fb8072;
+        font-size:0px;
       }
     </style>
   </head>
@@ -35,42 +49,210 @@
     </div>
     <script>
       var chartDiv = document.getElementById("chart");
-      var width = chartDiv.clientWidth -20;
-      var height = chartDiv.clientHeight -20;
+      var width = chartDiv.clientWidth - 20;
+      var height = chartDiv.clientHeight - 20;
 
-      var x = d3.scaleLinear().range([0,width]).domain([0,10])
-      var y = d3.scaleLinear().range([0,height]).domain([10,0])
+      var xscale = d3.scaleLinear().range([0,width]).domain([0,30])
+      var y = d3.scaleLinear().range([0,height]).domain([0,21.5])
       var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
 
-      var classScale = d3.scaleOrdinal()
-        .domain(['NA','C','B','A'])
-        .range(['#80b1d3','#ffed6f','#fdb462','#fb8072'])
+      var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .attr("font-size",scale(60))
+        .style("opacity", 0);
 
       var svg = d3.select("body").append("svg")
         .attr("width", width)
         .attr("height", height)
 
+      var harms = ['Acute','Chronic','Intravenous','Pleasure','Psychological','Physical','Intoxication','Social harm','Health-care']
+      var harmsAlign = ['start','start','start','middle','middle','middle','end','end','end']
+      var harmsColor = ['#7570b3','#7570b3','#7570b3','#d95f02','#d95f02','#d95f02','#1b9e77','#1b9e77','#1b9e77']
+      var colors1 = ['#b10026','#e31a1c','#fc4e2a','#fd8d3c','#feb24c','#fed976','#ffffb2']
+      var colors2 = ['#6e016b','#88419d','#8c6bb1','#8c96c6']
+      var colors3 = ['#005a32','#238443','#41ab5d','#78c679','#addd8e']
+      var colors0 = ['#0c2c84','#225ea8','#1d91c0','#41b6c4','#7fcdbb','#c7e9b4']
+
+
+      var textAlignScale = d3.scaleOrdinal()
+        .domain(harms)
+        .range(harmsAlign)
+
+      var textColorScale = d3.scaleOrdinal()
+        .domain(harms)
+        .range(harmsColor)
+
+      var angleScale = d3.scaleBand()
+        .domain(harms)
+        .range([-70 * Math.PI/180, 290 * Math.PI/180])
+
+      var lineRadial = d3.lineRadial()
+        .angle(function(d){return angleScale(d.harm) +(Math.PI /2)})
+        .radius(function(d){return xscale(d.value)})
+        .curve(d3.curveCardinalClosed.tension(1))
+
+      var drawLegendMarker = function(distance,x,y,legend ){
+        for (var i = 0; i < harms.length-1; i++){
+          legend.append('line')
+            .attr('x1',x)
+            .attr('y1',y)
+            .attr('x2', x + (xscale(3.2) * Math.cos(angleScale(harms[i]))))
+            .attr('y2', y + (xscale(3.2) * Math.sin(angleScale(harms[i]))))
+            .attr('stroke','black')
+            .attr('stroke-width',scale(0.5))
+            .attr('opacity','0.5')
+          legend.append('line')
+            .attr('x1', x + (xscale(distance) * Math.cos(angleScale(harms[i]))))
+            .attr('y1', y + (xscale(distance) * Math.sin(angleScale(harms[i]))))
+            .attr('x2', x + (xscale(distance) * Math.cos(angleScale(harms[i+1]))))
+            .attr('y2', y + (xscale(distance) * Math.sin(angleScale(harms[i+1]))))
+            .attr('stroke','black')
+            .attr('stroke-width',scale(0.5))
+            .attr('opacity','0.5')
+        }
+        legend.append('line')
+          .attr('x1',x)
+          .attr('y1',y)
+          .attr('x2', x + (xscale(3.2) * Math.cos(angleScale(harms[harms.length-1]))))
+          .attr('y2', y + (xscale(3.2) * Math.sin(angleScale(harms[harms.length-1]))))
+          .attr('stroke','black')
+          .attr('stroke-width',scale(0.5))
+          .attr('opacity','0.5')
+        legend.append('line')
+          .attr('x1', x + (xscale(distance) * Math.cos(angleScale(harms[0]))))
+          .attr('y1', y + (xscale(distance) * Math.sin(angleScale(harms[0]))))
+          .attr('x2', x + (xscale(distance) * Math.cos(angleScale(harms[harms.length-1]))))
+          .attr('y2', y + (xscale(distance) * Math.sin(angleScale(harms[harms.length-1]))))
+          .attr('stroke','black')
+          .attr('stroke-width',scale(1))
+          .attr('stroke-width',scale(0.5))
+          .attr('opacity','0.5')
+      }
+
       //start drawing actual data
       d3.tsv('drugHarm.txt', function(error,data){
         if (error) throw error;
 
-        console.log(data)
+        //console.log(data)
 
-        var node = svg.selectAll('g')
-          .data(data)
-          .enter()
-          .append('g')
-          .attr('class','node')
-          .attr('transform',function(d){return 'translate(' + x(d['Sum Physical']) + ',' + y(d['Sum Dependance']) + ')'})
+        data1 = data.filter(function(drug){return drug.Schedule == 1})
+        data2 = data.filter(function(drug){return drug.Schedule == 2})
+        data3 = data.filter(function(drug){return drug.Schedule == 3})
+        data0 = data.filter(function(drug){return drug.Schedule == 0})
 
-        var circle = node.append('circle')
-          .attr('r','10')
-          .attr('fill',function(d){return classScale(d['Class'])})
+        var drawRadials = function(data, colors, x, y, classname, title){
+          //console.log(data)
+          for (var i in data){
+            data[i].data = []
+            for (var harm in harms){
+              data[i].data.push({'harm':harms[harm], 'value': data[i][harms[harm]]})
+            }
+          }
 
-        var label = node.append('text')
-          .attr('dx','15')
-          .attr('dy','10')
-          .text(function(d){return d['Drug']})
+          //draw radial fills
+          var circle = svg.selectAll('.circle')
+            .data(data).enter()
+            .append('g')
+            .attr('class', classname)
+            .attr('transform','translate(' + x + ',' + y + ')')
+          var fill = circle.append('path')
+            .attr('fill',function(d,i){return colors[i]})
+            .attr('d',function(d){return lineRadial(d.data)})
+            .attr('opacity','0.55')
+            .on('click',function(d,i){
+              d3.selectAll('#highlight')
+                .remove()
+              svg.append('path')
+                .attr('transform','translate(' + x + ',' + y + ')')
+                .attr('fill',colors[i])
+                .attr('d',lineRadial(d.data))
+                .attr('id','highlight')
+                .attr('stroke','black')
+                .attr('stroke-width',scale(0))
+                .attr('opacity','0.55')
+                .on('mousemove',function(){
+                    div.html(d.Drug)
+                    div.style("left", x +scale(20)+ d3.mouse(this)[0] + 'px')
+                    div.style("top",y + scale(20) + d3.mouse(this)[1] + 'px')
+                    div.style('opacity','0.8')
+                })
+                .on('mouseout',function(){
+                  div.style('opacity','0')
+                })
+                .transition()
+                  .duration(200)
+                  .attr('stroke-width',scale(3))
+                  .attr('opacity','0.8')
+            })
+
+          //draw legend
+          var legend = svg.append('g')
+            .attr('class','legend')
+          for (harm in harms){
+            legend.append('text')
+              .text(harms[harm])
+              .attr('x', x + (xscale(3.5) * Math.cos(angleScale(harms[harm]))))
+              .attr('y', y + (xscale(3.5) * Math.sin(angleScale(harms[harm]))))
+              .attr('text-anchor', textAlignScale(harms[harm]))
+              .attr('font-size',scale(15))
+              .attr('fill',textColorScale(harms[harm]))
+          }
+          //lables
+          legend.append('text')
+            .text('Physical Harm')
+            .attr('x', x + (xscale(5) * Math.cos(angleScale('Chronic'))))
+            .attr('y', y + (xscale(5) * Math.sin(angleScale('Chronic'))))
+            .attr('text-anchor', 'start')
+            .attr('font-size',scale(18))
+            .attr('font-weight','bold')
+            .attr('fill','#7570b3')
+
+          legend.append('text')
+            .text('Societial Cost')
+            .attr('x', x + (xscale(5) * Math.cos(angleScale('Social harm'))))
+            .attr('y', y + (xscale(5) * Math.sin(angleScale('Social harm'))))
+            .attr('text-anchor', 'end')
+            .attr('font-size',scale(18))
+            .attr('font-weight','bold')
+            .attr('fill','#1b9e77')
+
+          legend.append('text')
+            .text('Dependence')
+            .attr('x', x )
+            .attr('y', y + xscale(4.5))
+            .attr('text-anchor', 'middle')
+            .attr('font-size',scale(18))
+            .attr('font-weight','bold')
+            .attr('fill','#d95f02')
+
+          legend.append('text')
+            .text(title)
+            .attr('x', x )
+            .attr('y', y - xscale(4))
+            .attr('text-anchor', 'middle')
+            .attr('font-size',scale(20))
+            .attr('font-weight','bold')
+            .attr('fill','black')
+
+          drawLegendMarker(3,x,y,legend)
+          drawLegendMarker(2,x,y,legend)
+          drawLegendMarker(1,x,y,legend)
+        }
+
+        var background = svg.append('rect')
+          .attr("width", width)
+          .attr("height", height)
+          .attr('fill','white')
+          .on('click',function(d){
+            d3.selectAll('#highlight')
+              .remove()
+          })
+
+        drawRadials(data1,colors1, width/4, height/4, "sched1",'SCHEDULE I')
+        drawRadials(data2,colors2, 3*width/4, height/4, "sched2",'SCHEDULE II')
+        drawRadials(data3,colors3, width/4, 3*height/4, "sched3",'SCHEDULE III')
+        drawRadials(data0,colors0, 3*width/4, 3*height/4, "sched0",'LEGAL')
+
       })
     </script>
   </body>
