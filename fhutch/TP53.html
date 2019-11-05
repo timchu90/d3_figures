@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: left;
+        left: 5%;
+        top: 5%;
+        width: 20%;
+        height: 15%;
+        padding: 2px;
+        border: 0px;
+        border-radius: 2px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+      var chartDiv = document.getElementById("chart");
+      var width = chartDiv.clientWidth -20;
+      var height = chartDiv.clientHeight -20;
+
+      var y = d3.scaleLinear().range([0,height]).domain([0,1000])
+      var x = d3.scaleLinear().range([0,width]).domain([-50,400])
+      var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+      var VAFscale = d3.scaleLinear().range(['#fff5eb','#d94801']).domain([0,1])
+      var backboneY = y(800)
+      
+      var ProgPatientScale = d3.scaleBand().range([30,850])
+        .domain([
+            "74",
+            "686",
+            "954",
+            "856",
+            "266",
+            "322",
+            "951",
+            "396",
+            "891",
+            "702",
+            "833",
+            "568",
+            "169",
+            "450",
+            "295",
+            "740", 
+            "512",
+            //306
+            "391",
+            "997",
+            "779",
+            "279",
+            //273
+            "42",
+            "995",
+            "403",
+            //248
+            "422",
+            "660",
+            "772",
+            "626",
+            "43",
+            "728",
+            //175
+            "163",
+            "977",
+            "852",
+            "551",
+            //NULLS
+            "160",
+            "623"
+        ])
+      var NPPatientScale = d3.scaleBand().range([30,225])
+        .domain([
+            "942",
+            "303",
+            "303",
+            "611",
+            "385",
+            "619",
+            "478",
+            "515",
+            "915",
+            //NULLS
+            "88",
+        ])
+      
+      var circleSector = function(count) {
+        var startAngle 
+        var endAngle 
+        
+        switch(count){
+            case 0:
+                startAngle = 3 * Math.PI / 2
+                endAngle =  4 * Math.PI / 2
+                break;
+            case 1:
+                startAngle = 2 * Math.PI / 2
+                endAngle = 3 * Math.PI / 2
+                break;
+            case 2:
+                startAngle = 0
+                endAngle = Math.PI / 2
+                break;
+            case 3: 
+                startAngle = Math.PI / 2
+                endAngle = 2 * Math.PI / 2
+                break;
+        }
+        return d3.arc()
+            .innerRadius(0)
+            .outerRadius(scale(10))
+            .startAngle(startAngle)
+            .endAngle(endAngle)
+      }
+      
+      var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+      
+      var getAA_X = function(AA_Change){
+        aaNum = AA_Change.match(/\d+/g)
+            try {
+                return x(aaNum[0])
+            } catch(indexError) {
+                return x(-100)
+            }
+      }
+      var getPatient_Y = function(PatientID, ProgressionStatus){
+        if( ProgressionStatus == 'Prog'){
+            return backboneY - y(ProgPatientScale(PatientID))
+        } else {
+            return backboneY - y(-1 * NPPatientScale(PatientID))
+        }
+      }
+      var getShortAA = function(AA_Change){
+          var aa_to_short = {'Ala': 'A',
+                   'Arg': 'R',
+                   'Asn': 'N',
+                   'Asp': 'D',
+                   'Asx': 'B',
+                   'Cys': 'C',
+                   'Glu': 'E',
+                   'Gln': 'Q',
+                   'Glx': 'Z',
+                   'Gly': 'G',
+                   'His': 'H',
+                   'Ile': 'I',
+                   'Leu': 'L',
+                   'Lys': 'K',
+                   'Met': 'M',
+                   'Phe': 'F',
+                   'Pro': 'P',
+                   'Ser': 'S',
+                   'Thr': 'T',
+                   'Trp': 'W',
+                   'Tyr': 'Y',
+                   'Val': 'V',
+                   'Xxx': 'X',
+                   'Xaa': 'X',
+                   'Ter': '*'
+                  }
+          AA_short = AA_Change.split('.')[1]
+          keys = Object.keys(aa_to_short)
+          if(AA_short){
+              for (var key in keys){
+                  AA_short = AA_short.replace(keys[key], aa_to_short[keys[key]])
+              }
+              return AA_short
+          }
+      }
+      d3.tsv('data/TP53condensed.tsv', function(error,data){
+        if (error) throw error;
+          //for each row, draw a pie chart based on VAF
+          //x at AA change
+          //y fixed for now, generate a patient > height scale later
+          //modify height by Prog (1) or NP (-1)
+          var nodes = svg.append('g')
+            .attr('class','nodes')
+          var node = nodes.selectAll('.nodes')
+            .data(data)
+            .enter()
+          
+          //draw line down to gene track
+          node.append('line')
+            .attr('x1', function(d){return getAA_X(d.AA_Change)})
+            .attr('x2', function(d){return getAA_X(d.AA_Change)})
+            .attr('y1', backboneY)
+            .attr('y2', function(d){return getPatient_Y(d.PatientID,d.ProgressionStatus)})
+            .attr('stroke','black')
+          
+          //draw horizontal line for patients
+          node.append('line')
+            .attr('x1', function(d){ 
+                aaNum = d.AA_Change.match(/\d+/g)
+                if (aaNum) {
+                    return x(-4)
+                } else {
+                    return x(-100)
+                }
+            })
+            .attr('x2', function(d){return getAA_X(d.AA_Change)})
+            .attr('y1', function(d){return getPatient_Y(d.PatientID,d.ProgressionStatus)})
+            .attr('y2', function(d){return getPatient_Y(d.PatientID,d.ProgressionStatus)})
+            .attr('stroke','black')
+            .attr('opacity',1)
+            .attr('stroke-dasharray',5)
+            .attr('stroke-width','0.5px')
+          
+          //draw patient ID
+          node.append('text')
+            .attr('x', function(d){ 
+                aaNum = d.AA_Change.match(/\d+/g)
+                if (aaNum) {
+                    return x(-5)
+                } else {
+                    return x(-100)
+                }
+            })
+            .attr('y', function(d){return getPatient_Y(d.PatientID,d.ProgressionStatus)})
+            .text(function(d){return d.PatientID})
+            .attr('text-anchor','end')
+            .attr('font-size', scale(18))
+            .attr('dy', scale(4.5))
+            .attr('dx', scale(-3))
+          
+          //draw variant text
+          node.append('text')
+            .attr('x', function(d){return getAA_X(d.AA_Change)})
+            .attr('y', function(d){return getPatient_Y(d.PatientID,d.ProgressionStatus)})
+            .text(function(d){ return getShortAA(d.AA_Change)})
+            .attr('text-anchor','start')
+            .attr('font-size', scale(14))
+            .attr('dx', scale(10))
+            .attr('dy', function(d){
+              if( d.ProgressionStatus == 'Prog'){
+                return scale(0)
+              } else {
+                return scale(7)
+              }
+            })
+            
+          //draw node
+          //draw white node first as background
+          
+          node.append('circle')
+            .attr('cx', function(d){return getAA_X(d.AA_Change)})
+            .attr('cy', function(d){return getPatient_Y(d.PatientID,d.ProgressionStatus)})
+            .attr('r', scale(9))
+            //.attr('fill',function(d){return VAFscale(d.VAF) })
+            .attr('fill','white')
+          /*
+          //draw transparent nodes over eachother to show number of samples with variant
+          node.append('circle')
+            .attr('cx', function(d){return getAA_X(d.AA_Change)})
+            .attr('cy', function(d){return getPatient_Y(d.PatientID,d.ProgressionStatus)})
+            .attr('r', scale(9))
+            //.attr('fill',function(d){return VAFscale(d.VAF) })
+            .attr('fill','#cecece')
+            .attr('opacity',1)
+            */
+          
+          //draw radial chart for AA change
+          node.append('g')
+            .attr('transform',function(d){
+              return 'translate(' + getAA_X(d.AA_Change) + ',' + getPatient_Y(d.PatientID,d.ProgressionStatus) + ')'
+            })
+            .attr('opacity', function(d){
+              if (d.VariantType == "splice"){
+                  return 0
+              }
+            })
+            .selectAll('sector')
+            .data(function(d){return d.HitArray.split(',')})
+            .enter().append('path')
+            .attr('d', function(d,i){ return circleSector(i)(d)})
+            .style('stroke','black')
+            .style('stroke-width','1px')
+            .attr('fill', function(d,i){
+                switch(parseInt(d)){
+                    case 0:
+                        return 'white'
+                    case 1:
+                        return '#feb24c'
+                    case 2:
+                        return '#f03b20'
+                    case 3:
+                        return '#feb24c'
+              }
+            })
+            //draw again on the left by patients
+            node.append('g')
+            .attr('transform',function(d){
+              return 'translate(' + x(-15) + ',' + getPatient_Y(d.PatientID,d.ProgressionStatus) + ')'
+            })
+            .attr('opacity', function(d){
+              if (d.VariantType == "splice"){
+                  return 0
+              }
+            })
+            .selectAll('sector')
+            .data(function(d){return d.HitArray.split(',')})
+            .enter().append('path')
+            .attr('d', function(d,i){ return circleSector(i)(d)})
+            .style('stroke','black')
+            .style('stroke-width','1px')
+            .attr('fill', function(d,i){
+                switch(parseInt(d)){
+                    case 0:
+                        return '#d3d3d3'
+                    case 1:
+                        return '#feb24c'
+                    case 2:
+                        return '#f03b20'
+                    case 3:
+                        return '#feb24c'
+              }
+            })
+            .attr('fill-opacity', function(d,i){
+                switch(parseInt(d)){
+                    case 0:
+                        return 0
+                    case 1:
+                        return 1
+                    case 2:
+                        return 1
+                    case 3:
+                        return 1
+              }
+            })
+          
+            //draw diamond chart for splice change
+          node.append('g')
+            .attr('transform',function(d){
+              return 'translate(' + getAA_X(d.AA_Change) + ',' + getPatient_Y(d.PatientID,d.ProgressionStatus) + ')'
+            })
+            .attr('opacity', function(d){
+              if (d.VariantType == "aa"){
+                  return 0
+              }
+            })
+            .selectAll('sector')
+            .data(function(d){return d.HitArray.split(',')})
+            .enter().append('polygon')
+            .attr('points', '0,0 0,' + scale(-11) + ' ' + scale(-11) + ',0')
+            .attr('transform', function(d,i){
+                switch(i){
+                    case 0:
+                        return 'rotate(0)'
+                    case 1:
+                        return 'rotate(-90)'
+                    case 2:
+                        return 'rotate(90)'
+                    case 3:
+                        return 'rotate(180)'
+                }
+            })
+            .style('stroke','black')
+            .style('stroke-width','1px')
+            .attr('fill', function(d,i){
+                switch(parseInt(d)){
+                    case 0:
+                        return 'white'
+                    case 1:
+                        return '#feb24c'
+                    case 2:
+                        return '#f03b20'
+                    case 3:
+                        return '#feb24c'
+              }
+            })
+          
+            node.append('g')
+            .attr('transform',function(d){
+              return 'translate(' + x(-19) + ',' + getPatient_Y(d.PatientID,d.ProgressionStatus) + ')'
+            })
+            .attr('opacity', function(d){
+              if (d.VariantType == "aa"){
+                  return 0
+              }
+            })
+            .selectAll('sector')
+            .data(function(d){return d.HitArray.split(',')})
+            .enter().append('polygon')
+            .attr('points', '0,0 0,' + scale(-11) + ' ' + scale(-11) + ',0')
+            .attr('transform', function(d,i){
+                switch(i){
+                    case 0:
+                        return 'rotate(0)'
+                    case 1:
+                        return 'rotate(-90)'
+                    case 2:
+                        return 'rotate(90)'
+                    case 3:
+                        return 'rotate(180)'
+                }
+            })
+            .style('stroke','black')
+            .style('stroke-width','1px')
+            .attr('fill', function(d,i){
+                switch(parseInt(d)){
+                    case 0:
+                        return 'white'
+                    case 1:
+                        return '#feb24c'
+                    case 2:
+                        return '#f03b20'
+                    case 3:
+                        return '#feb24c'
+              }
+            })
+          
+          //draw gene
+          var backbones = svg.append('g')
+            .attr('class','backbones')
+          var backbone = backbones.selectAll(".backbone")
+            .data([
+                {start:0, end:6, color:'gray', width: 8, cornerRadius: 0, text:''},
+                {start:6, end:29, color:'firebrick',width: 30, cornerRadius: 10, text:'P53 TAD'},
+                {start:29, end:95, color:'gray', width: 8, cornerRadius: 0, text:''},
+                {start:95, end:288, color:'yellowgreen', width: 30, cornerRadius: 10, text:'P53 DNA-binding'},
+                {start:288, end:318, color:'gray', width: 8, cornerRadius: 0, text:''},
+                {start:318, end:358, color:'dodgerblue', width: 30, cornerRadius: 10, text:'P53 tetramer'}
+            ])
+            .enter()
+            .append('g')
+          
+          backbone.append("rect")
+            .attr('x', function(d){return x(d.start)})
+            .attr('y', function(d){return backboneY - y(d.width)/2})
+            .attr('width', function(d){return x(d.end) - x(d.start)})
+            .attr('height', function(d){return y(d.width)})
+            .attr('fill', function(d){return d.color})
+            .attr('rx', function(d){return d.cornerRadius})
+            .attr('ry', function(d){return d.cornerRadius})
+        
+          backbone.append('text')
+            .text(function(d){return d.text})
+            .attr('text-anchor','middle')
+            .attr('font-size', scale(20))
+            .attr('x', function(d){return x(d.start)})
+            .attr('y', function(d){return backboneY})
+            .attr('dx', function(d){return (x(d.end) - x(d.start)) / 2})
+            .attr('dy', function(d){return y(6)})
+            .attr('fill','white')
+          
+          svg.append('text')
+            .text('Progressors')
+            .attr('x', x(-25))
+            .attr('y', y(400))
+            .attr('text-anchor','middle')
+            .attr('transform','rotate(270,' + x(-25) + ',' + y(400) + ')' )
+          
+          svg.append('text')
+            .text('Non-progressors')
+            .attr('x', x(-25))
+            .attr('y', y(900))
+            .attr('text-anchor','middle')
+            .attr('transform','rotate(270,' + x(-25) + ',' + y(900) + ')' )
+      })
+    </script>
+  </body>
+</html>

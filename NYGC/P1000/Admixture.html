@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+        #chart {
+            position: fixed;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+            z-index: -2;
+            height: 100%;
+        }
+        body {
+            font-family: sans-serif
+        }
+        div.tooltip {
+            position: absolute;
+            text-align: left;
+            width: 120px;
+            height: 50px;
+            padding-left: 10px;
+            font: 12px sans-serif;
+            border: 0.5px solid gray;
+            background: white;
+            border-radius: 5px;
+            pointer-events: none;
+            padding-top: 10px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+        var chartDiv = document.getElementById("chart");
+        var margin = 20
+        var width = chartDiv.clientWidth;
+        var height = chartDiv.clientHeight;
+        var xshift = 70
+        var x = d3.scaleLinear().range([xshift,width-50]).domain([0,1000])
+        var y = d3.scaleLinear().range([0,height]).domain([0,1.2])
+        var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
+        var populations = ['ADMIX_AFR','ADMIX_AMR','ADMIX_EAS','ADMIX_EUR','ADMIX_SAS']
+        var populationColors = ['#2986e2','#dc3912','#f88508','#109618','#990099']
+
+        var colorScale = d3.scaleOrdinal().range(populationColors).domain(populations)
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", chartDiv.clientWidth - margin)
+            .attr("height", chartDiv.clientHeight - margin)
+            .attr('transform','translate(' + margin/4 + ',' + margin/4 + ')')
+
+        var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        var yaxis = svg.append("g")
+            .attr('class', 'yaxis')
+            .attr('transform','translate(' + x(-25) + ',' + y(0.05) + ')')
+            
+        
+        yaxis.append('line')
+            .attr('x1', 0)
+            .attr('x2', 0)
+            .attr('y1', y(0))
+            .attr('y2', y(1))
+            .attr('stroke','black')
+        
+        yaxis.append('line')
+            .attr('x1', 0)
+            .attr('x2', -5)
+            .attr('y1', y(0))
+            .attr('y2', y(0))
+            .attr('stroke','black')
+        
+        yaxis.append('line')
+            .attr('x1', 0)
+            .attr('x2', -5)
+            .attr('y1', y(0.5))
+            .attr('y2', y(0.5))
+            .attr('stroke','black')
+        
+        yaxis.append('line')
+            .attr('x1', 0)
+            .attr('x2', -5)
+            .attr('y1', y(1))
+            .attr('y2', y(1))
+            .attr('stroke','black')
+        
+        yaxis.append('text')
+            .text('1.0')
+            .attr('x', -10)
+            .attr('y', y(0))
+            .attr('text-anchor','end')
+            .attr('font-size', 10)
+            .attr('dy', 3)
+        
+        yaxis.append('text')
+            .text('0.5')
+            .attr('x', -10)
+            .attr('y', y(0.5))
+            .attr('text-anchor','end')
+            .attr('font-size', 10)
+            .attr('dy',3)
+        
+        yaxis.append('text')
+            .text('0.0')
+            .attr('x', -10)
+            .attr('y', y(1))
+            .attr('text-anchor','end')
+            .attr('font-size', 10)
+            .attr('dy',3)
+        
+        yaxis.append('text')
+            .text('Admixture Proportion')
+            .attr('x', -40)
+            .attr('y', y(0.5))
+            .attr('transform','rotate(270,' + -40 + ',' + y(0.5) + ')')
+            .attr('text-anchor','middle')
+            .attr('font-size', 10)
+            .attr('dy',scale(15))
+
+      //start drawing actual data
+      
+        data = [
+            {
+              ADMIX_AFR: "0.81",
+              ADMIX_AMR: "0.02",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0.17",
+              ADMIX_SAS: "0",
+              patientId: "P1000-0001",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.6",
+              ADMIX_AMR: "0.23",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0.17",
+              ADMIX_SAS: "0",
+              patientId: "P1000-0002",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "1",
+              ADMIX_AMR: "0.",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0",
+              ADMIX_SAS: "0",
+              patientId: "P1000-0004",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.91",
+              ADMIX_AMR: "0",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0.07",
+              ADMIX_SAS: "0.02",
+              patientId: "P1000-0005",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.37",
+              ADMIX_AMR: "0.42",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0.21",
+              ADMIX_SAS: "0",
+              patientId: "P1000-0006",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.72",
+              ADMIX_AMR: "0",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0.28",
+              ADMIX_SAS: "0",
+              patientId: "P1000-0007",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.45",
+              ADMIX_AMR: "0",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0.39",
+              ADMIX_SAS: "0.16",
+              patientId: "P1000-0010",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.98",
+              ADMIX_AMR: "0.02",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0",
+              ADMIX_SAS: "0",
+              patientId: "P1000-00011",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.64",
+              ADMIX_AMR: "0",
+              ADMIX_EAS: "0.02",
+              ADMIX_EUR: "0.34",
+              ADMIX_SAS: "0",
+              patientId: "P1000-00013",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.72",
+              ADMIX_AMR: "0",
+              ADMIX_EAS: "0.01",
+              ADMIX_EUR: "0.26",
+              ADMIX_SAS: "0.01",
+              patientId: "P1000-0014",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.8",
+              ADMIX_AMR: "0.02",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0.16",
+              ADMIX_SAS: "0.01",
+              patientId: "P1000-0015",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0.4",
+              ADMIX_AMR: "0.28",
+              ADMIX_EAS: "0",
+              ADMIX_EUR: "0.32",
+              ADMIX_SAS: "0",
+              patientId: "P1000-0017",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0",
+              ADMIX_AMR: "0",
+              ADMIX_EAS: "1",
+              ADMIX_EUR: "0",
+              ADMIX_SAS: "0",
+              patientId: "P1000-0018",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0",
+              ADMIX_AMR: "0",
+              ADMIX_EAS: "0.98",
+              ADMIX_EUR: "0",
+              ADMIX_SAS: "0.02",
+              patientId: "P1000-0019",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0",
+              ADMIX_AMR: "0",
+              ADMIX_EAS: "0.91",
+              ADMIX_EUR: "0",
+              ADMIX_SAS: "0.09",
+              patientId: "P1000-0020",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            },
+            {
+              ADMIX_AFR: "0",
+              ADMIX_AMR: "0",
+              ADMIX_EAS: "1",
+              ADMIX_EUR: "0",
+              ADMIX_SAS: "0",
+              patientId: "P1000-0021",
+              studyId: "nygc_pe1k_phase1_2019",
+              uniquePatientKey: "UDEwMDAtMDAwMTpueWdjX3BlMWtfcGhhc2UxXzIwMTk"
+            }
+        ]
+
+        var bars = svg.append('g').attr('class','bars')
+        
+        for(var i in data){
+            data[i].sortScore = data[i].ADMIX_AFR * 128 + data[i].ADMIX_AMR * 64 + data[i].ADMIX_EAS * 32 + data[i].ADMIX_EUR * 16 + data[i].ADMIX_SAS * 8
+        }
+        data.sort((a, b) => (a.sortScore < b.sortScore) ? 1 : -1)
+        
+        var bar = bars.selectAll('.bar')
+            .data(data).enter()
+            .append('g')
+            .attr('transform',function(d,i){
+                return 'translate(' + x(1000/data.length * i)  + ',' + y(0.05) + ')'
+            })
+        
+        for (var i in populations){
+            bar.append('rect')
+                .attr('class', populations[i])
+                .attr('width', function(){
+                    var width = x(1000/data.length)-xshift-0.5
+                    if (width > 75) {
+                        return 75
+                    }
+                    else {
+                        return width
+                    }
+                })
+                .attr('height', function(d) { return y(d[populations[i]])})
+                .attr('fill', colorScale(populations[i]))
+                .attr('y', function(d) {
+                    if (i > 0){
+                        var yshift = 0
+                        for (var j = 0; j < i ; j++){
+                            yshift = yshift + parseFloat(d[populations[j]])
+                        }
+                        return y(yshift)
+                    } else {
+                        return 0
+                    }
+                })
+                .on('mousemove',function(d){
+                    var population = d3.select(this).attr('class')
+                    div.html("<b>" + d.patientId + "</b>" + "<br>" +
+                            "<b>" + population + ":</b>" + d[population])
+                    .style("left", function(){
+                        if (d3.event.pageX > chartDiv.clientWidth/2){
+                            return (d3.event.pageX - 125) + "px"
+                        } else {
+                            return (d3.event.pageX + 5) + "px"
+                        }
+                    })
+                    .style("top", function(){
+                        if (d3.event.pageY > chartDiv.clientHeight/2){
+                            return (d3.event.pageY - 65) + "px"
+                        } else {
+                            return (d3.event.pageY) + "px"
+                        }
+                    })
+                    .style("opacity", .9)
+                })
+                .on('mouseout',function(d){
+                    div.style('opacity',0)
+                })
+        }
+
+    </script>
+  </body>
+</html>

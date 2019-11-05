@@ -205,8 +205,8 @@
               .attr('class','totallabel')
               .style("text-anchor", "middle")
               .text(d3.sum(data.map(function(d){ return d.numsample})))
-              .attr('dy', r_in/3)
-              .attr('font-size', r_in + 1)
+              .attr('dy', r_in - r_in/2)
+              .attr('font-size', r_in + 5)
               .attr('opacity',0)
               .transition()
                 .delay(1500)
@@ -220,7 +220,7 @@
                 .text(input.slice(8,).split('.')[0])
                 .attr('dx', radius)
                 .attr('dy',  r_in/3 )
-                .attr('font-size', r_in + 1)
+                .attr('font-size', r_in + 8)
                 .attr('opacity',0)
                 .transition()
                   .delay(1800)
@@ -234,7 +234,7 @@
                 .style("text-anchor", "end")
                 .attr('dx', radius * -1)
                 .attr('dy',  r_in/3)
-                .attr('font-size', r_in + 1)
+                .attr('font-size', r_in + 8)
                 .attr('opacity',0)
                 .transition()
                   .delay(1800)
@@ -262,6 +262,7 @@
       }
 
       //draw donuts
+      //var donutGen = function(input, radius, r_out, r_in, angle, distance, direction, labeldir)
       donutGen('dataA_1/M1V.tsv', scale(20), scale(2), scale(12), getAminoAngle(1), scale(80), 'up', 'left')
       donutGen('dataA_1/P7X.tsv', scale(20), scale(2), scale(12), getAminoAngle(7), scale(80), 'down', 'right')
       donutGen('dataA_1/S26*.tsv', scale(20), scale(2), scale(12), getAminoAngle(26), scale(80), 'up', 'left')

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src='https://underscorejs.org/underscore-min.js'></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: left;
+        left: 5%;
+        top: 5%;
+        width: 20%;
+        height: 15%;
+        padding: 2px;
+        border: 0px;
+        border-radius: 2px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+        var chartDiv = document.getElementById("chart");
+        var width = chartDiv.clientWidth -40;
+        var height = chartDiv.clientHeight -40;
+
+        var x = d3.scaleLinear().range([0,width]).domain([0,1000])
+        var y = d3.scaleLinear().range([0,height]).domain([0,1000])
+        var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+        
+        //sample names here
+        var samples = [1,2,3,4,5,6,7,8,9,10,11,12]
+        //colors here
+        var colors = ['#4472C4','#ED7D31','#A5A5A5','#FFC000','#5B9BD5','#70AD47','#264478','#9E480E','#636363','#997300','#255E91','#43682B']
+        
+        var colorscale = d3.scaleOrdinal()
+        .domain(samples.length)
+        .range(colors)
+
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+        
+        //took this from github to conver
+        function treeify(list, parentAttr, childrenAttr) {
+            if (!parentAttr) parentAttr = 'parent';
+            if (!childrenAttr) childrenAttr = 'children';
+
+            var treeList = [];
+            var lookup = {};
+            _.each(list, function(obj,i) {
+                lookup[i] = obj;
+                obj[childrenAttr] = []
+                obj['id'] = i
+            });
+            _.each(list, function(obj,i) {
+                if (obj[parentAttr] != null) {
+                    lookup[obj[parentAttr]][childrenAttr].push(obj);
+                } else {
+                    treeList.push(obj)
+                }
+            });
+            return treeList;
+        };
+
+          //start drawing actual data
+        d3.json('example_data.summ.json', function(error,data){
+            if (error) throw error;
+            //select tree tree here (get best tree from witness)
+            treeData = data.trees[1393]
+            
+            //change flat object to include parent attribute instead of child
+            _.each(treeData.structure, function (o,i) {
+              o.forEach(function (childId) {
+                treeData.populations[childId].parent = i
+              });
+            });
+            //convert flat object to hierarchical object
+            hierData = treeify(treeData.populations)[0]
+            nodes = d3.tree().size([width, height-100])(d3.hierarchy(hierData))
+            
+            var g = svg.append('g').attr('transform', function(d) { 
+                  return "translate(" + 20 + "," + 50 + ")"; })
+            
+            var link = g.selectAll(".link").data( nodes.descendants().slice(1))
+                .enter().append("path")
+                .attr("class", "link")
+                .attr("d", function(d) {
+                   return "M" + d.x + "," + d.y
+                     + "C" + d.x + "," + (d.y + d.parent.y) / 2
+                     + " " + d.parent.x + "," +  (d.y + d.parent.y) / 2
+                     + " " + d.parent.x + "," + d.parent.y;
+                })
+                .attr('fill','none')
+                .attr('stroke-width','2px')
+                .attr('stroke','gray')
+            
+            var node = g.selectAll(".node").data(nodes.descendants())
+                .enter().append("g")
+                .attr("class", function(d) { 
+                  return "node" + 
+                    (d.children ? " node--internal" : " node--leaf"); })
+                .attr("transform", function(d) { 
+                  return "translate(" + d.x + "," + d.y + ")"; });
+            
+            var size_thresh = 50
+            
+            node.append('circle')
+                .attr("r", function(d){
+                    nodesize = Math.log(d.data.num_ssms) * 5
+                    if (nodesize > 50) {
+                        nodesize = 50
+                    }
+                    return scale(nodesize) 
+                })
+                .attr('fill','dodgerblue')
+                .attr('stroke','white')
+                .attr('stroke-width','3px')
+            
+            var pie = d3.pie()
+                .sort(null)
+                .value(function(d){return d.value})
+            
+            var donut = node.selectAll('.arc')
+                .data(function(d){
+                    var output = []
+                    for (var i in d.data.cellular_prevalence){
+                        output.push({size: d.data.num_ssms, 
+                                     value: d.data.cellular_prevalence[i], 
+                                     id:i+1
+                                    })
+                    }
+                    return pie(output)
+                })
+                .enter().append('g')
+            
+            donut.append('path')
+                .attr('d',function(d){
+                    nodesize = Math.log(d.data.size) * 5
+                    if (nodesize > 50) {
+                            nodesize = 50
+                        }
+                    return d3.arc().innerRadius(scale(nodesize)).outerRadius(scale(nodesize*1.4))(d)
+                })
+                .attr('fill', function(d){return colorscale(d.data.id)})
+            
+            node.append('text')
+                .text(function(d){
+                    return d.data.num_ssms
+                })
+                .style('text-anchor','middle')
+                .attr('dy',scale(6))
+                .attr('fill','white')
+                .attr('font-size',scale(20))
+            
+            legendgroup = svg.append('g')
+            
+            legend = legendgroup.selectAll('.legend')
+                .data(samples)
+                .enter().append('g')
+                .attr('transform', function(d,i){return 'translate(' + scale(20) + ',' + (i * scale(30) + scale(20)) + ')'})
+            
+            legend.append('rect')
+                .attr('fill',function(d){return colorscale(d)})
+                .attr('width',scale(20))
+                .attr('height',scale(20))
+            
+            legend.append('text')
+                .text(function(d){console.log(d);return d})
+                .style('font-size', scale(20))
+                .attr('dx',scale(25))
+                .attr('dy',scale(17))
+                .style('text-anchor','start')
+            
+        })
+    </script>
+  </body>
+</html>

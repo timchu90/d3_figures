@@ -175,7 +175,7 @@
         //y axis
         svg.append("g")
          .attr("class", "y")
-         .call(d3.axisLeft(y));
+         .call(d3.axisLeft(y).ticks(3));
 
         svg.append("text")
          .attr("transform", "rotate(-90)")
