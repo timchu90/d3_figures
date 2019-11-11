@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>    
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: left;
+        left: 5%;
+        top: 5%;
+        width: 20%;
+        height: 15%;
+        padding: 2px;
+        border: 0px;
+        border-radius: 2px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    Sort by:
+    <select id='dropdown', style="margin-bottom:5px">
+        <option value="default">Default</option>
+        <option value="alphabetical">Alphabetical</option>
+    </select>
+    <div id="chart">
+    </div>
+    <script>
+        var chartDiv = document.getElementById("chart");
+        var width = chartDiv.clientWidth -20;
+        var height = chartDiv.clientHeight -20;
+
+        var x = d3.scaleLinear().range([0,width]).domain([0,1000])
+        var y = d3.scaleLinear().range([0,height-150]).domain([0,1000])
+        var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+        
+        var attr = ['HIGH','MODERATE','HIGH AMP','AMP','DEL','DEEP DEL']
+        var attrColors = ['black','#f8b946','#982f2f','#f85252','#3573fd','#00308b']
+        var colorScale = d3.scaleOrdinal().range(attrColors).domain(attr)
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+        
+        var cellWidth = 12
+        var cellHeight = 35
+        var cellPadding = 2
+        var textSize = 11
+        
+        
+        function getCNVColor(s){
+            var attributes = s.split(';')
+            if (attributes.includes("HIGH AMP")){
+                return colorScale('HIGH AMP')
+            } else if (attributes.includes("AMP")){
+                return colorScale('AMP')
+            } else if (attributes.includes("DEL")){
+                return colorScale('DEL')
+            } else if (attributes.includes("DEEP DEL")){
+                return colorScale('DEEP DEL')
+            } else {
+                return 'lightgray'
+            }
+        }
+        
+        function getVARColor(s){
+            var attributes = s.split(';')
+            if (attributes.includes("HIGH")){
+                return colorScale('HIGH')
+            } else if (attributes.includes("MODERATE")){
+                return colorScale('MODERATE')
+            } else {
+                return 'rgb(0,0,0,0)'
+            }
+        }
+        
+
+        //start drawing actual data
+        d3.tsv('data.txt', function(error,data){
+            if (error) throw error;
+
+            var samples = data.columns.slice(1)
+            var geneList = data.map(a => a.GENE)
+            
+            //adjust y axis padding based on longest genename
+            var longestGene = Math.max(...(geneList.map(el => el.length)))
+            var yaxisWidth = 10 * (longestGene + 1)
+            
+            function rearrangeSamples(samples, dataLen){
+                for(var i in samples){
+                    var sample = d3.selectAll('.'+samples[i])
+                        .transition()
+                            .delay(i*100)
+                            .duration(100)
+                            .attr('x',(y(cellWidth) + cellPadding) * i)
+                    var sampletext = d3.selectAll('#'+samples[i])
+                        .transition()
+                            .delay(i*100)
+                            .duration(100)
+                            .attr('x',(y(cellWidth) + cellPadding) * i)
+                            .attr('transform','rotate(45,' + ((y(cellWidth) + cellPadding) * i + y(yaxisWidth) )+ ',' + ((y(cellHeight) + cellPadding) * dataLen + y(10))+ ')')
+                }
+            }
+            
+            var gene = svg.selectAll('.gene')
+                .data(data).enter()
+                .append('g')
+                .attr('transform', function(d,i){
+                    return 'translate(' + y(yaxisWidth) + ',' + (y(cellHeight) + cellPadding) * i + ')'
+                })
+            gene.append('text')
+                .text(function(d){return d.GENE})
+                .attr('text-anchor', 'end')
+                .attr('dx', '-5')
+                .attr('dy', y(2*cellHeight/3))
+                .attr('font-size', scale(textSize))
+
+            for(var i in samples){
+                //draw CNV cell
+                svg.append('text')
+                    .text(samples[i])
+                    .attr('id',samples[i])
+                    .attr('x', (y(cellWidth) + cellPadding) * i)
+                    .attr('dx',y(yaxisWidth))
+                    .attr('y', (y(cellHeight) + cellPadding) * data.length)
+                    .attr('dy',y(10))
+                    .attr('text-anchor', 'start')
+                    .attr('transform','rotate(45,' + ((y(cellWidth) + cellPadding) * i + y(yaxisWidth) )+ ',' + ((y(cellHeight) + cellPadding) * data.length + y(10))+ ')')
+                    .attr('font-size',scale(textSize))
+
+                var sample = gene.append('g')
+
+                sample.append('rect')
+                    .attr('class',samples[i])
+                    .attr('width',y(cellWidth))
+                    .attr('height',y(cellHeight))
+                    .attr('fill',function(d){return getCNVColor(d[samples[i]])})
+                    .attr('x', (y(cellWidth) + cellPadding) * i)
+
+                //draw var square
+                sample.append('rect')
+                    .attr('class',samples[i])
+                    .attr('width',y(cellWidth))
+                    .attr('height',y(cellHeight/3))
+                    .attr('fill',function(d){return getVARColor(d[samples[i]])})
+                    .attr('x', (y(cellWidth) + cellPadding) * i)
+                    .attr('y', y(cellHeight/3))
+            }
+            
+            var dropdown = d3.select('#dropdown')
+                .on("change", function(){
+                    if(this.value == 'alphabetical'){
+                        var sampleList = samples.slice().sort()
+                    }else {
+                        var sampleList = samples
+                    }
+                    rearrangeSamples(sampleList, data.length)
+                })
+
+        })
+    </script>
+  </body>
+</html>
