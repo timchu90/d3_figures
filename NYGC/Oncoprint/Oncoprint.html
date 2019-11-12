@@ -2,7 +2,7 @@
 <html>    
   <head>
     <meta charset="utf-8">
-    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
     <style>
       #chart {
         position: fixed;
@@ -19,23 +19,31 @@
       div.tooltip {
         position: absolute;
         text-align: left;
-        left: 5%;
-        top: 5%;
-        width: 20%;
-        height: 15%;
-        padding: 2px;
-        border: 0px;
+        width: auto;
+        height: auto;
+        padding: 5px;
+        border-width: 1px;
         border-radius: 2px;
         pointer-events: none;
+        font-family: sans-serif;
+        font-size: 13px;
+        border: 2px solid white;
       }
     </style>
   </head>
   <body>
-    Sort by:
-    <select id='dropdown', style="margin-bottom:5px">
-        <option value="default">Default</option>
-        <option value="alphabetical">Alphabetical</option>
-    </select>
+    <div style="margin-bottom:10px">
+        Sort by:
+        <select id='sortDropdown' style='margin-right:10px'>
+            <option value="default">Default</option>
+            <option value="alphabetical">Alphabetical</option>
+        </select>
+        Color by:
+        <select id='colorDropdown'>
+            <option value="binned">Binned</option>
+            <option value="continuous">Continuous</option>
+        </select>
+    </div>
     <div id="chart">
     </div>
     <script>
@@ -50,16 +58,24 @@
         var attr = ['HIGH','MODERATE','HIGH AMP','AMP','DEL','DEEP DEL']
         var attrColors = ['black','#f8b946','#982f2f','#f85252','#3573fd','#00308b']
         var colorScale = d3.scaleOrdinal().range(attrColors).domain(attr)
+        
+        var ampColorScale = d3.scaleLinear().range(['white','darkred']).domain([0,1])
+        var delColorScale = d3.scaleLinear().range(['white','darkblue']).domain([0,-1])
+        
+        var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .attr("font-size",scale(60))
+        .style("opacity", 0);
 
         var svg = d3.select("body").append("svg")
             .attr("width", width)
             .attr("height", height)
         
-        var cellWidth = 12
-        var cellHeight = 35
+        var cellWidth = 20
+        var cellHeight = 60
         var cellPadding = 2
-        var textSize = 11
-        
+        var xAxistextSize = 15
+        var yAxistextSize = 12
         
         function getCNVColor(s){
             var attributes = s.split(';')
@@ -89,15 +105,20 @@
         
 
         //start drawing actual data
-        d3.tsv('data.txt', function(error,data){
-            if (error) throw error;
-
+        Promise.all([
+            d3.csv('data.txt'),
+            d3.json('metadata.json')
+        ]).then(function(files){
+            console.log(files[0])
+            console.log(files[1])
+            var data = files[0]
+            var metadata = files[1]
             var samples = data.columns.slice(1)
             var geneList = data.map(a => a.GENE)
             
             //adjust y axis padding based on longest genename
             var longestGene = Math.max(...(geneList.map(el => el.length)))
-            var yaxisWidth = 10 * (longestGene + 1)
+            var yaxisWidth = xAxistextSize * (longestGene + 1)
             
             function rearrangeSamples(samples, dataLen){
                 for(var i in samples){
@@ -121,12 +142,77 @@
                 .attr('transform', function(d,i){
                     return 'translate(' + y(yaxisWidth) + ',' + (y(cellHeight) + cellPadding) * i + ')'
                 })
+                .attr('class', function(d){return d.GENE})
             gene.append('text')
                 .text(function(d){return d.GENE})
                 .attr('text-anchor', 'end')
                 .attr('dx', '-5')
                 .attr('dy', y(2*cellHeight/3))
-                .attr('font-size', scale(textSize))
+                .attr('font-size', scale(xAxistextSize))
+            
+            gene.append('circle')
+                .attr('r',y(10))
+                .attr('cx', (y(cellWidth) + cellPadding) * (samples.length + 1))
+                .attr('cy', (y(cellHeight) + cellPadding)/2)
+                .attr('fill',function(d){
+                    var i = 0
+                    while(metadata[samples[i]][d.GENE].oncogene == null){
+                        i = i + 1
+                    }
+                    if (metadata[samples[i]][d.GENE].oncogene == 1){
+                        return 'darkgreen'
+                    }
+                    return 'lightgray'
+                })
+                .on('mousemove', function(d){
+                    div.html(
+                        'Oncogene'
+                    )
+                    div.style("left", (d3.event.pageX + 10) + "px")
+                    div.style("top", (d3.event.pageY + 15) + "px")
+                    div.style('opacity','0.9')
+                    div.style('background', 'green')
+                    d3.select(this)
+                        .attr('stroke','black')
+                        .attr('stroke-width', '2px')
+                })
+                .on('mouseout', function(){
+                    d3.select(this)
+                        .attr('stroke','none') 
+                    div.style('opacity','0')
+                })
+                
+            gene.append('circle')
+                .attr('r',y(10))
+                .attr('cx', (y(cellWidth) + cellPadding) * (samples.length + 2))
+                .attr('cy', (y(cellHeight) + cellPadding)/2)
+                .attr('fill', function(d){
+                    var i = 0
+                    while(metadata[samples[i]][d.GENE].oncogene == null){
+                        i = i + 1
+                    }
+                    if (metadata[samples[0]][d.GENE].suppressor == 1){  
+                        return 'blueviolet'
+                    }
+                    return 'lightgray'
+                })
+                .on('mousemove', function(d){
+                    div.html(
+                        'Suppressor'
+                    )
+                    div.style("left", (d3.event.pageX + 10) + "px")
+                    div.style("top", (d3.event.pageY + 15) + "px")
+                    div.style('opacity','0.9')
+                    div.style('background', 'violet')
+                    d3.select(this)
+                        .attr('stroke','black')
+                        .attr('stroke-width', '2px')
+                })
+                .on('mouseout', function(){
+                    d3.select(this)
+                        .attr('stroke','none') 
+                    div.style('opacity','0')
+                })
 
             for(var i in samples){
                 //draw CNV cell
@@ -139,16 +225,51 @@
                     .attr('dy',y(10))
                     .attr('text-anchor', 'start')
                     .attr('transform','rotate(45,' + ((y(cellWidth) + cellPadding) * i + y(yaxisWidth) )+ ',' + ((y(cellHeight) + cellPadding) * data.length + y(10))+ ')')
-                    .attr('font-size',scale(textSize))
+                    .attr('font-size',scale(yAxistextSize))
 
                 var sample = gene.append('g')
 
                 sample.append('rect')
                     .attr('class',samples[i])
+                    .attr('id', 'CNV')
                     .attr('width',y(cellWidth))
                     .attr('height',y(cellHeight))
                     .attr('fill',function(d){return getCNVColor(d[samples[i]])})
                     .attr('x', (y(cellWidth) + cellPadding) * i)
+                    .on('mousemove', function(d){
+                        var selectedSample = this.getAttribute('class')
+                        var selectedGene = this.parentNode.parentNode.getAttribute('class')
+                        var attributes = d[selectedSample].split(';')
+                        if (attributes.includes('AMP') || attributes.includes('HIGH AMP')){
+                            div.html(
+                                'log2: '+ metadata[selectedSample][selectedGene].log2_amp + '<br>' +
+                                'Tier: ' + metadata[selectedSample][selectedGene].tier
+                            )
+                            div.style("left", (d3.event.pageX + 10) + "px")
+                            div.style("top", (d3.event.pageY + 15) + "px")
+                            div.style('opacity','0.9')
+                            div.style('background', 'salmon')
+                        }
+                        if (attributes.includes('DEL') || attributes.includes('DEEP DEL')){
+                            div.html(
+                                'log2: ' + metadata[selectedSample][selectedGene].log2_del + '<br>' +
+                                'Tier: ' + metadata[selectedSample][selectedGene].tier
+                            )
+                            div.style("left", (d3.event.pageX + 10) + "px")
+                            div.style("top", (d3.event.pageY + 15) + "px")
+                            div.style('opacity','0.9')
+                            div.style('background', 'lightblue')
+                        }
+                        d3.select(this)
+                            .attr('stroke','black')
+                            .attr('stroke-width', '2px')
+                    })
+                    .on('mouseout', function(){
+                        d3.select(this)
+                            .attr('stroke','none') 
+                        div.style('opacity','0')
+                    })
+                        
 
                 //draw var square
                 sample.append('rect')
@@ -158,9 +279,42 @@
                     .attr('fill',function(d){return getVARColor(d[samples[i]])})
                     .attr('x', (y(cellWidth) + cellPadding) * i)
                     .attr('y', y(cellHeight/3))
+                    .attr('pointer-events', function(d){
+                        var attributes = d[samples[i]].split(';')
+                        if (attributes.includes('MODERATE') || attributes.includes('HIGH')){
+                            return 'all'
+                        }
+                        else {
+                            return 'none'
+                        }
+                    })
+                    .on('mouseover', function(d){
+                        var selectedSample = this.getAttribute('class')
+                        var selectedGene = this.parentNode.parentNode.getAttribute('class')
+                        var attributes = d[selectedSample].split(';')
+                        if (attributes.includes('MODERATE') || attributes.includes('HIGH')){
+                            div.html(
+                                'Consequence: ' + metadata[selectedSample][selectedGene].consequence + '<br>' + 
+                                'HGVSp: '+ metadata[selectedSample][selectedGene].HGVSp + '<br>' +
+                                'Tier: ' + metadata[selectedSample][selectedGene].tier
+                            )
+                            div.style("left", (d3.event.pageX + 10) + "px")
+                            div.style("top", (d3.event.pageY + 15) + "px")
+                            div.style('opacity','0.9')
+                            div.style('background', 'gray')
+                        }
+                        d3.select(this)
+                            .attr('stroke','black')
+                            .attr('stroke-width', '2px')
+                    })
+                    .on('mouseout', function(){
+                        d3.select(this)
+                            .attr('stroke','none')
+                        div.style('opacity','0')
+                    })
             }
             
-            var dropdown = d3.select('#dropdown')
+            var sortDropdown = d3.select('#sortDropdown')
                 .on("change", function(){
                     if(this.value == 'alphabetical'){
                         var sampleList = samples.slice().sort()
@@ -169,8 +323,42 @@
                     }
                     rearrangeSamples(sampleList, data.length)
                 })
+            
+            var colorDropdown = d3.select('#colorDropdown')
+                .on("change", function(){
+                    if(this.value == 'continuous'){
+                        d3.selectAll('#CNV')
+                            .transition()
+                            .duration(500)
+                            .attr('fill',function(d){
+                                var selectedSample = this.getAttribute('class')
+                                var selectedGene = this.parentNode.parentNode.getAttribute('class')
+                                var attributes = d[selectedSample].split(';')
+                                if (attributes.includes('AMP') || attributes.includes('HIGH AMP')){
+                                    return ampColorScale(metadata[selectedSample][selectedGene].log2_amp)
+                                }
+                                else if (attributes.includes('DEL') || attributes.includes('DEEP DEL')){
+                                    return delColorScale(metadata[selectedSample][selectedGene].log2_del)
+                                }
+                                else {
+                                    return 'lightgray'
+                                }
+                            })
+                    }else {
+                        d3.selectAll('#CNV')
+                            .transition()
+                            .duration(500)
+                            .attr('fill', function(d){
+                                var selectedSample = this.getAttribute('class')
+                                return getCNVColor(d[selectedSample])
+                            })
+                    }
+                })
 
-        })
+        }).catch(function(err){
+            if (err) throw err;
+         })
+
     </script>
   </body>
 </html>
