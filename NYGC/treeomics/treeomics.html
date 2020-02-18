@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src='https://underscorejs.org/underscore-min.js'></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: left;
+        left: 5%;
+        top: 5%;
+        width: 20%;
+        height: 15%;
+        padding: 2px;
+        border: 0px;
+        border-radius: 2px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+        var chartDiv = document.getElementById("chart");
+        var width = chartDiv.clientWidth -40;
+        var height = chartDiv.clientHeight -40;
+
+        var x = d3.scaleLinear().range([0,width]).domain([0,1000])
+        var y = d3.scaleLinear().range([0,height]).domain([0,1000])
+        var scale = d3.scaleLinear().range([0,width]).domain([0,1000])
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+        
+        //took this from github to conver
+        function treeify(list, parentAttr, childrenAttr) {
+            if (!parentAttr) parentAttr = 'parent';
+            if (!childrenAttr) childrenAttr = 'children';
+
+            var treeList = [];
+            var lookup = {};
+            _.each(list, function(obj,i) {
+                lookup[i] = obj;
+                obj[childrenAttr] = []
+                obj['id'] = i
+            });
+            _.each(list, function(obj,i) {
+                if (obj[parentAttr] != null) {
+                    lookup[obj[parentAttr]][childrenAttr].push(obj);
+                } else {
+                    treeList.push(obj)
+                }
+            });
+            return treeList;
+        };
+        
+        function tex2json(input){
+            input = input.replace(/\\/g,"")
+            input = input.slice(input.indexOf("Tree"), input.indexOf("end{tikzpicture}"))
+            input = input.split('\n')
+            //console.log(input)
+            output = []
+            i = 0
+            while(i < input.length){
+                if(!input[i].includes("% Acquired") && !input[i].includes("% VAF") && !input[i].includes("% Present")){
+                    //console.log(input[i])
+                    if(i==0){
+                        output.push(input[i].trim().replace("Tree [.",'"name":"')+'","children":[')
+                    }
+                    else{
+                        if (input[i].includes('footnotesize') || input[i].includes('NavyBlue')){
+                            output.push(input[i].trim()
+                                        .replace(/node\[below, black!60\]\{footnotesize\{\d*%\}\};/g,"")
+                                        .replace(/edge node\[above, NavyBlue\]\{/g,'{"edge":')
+                                        .replace(/footnotesize\{/g,'"')
+                                        .replace(/\}\}/g,'",')
+                                        .replace(/\};/g,'"",')
+                                        .replace(/;/g,'')
+                            )
+                        }
+                        else if (input[i].includes('.small')){
+                            output.push(input[i].trim()
+                                        .replace(/\[\.small\{/g,'"name":"')
+                                        .replace(/\}/g,'","children":[')
+                            )
+                        }
+                        else if (input[i].includes('black,draw,text')){
+                            output.push(input[i].trim()
+                                        .replace(/node\[black,draw,text width=1.09cm,inner sep=2pt,align=center\]\{/g,'"name":"')
+                                        .replace(/\};/g, '"},')
+                                
+                            )
+                        }
+                        else{
+                            output.push(input[i].trim()
+                                        .replace(/\]/,"]},")
+                                       )
+                        }
+                    }
+                }
+                i++
+            }
+            //console.log(output)
+            output = "{" + output.join("").replace(/\},\]/g, "}]")
+            n = output.lastIndexOf(",")
+            output = output.slice(0,n) + output.slice(n).replace(",","")
+            //console.log(output)
+            return(JSON.parse(output))
+        }
+        
+        function setWidths(d, mode="default"){
+            switch(mode){
+                case 'default':
+                    d.each(function(d){
+                    if(d.value < minWidth){
+                        d.nmuts = minWidth
+                    }
+                    else {
+                        d.nmuts = d.value
+                    }
+                    })
+                    break;
+                case 'ancestor':
+                    d.each(function(d){
+                        width = 0
+                        for(i in d.ancestors()){
+                            width = parseInt(d.ancestors()[i].value) + width
+                        }
+                        if(width < minWidth){
+                            d.nmuts = minWidth
+                        }
+                        else {
+                            d.nmuts = width
+                        }
+                    })
+                    break;
+                case 'descendant':
+                    d.each(function(d){
+                        width = 0
+                        for(i in d.descendants()){
+                            width = parseInt(d.descendants()[i].value) + width
+                        }
+                        if(width < minWidth){
+                            d.nmuts = minWidth
+                        }
+                        else {
+                            d.nmuts = width
+                        }
+                    })
+                    break;
+            }
+        }
+        
+        function setValues(d){
+            d.each(function(d){
+                if(d.data.edge && d.data.edge != ""){
+                    edge = d.data.edge
+                    if(d.data.edge.includes('(')){
+                        d.value = edge.slice(edge.indexOf('+')+1,edge.indexOf(' '))
+                        d.genes = edge.slice(edge.indexOf('(')+1,edge.indexOf(')')).split(',')
+                    }
+                    else{
+                        d.value = edge.slice(edge.indexOf('+')+1)
+                        d.genes = []
+                    }
+                }
+                else {
+                    d.value = 0
+                    d.genes = []
+                }
+            })
+        }
+        
+        //start drawing actual data
+        d3.text('PM0_5_SC_e=0_01_c0=0_5_af=0_05_mlhtree_1_tikz.tex', function(error,data){
+        //d3.text('PM63_12_SC_e=0_01_c0=0_5_af=0_05_mlhtree_1_tikz.tex', function(error,data){
+        //d3.text('PM1070_5_SC_e=0_01_c0=0_5_af=0_05_mlhtree_2_tikz.tex', function(error,data){
+        //d3.text('PM159_5_SC_e=0_01_c0=0_5_af=0_05_mlhtree_1_tikz.tex', function(error,data){
+            if(error) throw error;
+            
+            htree = tex2json(data)
+            nodes = d3.tree().size([height-50, width-300])(d3.hierarchy(htree))
+            scaleMuts = 150
+            minWidth = 250
+            fontsize = 8
+            samplefontsize = 10
+            setValues(nodes)
+            setWidths(nodes, mode='default')
+            console.log(nodes)
+            
+            var g = svg.append('g').attr('transform', function(d) { 
+                  return "translate(" + 100 + "," + 50 + ")"; })
+            
+            var link = g.selectAll(".link").data( nodes.descendants().slice(1))
+                .enter()
+            
+            link.append("path")
+                .attr("class", "link")
+                .attr("d", function(d) {
+                    adjustX = d.x + scale(d.nmuts/scaleMuts)
+                    adjustParentX = d.parent.x + scale(d.parent.nmuts/scaleMuts)
+                    adjustX2 = d.x - scale(d.nmuts/scaleMuts)
+                    adjustParentX2 = d.parent.x - scale(d.parent.nmuts/scaleMuts)
+                    
+                    return "M" + (d.y) + "," + (adjustX)
+                     + "C" + (d.y + d.parent.y) / 2 + "," + adjustX
+                     + " " + (d.y + d.parent.y) / 2 + "," + adjustParentX
+                     + " " + d.parent.y + "," + adjustParentX 
+                     + " L" + d.parent.y + "," + adjustParentX2
+                     + " C" + (d.y + d.parent.y) / 2 + "," + adjustParentX2
+                     + " " + (d.y + d.parent.y) / 2 + "," + adjustX2
+                     + " " + d.y + "," + adjustX2
+                   })
+                .attr('fill','#cce6ff')
+                .attr('stroke','#cce6ff')
+                .attr('stroke-width',function(d){
+                    return scale(0)
+                })
+            
+            var node = g.selectAll(".node").data(nodes.descendants())
+                .enter().append("g")
+                .attr("class", function(d) { 
+                  return "node" + 
+                    (d.children ? " node--internal" : " node--leaf"); })
+                .attr("transform", function(d) { 
+                  return "translate(" + d.y + "," + d.x + ")"; });
+            
+            var size_thresh = 50
+            
+            
+            node.append('circle')
+                .attr("r", function(d){
+                    return scale(d.nmuts/scaleMuts)
+                })
+                .attr('fill','#ffd699')
+                .attr('stroke','white')
+                .attr('stroke-width',scale(1))
+            
+            node.append('text')
+                .text(function(d){
+                    if(d.data.edge){
+                        edge = d.data.edge
+                        if(d.data.edge.includes('(')){
+                            nmuts = edge.slice(edge.indexOf('+'),edge.indexOf(' '))
+                        }
+                        else{
+                            nmuts = edge.slice(edge.indexOf('+'))
+                        }
+                    return nmuts
+                    }
+                })
+                .style('text-anchor','middle')
+                .attr('dy',scale(fontsize)/2)
+                .attr('fill','black')
+                .attr('font-size',scale(fontsize))
+            
+            node.append('text')
+                .text(function(d){
+                    if(d.data.name && !d.data.name.includes("SC~")){
+                        return d.data.name.replace(/\~/g,'_')
+                    }
+                })
+                .style('text-anchor',function(d){
+                    if(d.data.name.includes('Germline')){
+                        return 'end'
+                    }
+                    else {
+                        return 'start'
+                    }
+                })
+                .attr('dx', function(d){
+                    if(d.data.name.includes('Germline')){
+                        return -1 * scale(d.nmuts/scaleMuts + 5)
+                    }
+                    else {
+                        return scale(d.nmuts/scaleMuts + 5)
+                    }
+                    
+                })
+                .attr('dy', (scale(samplefontsize)/2))
+                .attr('fill','black')
+                .attr('font-size',scale(samplefontsize))
+            
+            var genes = g.selectAll(".gene").data(nodes.descendants())
+                .enter().append("g")
+                .attr('class','gene')
+                .attr("transform", function(d) { 
+                  return "translate(" + d.y + "," + d.x + ")"; });
+            
+            genes.append('text')
+                .style('text-anchor','middle')
+                .attr('fill','black')
+                .attr('font-size',scale(fontsize))
+                .attr('fill','darkred')
+                .attr('y',function(d){
+                    return scale(d.nmuts/scaleMuts)
+                })
+                .html(function(d){
+                    output = []
+                    for(i in d.genes){
+                        output = output + "<tspan x='0' dy='" + scale(fontsize) + "'>"+ d.genes[i] + "</tspan>"
+                    }
+                    return output
+                })
+        })
+    </script>
+  </body>
+</html>
