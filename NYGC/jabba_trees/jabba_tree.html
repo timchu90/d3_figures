@@ -33,7 +33,7 @@
   </head>
   <body>
     <div style="font-size:10px">
-        Adjust scale: <input type="number" id="scaleNode" value=100>
+        Adjust scale: <input type="number" id="scaleNode" value=1>
         Width calculation:
         <select id="width_type">
           <option value="default">Default</option>
@@ -77,64 +77,6 @@
             });
             return treeList;
         };
-        
-        function tex2json(input){
-            input = input.replace(/\\/g,"")
-            input = input.slice(input.indexOf("Tree"), input.indexOf("end{tikzpicture}"))
-            input = input.split('\n')
-            console.log(input)
-            output = []
-            i = 0
-            while(i < input.length){
-                if(!input[i].includes("% Acquired") && !input[i].includes("% Present")){
-                    console.log(input[i])
-                    if(i==0){
-                        output.push(input[i].trim().replace("Tree [.",'"name":"')+'","children":[')
-                    }
-                    else{
-                        if (input[i].includes('footnotesize') || input[i].includes('NavyBlue')){
-                            output.push(input[i].trim()
-                                        .replace(/node\[below, black!60\]\{footnotesize\{\d*%\}\};/g,"")
-                                        .replace(/edge node\[above, NavyBlue\]\{/g,'{"edge":')
-                                        .replace(/footnotesize\{/g,'"')
-                                        .replace(/\}\}/g,'",')
-                                        .replace(/\};/g,'"",')
-                                        .replace(/;/g,'')
-                            )
-                        }
-                        else if (input[i].includes('.small')){
-                            output.push(input[i].trim()
-                                        .replace(/\[\.small\{/g,'"name":"')
-                                        .replace(/\}/g,'","children":[')
-                            )
-                        }
-                        else if (input[i].includes('black,draw,text')){
-                            output.push(input[i].trim()
-                                        .replace(/node\[black,draw,text width=1.09cm,inner sep=2pt,align=center\]\{/g,'"name":"')
-                                        .replace(/\};/g, '"},')
-                                
-                            )
-                        }
-                        else if (input[i].includes('% VAF of acquired mutations')){
-                            output.push('"mean_vaf": "' + input[i].slice(input[i].indexOf('mean')+ 5,input[i].indexOf(';')) + '",')
-                            output.push('"median_vaf": "' + input[i].slice(input[i].indexOf('median')+ 7) + '",')
-                        }
-                        else{
-                            output.push(input[i].trim()
-                                        .replace(/\]/,"]},")
-                                       )
-                        }
-                    }
-                }
-                i++
-            }
-            console.log(output)
-            output = "{" + output.join("").replace(/\},\]/g, "}]")
-            n = output.lastIndexOf(",")
-            output = output.slice(0,n) + output.slice(n).replace(",","")
-            console.log(output)
-            return(JSON.parse(output))
-        }
         
         function setWidths(d, mode="default"){
             switch(mode){
@@ -200,18 +142,14 @@
         }
         
         //start drawing actual data
-        //d3.text('PM1358_4_SC_e=0_01_c0=0_5_af=0_05_mlhtree_1_tikz.tex', function(error,data){
-        //d3.text('PM63_2_7_SC_e=0_01_c0=0_5_af=0_05_mlhtree_1_tikz.tex', function(error,data){
-        //d3.text('PM1070_5_SC_e=0_01_c0=0_5_af=0_05_mlhtree_2_tikz.tex', function(error,data){
-        //d3.text('PM677_6_SC_e=0_01_c0=0_5_af=0_05_mlhtree_1_tikz.tex', function(error,data){
-        d3.text('PM63_3.tex',function(error,data){
+
+        d3.json('PM63-jabba-junction-tree.json',function(error,data){
             if(error) throw error;
             
-            htree = tex2json(data)
-            console.log(JSON.stringify(htree))
+            htree=data
             nodes = d3.tree().size([height-50, width-300])(d3.hierarchy(htree))
-            var scaleMuts = 100
-            minWidth = 250
+            var scaleMuts = 1
+            minWidth = 1
             fontsize = 8
             samplefontsize = 10
             setValues(nodes)
@@ -254,10 +192,7 @@
                     (d.children ? " node--internal" : " node--leaf"); })
                 .attr("transform", function(d) { 
                   return "translate(" + d.y + "," + d.x + ")"; });
-            
-            var size_thresh = 50
-            
-            
+             
             var circles = node.append('circle')
                 .attr("r", function(d){
                     return scale(d.nmuts/scaleMuts)
@@ -286,82 +221,21 @@
             
             var samplenames = node.append('text')
                 .text(function(d){
-                    if(d.data.name && !d.data.name.includes("SC~")){
-                        return d.data.name.replace(/\~/g,'_')
+                    if (d.data.label != 'internal_node'){
+                        return d.data.label
+                    }
+                    else{
+                        return ''
                     }
                 })
-                .style('text-anchor',function(d){
-                    if(d.data.name.includes('Germline')){
-                        return 'end'
-                    }
-                    else {
-                        return 'start'
-                    }
-                })
+                .style('text-anchor','start')
                 .attr('dx', function(d){
-                    if(d.data.name.includes('Germline')){
-                        return -1 * scale(d.nmuts/scaleMuts + 5)
-                    }
-                    else {
-                        return scale(d.nmuts/scaleMuts + 5)
-                    }
-                    
+                    return scale(d.nmuts/scaleMuts + 5)
                 })
                 .attr('dy', (scale(samplefontsize)/4))
                 .attr('fill','black')
                 .attr('font-size',scale(samplefontsize))
             
-            var annotations = g.selectAll(".gene").data(nodes.descendants())
-                .enter().append("g")
-                .attr('class','gene')
-                .attr("transform", function(d) { 
-                  return "translate(" + d.y + "," + d.x + ")"; });
-            
-            var gene_annotations = annotations.append('text')
-                .style('text-anchor','middle')
-                .attr('fill','black')
-                .attr('font-size',scale(fontsize))
-                .attr('fill','darkred')
-                .attr('y',function(d){
-                    return scale(d.nmuts/scaleMuts)
-                })
-                .html(function(d){
-                    output = []
-                    for(i in d.genes){
-                        output = output + "<tspan x='0' dy='" + scale(fontsize) + "'>"+ d.genes[i] + "</tspan>"
-                    }
-                    return output
-                })
-            
-            var median_vaf = annotations.append('text')
-                .style('text-anchor','end')
-                .attr('fill','black')
-                .attr('font-size',scale(6))
-                .attr('fill','darkgray')
-                .attr('dy',function(d){
-                    return -1 * scale((d.nmuts/scaleMuts) / Math.cos(0.785398))/2
-                })
-                .attr('dx',function(d){
-                    return -1 * scale((d.nmuts/scaleMuts) / Math.sin(0.785398))/2
-                })
-                .text(function(d){
-                    return d.data.median_vaf
-                })
-            
-            var mean_vaf = annotations.append('text')
-                .style('text-anchor','end')
-                .attr('fill','black')
-                .attr('font-size',scale(6))
-                .attr('fill','darkgray')
-                .attr('dy',function(d){
-                    return (-1 * scale((d.nmuts/scaleMuts) / Math.cos(0.785398))/2) - scale(6)
-                })
-                .attr('dx',function(d){
-                    return -1 * scale((d.nmuts/scaleMuts) / Math.sin(0.785398))/2
-                })
-                .text(function(d){
-                    return d.data.mean_vaf
-                })
             
             
             //functions to adjust pos when changing scale
@@ -385,29 +259,8 @@
                      + " " + (d.y + d.parent.y) / 2 + "," + adjustX2
                      + " " + d.y + "," + adjustX2
                    })
-                median_vaf.attr('dy',function(d){
-                        return -1 * scale((d.nmuts/scaleMuts) / Math.cos(0.785398))/2
-                    })
-                    .attr('dx',function(d){
-                        return -1 * scale((d.nmuts/scaleMuts) / Math.sin(0.785398))/2
-                    })
-                mean_vaf.attr('dy',function(d){
-                        return (-1 * scale((d.nmuts/scaleMuts) / Math.cos(0.785398))/2) - scale(6)
-                    })
-                    .attr('dx',function(d){
-                        return -1 * scale((d.nmuts/scaleMuts) / Math.sin(0.785398))/2
-                    })
-                gene_annotations.attr('y',function(d){
-                    return scale(d.nmuts/scaleMuts)
-                })
                 samplenames.attr('dx', function(d){
-                    if(d.data.name.includes('Germline')){
-                        return -1 * scale(d.nmuts/scaleMuts + 5)
-                    }
-                    else {
-                        return scale(d.nmuts/scaleMuts + 5)
-                    }
-                    
+                    return scale(d.nmuts/scaleMuts + 5)
                 })
             })
             
@@ -433,29 +286,8 @@
                      + " " + (d.y + d.parent.y) / 2 + "," + adjustX2
                      + " " + d.y + "," + adjustX2
                    })
-                median_vaf.attr('dy',function(d){
-                        return -1 * scale((d.nmuts/scaleMuts) / Math.cos(0.785398))/2
-                    })
-                    .attr('dx',function(d){
-                        return -1 * scale((d.nmuts/scaleMuts) / Math.sin(0.785398))/2
-                    })
-                mean_vaf.attr('dy',function(d){
-                        return (-1 * scale((d.nmuts/scaleMuts) / Math.cos(0.785398))/2) - scale(6)
-                    })
-                    .attr('dx',function(d){
-                        return -1 * scale((d.nmuts/scaleMuts) / Math.sin(0.785398))/2
-                    })
-                gene_annotations.attr('y',function(d){
-                    return scale(d.nmuts/scaleMuts)
-                })
                 samplenames.attr('dx', function(d){
-                    if(d.data.name.includes('Germline')){
-                        return -1 * scale(d.nmuts/scaleMuts + 5)
-                    }
-                    else {
-                        return scale(d.nmuts/scaleMuts + 5)
-                    }
-                    
+                    return scale(d.nmuts/scaleMuts + 5)
                 })
             })
         })
@@ -471,31 +303,11 @@
             .attr('stroke','white')
             .attr('stroke-width',scale(1))
         legend.append('text')
-            .text('+X acquired mutations')
+            .text('+X acquired events')
             .attr('fill','black')
             .attr('font-size',scale(10))
             .attr('dy',scale(3))
             .attr('dx',scale(-7))
-        legend.append('text')
-            .text('median VAF')
-            .attr('font-size',scale(6))
-            .attr('fill','darkgray')
-            .attr('text-anchor','end')
-            .attr('dy', scale(-8))
-            .attr('dx', scale(-8))
-        legend.append('text')
-            .text('mean VAF')
-            .attr('font-size',scale(6))
-            .attr('fill','darkgray')
-            .attr('text-anchor','end')
-            .attr('dy', scale(-14))
-            .attr('dx', scale(-8))
-        legend.append('text')
-            .text('PUTATIVE DRIVERS')
-            .attr('font-size',scale(8))
-            .attr('fill','darkred')
-            .attr('text-anchor','middle')
-            .attr('dy', scale(17))
     </script>
   </body>
 </html>

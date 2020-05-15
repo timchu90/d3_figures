@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>    
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+    <style>
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        z-index: -2;
+        height: 100%;
+      }
+      body {
+        font-family: sans-serif
+      }
+      div.tooltip {
+        position: absolute;
+        text-align: left;
+        width: auto;
+        height: auto;
+        padding: 5px;
+        border-width: 1px;
+        border-radius: 2px;
+        pointer-events: none;
+        font-family: sans-serif;
+        font-size: 13px;
+        border: 2px solid white;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="margin-bottom:10px">
+        
+        <div>Add Gene:
+            <input list="addGeneList" placeholder="e.g. TP53" id='addGeneInput'>
+            <datalist id="addGeneList">
+            </datalist>
+            <button type="button" id="addGeneButton">Add</button>
+        </div>
+        <div>Adjust CNV Thresholds:</div>
+        <div style="padding-left: 20px">high amp: <input type="number" id="high_amp_adjust" value=2 step=".01"></div>
+        <div style="padding-left: 20px">amp: <input type="number" id="amp_adjust" value=1 step=".01"></div>
+        <div style="padding-left: 20px">del: <input type="number" id="del_adjust" value=-1 step=".01"></div>
+        <div style="padding-left: 20px">deep del: <input type="number" id="deep_del_adjust" value=-2 step=".01"></div>
+        <button type="button" id="readjustThreshold">Readjust</button>
+    </div>
+    <div id="chart">
+    </div>
+    <script>
+        var chartDiv = document.getElementById("chart");
+        var width = chartDiv.clientWidth -20;
+        var height = chartDiv.clientHeight -20;
+
+        var x = d3.scaleLinear().range([0,width]).domain([0,1000])
+        var y = d3.scaleLinear().range([0,height-150]).domain([0,1000])
+        var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+        
+        var attr = ['HIGH','MODERATE','HIGH AMP','AMP','DEL','DEEP DEL']
+        var attrColors = ['black','#f8b946','#982f2f','#f85252','#3573fd','#00308b']
+        var colorScale = d3.scaleOrdinal().range(attrColors).domain(attr)
+        
+        var ampColorScale = d3.scaleLinear().range(['white','#982f2f']).domain([0,1])
+        var delColorScale = d3.scaleLinear().range(['white','#00308b']).domain([0,-1])
+        
+        var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .attr("font-size",scale(60))
+        .style("opacity", 0);
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", 4000)
+        
+        var cellWidth = 20
+        var cellHeight = 60
+        var cellPadding = 2
+        var xAxistextSize = 12
+        var yAxistextSize = 15
+        var yAxisWidth = 10 //by default. will be changed
+        var thresh_highamp = 2
+        var thresh_amp = 1
+        var thresh_del = -1
+        var thresh_deepdel = -2
+        
+        function getCNVColor(cnv, ploidy){
+            if (cnv - ploidy >= thresh_highamp){
+                return colorScale('HIGH AMP')
+            } else if (cnv - ploidy >= thresh_amp){
+                return colorScale('AMP')
+            } else if (cnv - ploidy <= thresh_deepdel){
+                return colorScale('DEEP DEL')
+            } else if (cnv - ploidy <= thresh_del){
+                return colorScale('DEL')
+            } else {
+                return 'rgb(0,0,0,0)'
+            }
+        }
+        
+        function getVARColor(impact){
+            if (impact == "HIGH"){
+                return colorScale('HIGH')
+            } else if (impact == "MODERATE"){
+                return colorScale('MODERATE')
+            } else {
+                return 'rgb(0,0,0,0)'
+            }
+        }
+        
+        function rank(subset, thresh_ha, thresh_a, thresh_d, thresh_dd){
+            mod_num = subset.filter(function(f){return f.Impact == "MODERATE"}).length
+            high_num = subset.filter(function(f){return f.Impact == "HIGH"}).length
+            ploidy = 2
+            high_amp_num = subset.filter(function(f){return f.CNV-ploidy >= thresh_ha && f.CNV != ""}).length
+            amp_num = subset.filter(function(f){return f.CNV-ploidy >= thresh_a && f.CNV-ploidy < thresh_ha && f.CNV != ""}).length
+            deep_del_num = subset.filter(function(f){return f.CNV-ploidy <= thresh_dd && f.CNV != ""}).length
+            del_num = subset.filter(function(f){return f.CNV-ploidy <= thresh_d && f.CNV-ploidy > thresh_dd && f.CNV != ""}).length
+
+            score = high_num * 20
+                + mod_num * 10
+                + deep_del_num * 4
+                + high_amp_num * 3
+                + del_num * 2
+                + amp_num 
+            
+            return score
+        }
+        
+        function rankSamples(samples, data){
+            sampleRankList = []
+            for (i in samples){
+                sampleData = data.filter(function(f){
+                    return f.Sample == samples[i]
+                })
+                sampleRankList.push({Sample: samples[i], score: rank(sampleData, thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
+            }
+            sampleRankList.sort(function(a,b){return b.score - a.score})
+            return [...new Set(sampleRankList.map(a => a.Sample))]
+        }
+        
+        function readjustPos(genes, samples){
+            for(var i in samples){
+                //redraw sample label
+                d3.selectAll('#' + samples[i])
+                    .attr('x', (y(cellWidth) + cellPadding) * i)
+                    .attr('transform','rotate(45,' + ((y(cellWidth) + cellPadding) * i + y(yAxisWidth) )+ ',' + y(10)+ ')')
+                //redraw sample variants
+                d3.selectAll('.' + samples[i])
+                    .attr('x', (y(cellWidth) + cellPadding) * i)
+            }
+            for(var i in genes){
+                d3.selectAll('.' + genes[i])
+                    .attr('transform', function(d){
+                        return 'translate(' + y(yAxisWidth) + ',' + (y(cellHeight) + cellPadding) * i + ')'
+                    })
+            }
+            d3.selectAll('.xaxis')
+                .attr('transform', 'translate(0,'+(y(cellHeight) + cellPadding) * genes.length +")")
+        }
+        
+        function addVariants(data, genes, samples){
+            variant = svg.selectAll('.variant')
+                .data(data).enter()
+                .append('g')
+                .attr('transform', function(d){
+                    return 'translate(' + y(yAxisWidth) + ',' + (y(cellHeight) + cellPadding) * genes.indexOf(d.Gene) + ')'
+                })
+                .attr('class', function(d){return d.Gene})
+
+            //draw cnv square
+            variant.append('rect')
+                .attr('class', function(d){return d.Sample + " CNV"})
+                .attr('width',y(cellWidth))
+                .attr('height',y(cellHeight))
+                .attr('fill',function(d){return getCNVColor(d.CNV, 2)})
+                .attr('x', function(d){return (y(cellWidth) + cellPadding) * samples.indexOf(d.Sample)})
+
+            //draw var square
+            variant.append('rect')
+                .attr('class', function(d){return d.Sample + " VAR"})
+                .attr('width',y(cellWidth))
+                .attr('height',y(cellHeight/3))
+                .attr('fill',function(d){return getVARColor(d.Impact)})
+                .attr('x', function(d){return (y(cellWidth) + cellPadding) * samples.indexOf(d.Sample)})
+                .attr('y', y(cellHeight/3))
+        }
+        
+        function rankGenes(data, geneList){
+            rankList = []
+            for (i in geneList){
+                geneData = data.filter(function(f){
+                    return f.Gene == geneList[i]
+                })
+                rankList.push({gene: geneList[i], score: rank(geneData, thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
+            }
+            return rankList.sort(function(a,b){return b.score - a.score})
+        }
+        
+
+        //start drawing actual data
+        d3.tsv("oncomatrix.txt").then(function(data){
+            console.log(data)
+            
+            var geneList = [...new Set(data.map(a => a.Gene))]
+            
+            console.log("Ranking Genes...")
+            var rankList = rankGenes(data, geneList)
+
+            //filter data to top 30 ranked
+            var topList = rankList.slice(0,30)
+            var filteredData = []
+            for(i in topList){
+                filteredData = filteredData.concat(data.filter(function(f){return f.Gene == topList[i].gene}))
+            }
+            
+            //rank and sort samples based on current gene selection
+            var samples = [...new Set(data.map(a => a.Sample))]
+            samples = rankSamples(samples, filteredData)
+
+            var genes = topList.map(a => a.gene)
+            var longestGene = Math.max(...(genes.map(el => el.length)))
+            yAxisWidth = yAxistextSize * (longestGene + 5)
+            
+            xaxis = svg.append('g')
+                .attr('class','xaxis')
+                .attr('transform', 'translate(0,'+(y(cellHeight) + cellPadding) * topList.length +")")
+            yaxis = svg.append('g')
+                .attr('class','yaxis')
+            
+            //function to add gene to y axis
+            function addGene(geneToAdd, index){
+                var gene = yaxis.append('g')
+                    .attr('class', geneToAdd)
+                    .attr('transform', function(d){
+                        return 'translate(' + y(yAxisWidth) + ',' + (y(cellHeight) + cellPadding) * index + ')'
+                    })
+                
+                for (var i in samples){
+                    gene.append('rect')
+                        .attr('class','background')
+                        .attr('width',y(cellWidth))
+                        .attr('height',y(cellHeight))
+                        .attr('fill', 'lightgray')
+                        .attr('x', function(d){return (y(cellWidth) + cellPadding) * i})
+                }
+                gene.append('text')
+                    .text(geneToAdd)
+                    .attr('id',geneToAdd)
+                    .attr('dx', x(-20))
+                    .attr('dy', y(cellHeight/2 + 5))
+                    .attr('text-anchor', 'end')
+                    .attr('font-size',scale(yAxistextSize))
+                    .on('click', function(d){
+                        //show the x 
+                        console.log(this.id)
+                        d3.selectAll(".removeGeneButton")
+                            .attr('opacity', 0)
+                        d3.selectAll("#"+this.id+"_X")
+                            .attr('opacity', 1)
+                            .attr("pointer-events", "all")
+                    })
+
+                //click to remove gene
+                gene.append('svg:foreignObject')
+                    .attr('height', '15px')
+                    .attr('width', '15px')
+                    .attr('class','removeGeneButton')
+                    .attr('id', geneToAdd + "_X")
+                    .html('<i class="fa fa-times"></i>')
+                    .attr('x', x(-18))
+                    .attr('y', y(cellHeight/4) )
+                    .attr('fill','red')
+                    .attr('opacity', 0)
+                    .attr("pointer-events", "none")
+                    .on('click', function(d){
+                        //remove the gene
+                        geneToRemove = this.id.slice(0,-2)
+                        console.log("Removing " + geneToRemove)
+                        removeIndex = genes.indexOf(geneToRemove)
+                        if (removeIndex > -1){
+                            genes.splice(genes.indexOf(geneToRemove),1) //remove from gene list
+                            topList =  topList.filter(function(obj){ //remove from topList
+                                return obj.gene != geneToRemove
+                            })
+                            filteredData = filteredData.filter(function(f){return f.Gene != geneToRemove})
+                            console.log(filteredData)
+                            //rerank samples
+                            samples = rankSamples(samples, filteredData)
+                            console.log(sampleRankList)
+                            
+                            //redraw positions
+                            readjustPos(genes, samples)
+                            d3.selectAll('.' + geneToRemove).remove()
+                        }
+                    })
+            }
+            
+            //add x axis
+            for (var i in samples){
+                xaxis.append('text')
+                    .text(samples[i])
+                    .attr('id',samples[i])
+                    .attr('x', (y(cellWidth) + cellPadding) * i)
+                    .attr('dx',y(yAxisWidth))
+                    .attr('dy',y(10))
+                    .attr('text-anchor', 'start')
+                    .attr('transform','rotate(45,' + ((y(cellWidth) + cellPadding) * i + y(yAxisWidth) )+ ',' + y(10)+ ')')
+                    .attr('font-size',scale(xAxistextSize))
+            }
+            //add y axis
+            for (var j in genes){
+                addGene(genes[j], j)
+            }
+            
+            //add variants to chart
+            addVariants(filteredData,genes,samples)
+    
+            
+            //add gene code
+            var addGeneList = d3.select('#addGeneList')
+            var addGeneInput = d3.select('#addGeneInput')
+            var addGeneButton = d3.select('#addGeneButton')
+            
+            addGeneInput.on("keyup", function(d){
+                addGeneList.html(null) //remove old list
+                geneStartsWith = geneList.filter((gene) => gene.startsWith(this.value))
+                if(geneStartsWith.length <= 20){ //if list less than 20, show list
+                    for(var i in geneStartsWith){
+                        addGeneList.append('option')
+                            .text(geneStartsWith[i])
+                    }
+                }
+            })
+            addGeneButton.on('click', function(d){
+                geneToAdd = document.getElementById("addGeneInput").value
+                document.getElementById("addGeneInput").value = ""
+                if(geneList.includes(geneToAdd) && !genes.includes(geneToAdd)){
+                    console.log("Adding " + geneToAdd)
+                    geneRank = rankList.filter(function(f){
+                        return f.gene == geneToAdd
+                    })
+                    geneData = data.filter(function(f){
+                        return f.Gene == geneToAdd
+                    })
+                    //add to toplist
+                    topList.push(geneRank[0])
+                    topList.sort(function(a,b){return b.score - a.score})
+                    //add to genelist
+                    genes = topList.map(a => a.gene)
+                    //get filteredData again
+                    filteredData = []
+                    for(i in topList){
+                        filteredData = filteredData.concat(data.filter(function(f){return f.Gene == topList[i].gene}))
+                    }
+                    //rerank samples
+                    samples = rankSamples(samples,filteredData)
+                    //add gene to yaxis
+                    addGene(geneToAdd, genes.length)
+                    //add variants
+                    addVariants(geneData, genes, samples)
+                    //redraw positions
+                    readjustPos(genes, samples)
+                }
+                else{
+                    console.log("Gene missing or already in oncoprint")
+                    
+                }
+                
+            })
+            
+            //readjust threshold code 
+            var readjustThreshold = d3.select('#readjustThreshold')
+            
+            //on click of button
+            readjustThreshold.on('click',function(d){
+                console.log("Readjusting thresholds...")
+                thresh_highamp = document.getElementById("high_amp_adjust").value
+                thresh_amp = document.getElementById("amp_adjust").value
+                thresh_del = document.getElementById("del_adjust").value
+                thresh_deepdel = document.getElementById("deep_del_adjust").value
+                //rerank current genes
+                console.log("Ranking Genes...")
+                topList = rankGenes(filteredData, genes)
+                //reorder genes in list
+                genes = topList.map(a => a.gene)
+                //rerank samples
+                samples = rankSamples(samples,filteredData)
+                //recolor cnvs of current genes
+                d3.selectAll('.CNV')
+                    .attr('fill',function(d){return getCNVColor(d.CNV, 2)})
+                readjustPos(genes, samples)
+            })
+            
+            
+        })
+
+    </script>
+  </body>
+</html>

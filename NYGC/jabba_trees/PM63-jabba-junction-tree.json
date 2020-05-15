@@ -1,0 +1,1 @@
+{"edge":"+101","label":"internal_node","children":[{"edge":"+1","label":"internal_node","children":[{"label":"PM63-Z10-1-Case-WGS","edge":"+90"} , {"label":"PM63-Z2-1-Case","edge":"+24"}]} , {"edge":"+71","label":"internal_node","children":[{"label":"PM63-Z3-1-Case-WGS","edge":"+105"} , {"label":"PM63-Z6-1-Case-WGS","edge":"+127"}]}]}
