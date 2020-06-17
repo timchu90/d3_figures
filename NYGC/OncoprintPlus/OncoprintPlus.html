@@ -2,51 +2,78 @@
 <html>    
   <head>
     <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css">
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
     <style>
-      #chart {
-        position: fixed;
-        left: 0px;
-        right: 0px;
-        top: 0px;
-        bottom: 0px;
-        z-index: -2;
-        height: 100%;
-      }
-      body {
-        font-family: sans-serif
-      }
-      div.tooltip {
-        position: absolute;
-        text-align: left;
-        width: auto;
-        height: auto;
-        padding: 5px;
-        border-width: 1px;
-        border-radius: 2px;
-        pointer-events: none;
-        font-family: sans-serif;
-        font-size: 13px;
-        border: 2px solid white;
-      }
+        #chart {
+            position: fixed;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+            z-index: -2;
+            height: 100%;
+        }
+        body {
+            font-family: sans-serif
+        }
+        div.tooltip {
+            position: absolute;
+            text-align: left;
+            width: auto;
+            height: auto;
+            padding: 5px;
+            border-width: 1px;
+            border-radius: 2px;
+            pointer-events: none;
+            font-family: sans-serif;
+            font-size: 13px;
+            border: 2px solid white;
+        }
+        input{
+            margin-bottom: 0.5rem;
+            height: 25px !important;
+        }
+        button{
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    
     </style>
   </head>
   <body>
-    <div style="margin-bottom:10px">
-        
-        <div>Add Gene:
-            <input list="addGeneList" placeholder="e.g. TP53" id='addGeneInput'>
-            <datalist id="addGeneList">
-            </datalist>
-            <button type="button" id="addGeneButton">Add</button>
+    <div style="margin-bottom:10px" class="row">
+        <div class="four columns">
+            <div class="row">
+                Add Gene:
+                <input list="addGeneList" placeholder="e.g. TP53" id='addGeneInput'>
+                <datalist id="addGeneList">
+                </datalist>
+                <button type="button" id="addGeneButton">Add</button>
+            </div>
+            <div class="row">
+                Sort by:
+                <select id="sortByList">
+                </select>
+            </div>
         </div>
-        <div>Adjust CNV Thresholds:</div>
-        <div style="padding-left: 20px">high amp: <input type="number" id="high_amp_adjust" value=2 step=".01"></div>
-        <div style="padding-left: 20px">amp: <input type="number" id="amp_adjust" value=1 step=".01"></div>
-        <div style="padding-left: 20px">del: <input type="number" id="del_adjust" value=-1 step=".01"></div>
-        <div style="padding-left: 20px">deep del: <input type="number" id="deep_del_adjust" value=-2 step=".01"></div>
-        <button type="button" id="readjustThreshold">Readjust</button>
+        <div class="four columns">
+            <div>Adjust CNV Thresholds:</div>
+            <div style="padding-left: 20px" class="row">
+                <div class="four columns">HIGH AMP:</div> 
+                <input class="four columns" type="number" id="high_amp_adjust" value=2 step=".01"></div>
+            <div style="padding-left: 20px" class="row">
+                <div class="four columns">AMP:</div>  
+                <input class="four columns" type="number" id="amp_adjust" value=1 step=".01"></div>
+            <div style="padding-left: 20px" class="row">
+                <div class="four columns">DEL:</div>  
+                <input class="four columns" type="number" id="del_adjust" value=-1 step=".01"></div>
+            <div style="padding-left: 20px" class="row">
+                <div class="four columns">DEEP DEL:</div>  
+                <input class="four columns" type="number" id="deep_del_adjust" value=-2 step=".01"></div>
+            <button type="button" id="readjustThreshold" class="row">Readjust</button>
+        </div>
     </div>
     <div id="chart">
     </div>
@@ -76,8 +103,9 @@
             .attr("height", 4000)
         
         var cellWidth = 20
-        var cellHeight = 60
+        var cellHeight = 40
         var cellPadding = 2
+        var metadataHeight = 20
         var xAxistextSize = 12
         var yAxistextSize = 15
         var yAxisWidth = 10 //by default. will be changed
@@ -110,38 +138,52 @@
             }
         }
         
-        function rank(subset, thresh_ha, thresh_a, thresh_d, thresh_dd){
+        function rank(subset, metadata, thresh_ha, thresh_a, thresh_d, thresh_dd){
+            for(i in subset){
+                subset[i].Ploidy = metadata.filter(function(f){return f.Sample == subset[i].Sample})[0].Ploidy
+            }
             mod_num = subset.filter(function(f){return f.Impact == "MODERATE"}).length
             high_num = subset.filter(function(f){return f.Impact == "HIGH"}).length
-            ploidy = 2
-            high_amp_num = subset.filter(function(f){return f.CNV-ploidy >= thresh_ha && f.CNV != ""}).length
-            amp_num = subset.filter(function(f){return f.CNV-ploidy >= thresh_a && f.CNV-ploidy < thresh_ha && f.CNV != ""}).length
-            deep_del_num = subset.filter(function(f){return f.CNV-ploidy <= thresh_dd && f.CNV != ""}).length
-            del_num = subset.filter(function(f){return f.CNV-ploidy <= thresh_d && f.CNV-ploidy > thresh_dd && f.CNV != ""}).length
+            high_amp_num = subset.filter(function(f){return f.CNV-f.Ploidy >= thresh_ha && f.CNV != ""}).length
+            amp_num = subset.filter(function(f){return f.CNV-f.Ploidy >= thresh_a && f.CNV-f.Ploidy < thresh_ha && f.CNV != ""}).length
+            deep_del_num = subset.filter(function(f){return f.CNV-f.Ploidy <= thresh_dd && f.CNV != ""}).length
+            del_num = subset.filter(function(f){return f.CNV-f.Ploidy <= thresh_d && f.CNV-f.Ploidy > thresh_dd && f.CNV != ""}).length
 
             score = high_num * 20
                 + mod_num * 10
                 + deep_del_num * 4
-                + high_amp_num * 3
+                + high_amp_num * 4
                 + del_num * 2
-                + amp_num 
+                + amp_num * 2
             
             return score
         }
         
-        function rankSamples(samples, data){
+        function rankSamples(samples, data, metadata){
+            //console.log(metadata)
             sampleRankList = []
             for (i in samples){
                 sampleData = data.filter(function(f){
                     return f.Sample == samples[i]
                 })
-                sampleRankList.push({Sample: samples[i], score: rank(sampleData, thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
+                sampleRankList.push({Sample: samples[i], score: rank(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
             }
             sampleRankList.sort(function(a,b){return b.score - a.score})
             return [...new Set(sampleRankList.map(a => a.Sample))]
         }
         
-        function readjustPos(genes, samples){
+        function rankGenes(data, geneList, metadata){
+            rankList = []
+            for (i in geneList){
+                geneData = data.filter(function(f){
+                    return f.Gene == geneList[i]
+                })
+                rankList.push({gene: geneList[i], score: rank(geneData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
+            }
+            return rankList.sort(function(a,b){return b.score - a.score})
+        }
+        
+        function readjustPos(genes, samples, metaList){
             for(var i in samples){
                 //redraw sample label
                 d3.selectAll('#' + samples[i])
@@ -158,10 +200,14 @@
                     })
             }
             d3.selectAll('.xaxis')
-                .attr('transform', 'translate(0,'+(y(cellHeight) + cellPadding) * genes.length +")")
+                .attr('transform', 'translate(0,'+(((y(cellHeight) + cellPadding) * genes.length) + ((y(metadataHeight) + cellPadding) * metaList.length))+")")
+            d3.selectAll('.metadata')
+                .attr('transform', function(d){
+                    return 'translate(' + y(yAxisWidth) + ',' + ((y(cellHeight) + cellPadding) * genes.length) + ')'
+                })
         }
         
-        function addVariants(data, genes, samples){
+        function addVariants(data, genes, samples, metadata){
             variant = svg.selectAll('.variant')
                 .data(data).enter()
                 .append('g')
@@ -175,39 +221,89 @@
                 .attr('class', function(d){return d.Sample + " CNV"})
                 .attr('width',y(cellWidth))
                 .attr('height',y(cellHeight))
-                .attr('fill',function(d){return getCNVColor(d.CNV, 2)})
+                .attr('fill',function(d){
+                    var ploidy = metadata.filter(function(f){return f.Sample == d.Sample})[0].Ploidy
+                    return getCNVColor(d.CNV, ploidy)
+                })
                 .attr('x', function(d){return (y(cellWidth) + cellPadding) * samples.indexOf(d.Sample)})
 
             //draw var square
             variant.append('rect')
                 .attr('class', function(d){return d.Sample + " VAR"})
                 .attr('width',y(cellWidth))
-                .attr('height',y(cellHeight/3))
+                .attr('height',y(cellHeight/2))
                 .attr('fill',function(d){return getVARColor(d.Impact)})
                 .attr('x', function(d){return (y(cellWidth) + cellPadding) * samples.indexOf(d.Sample)})
-                .attr('y', y(cellHeight/3))
+                .attr('y', y(cellHeight/4))
         }
         
-        function rankGenes(data, geneList){
-            rankList = []
-            for (i in geneList){
-                geneData = data.filter(function(f){
-                    return f.Gene == geneList[i]
-                })
-                rankList.push({gene: geneList[i], score: rank(geneData, thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
+        function colorMetadata(key,metadata){
+            var metaValues = []
+            metadata.forEach(function(d){metaValues.push(d[key])})
+            //console.log(metaValues)
+            //check if metadata is numerical
+            if(!metaValues.some(isNaN)){
+                //if numerical, get range
+                metaValues = metaValues.map(Number);        
+                var hue = Math.floor(Math.random()*360)
+                var hsl_low = d3.color('hsl('+hue+',90%,15%)')
+                var hsl_high = d3.color('hsl('+hue+',90%,80%)')
+                var outputScale = d3.scaleLinear().range([hsl_low.toString(),hsl_high.toString()]).domain([Math.min(...metaValues),Math.max(...metaValues)])
+                return outputScale
             }
-            return rankList.sort(function(a,b){return b.score - a.score})
+            else {
+                //if not numerical, make range with unique list of variables, assign n random colors to?
+                uniqValues = [...new Set(metaValues)]
+                console.log(uniqValues)
+                colorRange = []
+                var saturation = Math.floor(Math.random()*70)
+                var lightness = Math.floor(Math.random()*60)
+                for(i in uniqValues){
+                    //var hue = Math.floor(Math.random()*360)
+                    var hue = (360/uniqValues.length) * i
+                    colorRange.push('hsl(' + hue + ',' + (30 + saturation) +'%,' + (20 + lightness) + '%)')
+                }
+                
+                if(uniqValues.includes("")){
+                    colorRange[uniqValues.indexOf("")] = 'white'
+                }
+                else{
+                    uniqValues.push('')
+                    colorRange.push('white')
+                }
+                console.log(colorRange)
+                
+                return d3.scaleOrdinal().range(colorRange).domain(uniqValues)
+                
+            }
         }
         
-
         //start drawing actual data
-        d3.tsv("oncomatrix.txt").then(function(data){
+        Promise.all([d3.tsv("oncomatrix.txt"), d3.tsv("metadata.txt")]).then(function(data){
+            var metadata = data[1]
+            var data = data[0]
             console.log(data)
+            console.log(metadata)
             
             var geneList = [...new Set(data.map(a => a.Gene))]
+            var samples = [...new Set(data.map(a => a.Sample))]
+            var metaList = Object.keys(metadata[0])
+            
+            if(metaList.includes('Ploidy')){
+                console.log("Metadata includes ploidy.")
+            } else {
+                console.log("ERROR: metadata does not include 'Ploidy' (case sensitive)")
+            }
+            //make metadata array for if metadata.txt is missing
+            //cannot asynchronously read two files. an empty metadata.txt file will have to be generated with preprocessing
+            /*
+            var metadata = []
+            for(i in samples){
+                metadata.push({'Sample': samples[i], 'Ploidy': 2})
+            }*/
             
             console.log("Ranking Genes...")
-            var rankList = rankGenes(data, geneList)
+            var rankList = rankGenes(data, geneList, metadata)
 
             //filter data to top 30 ranked
             var topList = rankList.slice(0,30)
@@ -217,8 +313,7 @@
             }
             
             //rank and sort samples based on current gene selection
-            var samples = [...new Set(data.map(a => a.Sample))]
-            samples = rankSamples(samples, filteredData)
+            samples = rankSamples(samples, filteredData, metadata)
 
             var genes = topList.map(a => a.gene)
             var longestGene = Math.max(...(genes.map(el => el.length)))
@@ -226,7 +321,7 @@
             
             xaxis = svg.append('g')
                 .attr('class','xaxis')
-                .attr('transform', 'translate(0,'+(y(cellHeight) + cellPadding) * topList.length +")")
+                .attr('transform', 'translate(0,'+(((y(cellHeight) + cellPadding) * topList.length) + ((y(metadataHeight) + cellPadding) * metaList.length)) +")")
             yaxis = svg.append('g')
                 .attr('class','yaxis')
             
@@ -265,13 +360,13 @@
 
                 //click to remove gene
                 gene.append('svg:foreignObject')
-                    .attr('height', '15px')
+                    .attr('height', '30px')
                     .attr('width', '15px')
                     .attr('class','removeGeneButton')
                     .attr('id', geneToAdd + "_X")
                     .html('<i class="fa fa-times"></i>')
                     .attr('x', x(-18))
-                    .attr('y', y(cellHeight/4) )
+                    .attr('y', y(-5 ) )
                     .attr('fill','red')
                     .attr('opacity', 0)
                     .attr("pointer-events", "none")
@@ -288,11 +383,11 @@
                             filteredData = filteredData.filter(function(f){return f.Gene != geneToRemove})
                             console.log(filteredData)
                             //rerank samples
-                            samples = rankSamples(samples, filteredData)
+                            samples = rankSamples(samples, filteredData, metadata)
                             console.log(sampleRankList)
                             
                             //redraw positions
-                            readjustPos(genes, samples)
+                            readjustPos(genes, samples, metaList)
                             d3.selectAll('.' + geneToRemove).remove()
                         }
                     })
@@ -316,7 +411,48 @@
             }
             
             //add variants to chart
-            addVariants(filteredData,genes,samples)
+            addVariants(filteredData,genes,samples,metadata)
+            
+            //add metadata to chart
+            var metaTracks = svg.append('g')
+                .attr('class','metadata')
+                .attr('transform', function(d){
+                    return 'translate(' + y(yAxisWidth) + ',' + ((y(cellHeight) + cellPadding) * genes.length) + ')'
+                })
+            
+            var metaTrack = metaTracks.selectAll('.metadata')
+                .data(metadata).enter()
+                .append('g')
+            
+            var sortByList = d3.select('#sortByList')
+            for (i in metaList){
+                if(metaList[i] != 'Sample'){
+                    //generate colorscale for meta value
+                    metaColorScale = colorMetadata(metaList[i], metadata)
+                    //for each sample, draw squares for each meta value
+                    metaTrack.append('rect')
+                        .attr('class',function(d){return d.Sample})
+                        .attr('width',y(cellWidth))
+                        .attr('height',y(cellHeight/2))
+                        .attr('fill',function(d){
+                            return metaColorScale(d[metaList[i]])
+                        })
+                        .attr('x', function(d){return (y(cellWidth) + cellPadding) * samples.indexOf(d.Sample)})
+                        .attr('y', (y(metadataHeight) + cellPadding) * i)
+                    //append label
+                    metaTracks.append('text')
+                        .text(metaList[i])
+                        .attr('dx', x(-20))
+                        .attr('dy', y(metadataHeight/2 + 5))
+                        .attr('text-anchor', 'end')
+                        .attr('y', (y(metadataHeight) + cellPadding) * i)
+                        .attr('font-size',scale(yAxistextSize))
+                }
+                sortByList.append('option')
+                    .attr('value',metaList[i])
+                    .text(metaList[i])
+            }
+            
     
             
             //add gene code
@@ -356,13 +492,13 @@
                         filteredData = filteredData.concat(data.filter(function(f){return f.Gene == topList[i].gene}))
                     }
                     //rerank samples
-                    samples = rankSamples(samples,filteredData)
+                    samples = rankSamples(samples,filteredData, metadata)
                     //add gene to yaxis
                     addGene(geneToAdd, genes.length)
                     //add variants
-                    addVariants(geneData, genes, samples)
+                    addVariants(geneData, genes, samples, metadata)
                     //redraw positions
-                    readjustPos(genes, samples)
+                    readjustPos(genes, samples, metaList)
                 }
                 else{
                     console.log("Gene missing or already in oncoprint")
@@ -383,18 +519,37 @@
                 thresh_deepdel = document.getElementById("deep_del_adjust").value
                 //rerank current genes
                 console.log("Ranking Genes...")
-                topList = rankGenes(filteredData, genes)
+                topList = rankGenes(filteredData, genes, metadata)
                 //reorder genes in list
                 genes = topList.map(a => a.gene)
                 //rerank samples
-                samples = rankSamples(samples,filteredData)
+                samples = rankSamples(samples,filteredData, metadata)
                 //recolor cnvs of current genes
                 d3.selectAll('.CNV')
-                    .attr('fill',function(d){return getCNVColor(d.CNV, 2)})
-                readjustPos(genes, samples)
+                    .attr('fill',function(d){
+                        var ploidy = metadata.filter(function(f){return f.Sample == d.Sample})[0].Ploidy
+                        return getCNVColor(d.CNV, ploidy)
+                    })
+                readjustPos(genes, samples, metaList)
             })
             
+            //sortBy code
+            var sortBy = d3.select('#sortByList')
             
+            sortBy.on('change',function(d){
+                console.log("sorting by... " + this.value)
+                sortValue = this.value
+                if(this.value == 'Sample'){
+                    //sort by default
+                    readjustPos(genes, samples, metaList)
+                }
+                else{
+                    metadata.sort((a, b) => (a[sortValue] < b[sortValue]) ? 1 : -1)
+                    sortedSamples = metadata.map(a => a.Sample)
+                    readjustPos(genes, sortedSamples, metaList)
+                }
+                
+            })
         })
 
     </script>
