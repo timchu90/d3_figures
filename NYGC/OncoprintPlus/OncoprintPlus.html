@@ -15,6 +15,12 @@
             z-index: -2;
             height: 100%;
         }
+        #options{
+            margin-bottom:10px; 
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #FFEFD5;
+        }
         body {
             font-family: sans-serif
         }
@@ -38,28 +44,31 @@
         button{
             padding-left: 10px;
             padding-right: 10px;
+            background-color: white;
         }
     
     </style>
   </head>
   <body>
-    <div style="margin-bottom:10px" class="row">
-        <div class="four columns">
+    <div id="options" class="row">
+        <div class="three columns">
             <div class="row">
-                Add Gene:
+                <b>Add Gene:</b>
+                <br>
                 <input list="addGeneList" placeholder="e.g. TP53" id='addGeneInput'>
                 <datalist id="addGeneList">
                 </datalist>
                 <button type="button" id="addGeneButton">Add</button>
             </div>
             <div class="row">
-                Sort by:
+                <b>Sort by:</b>
+                <br>
                 <select id="sortByList">
                 </select>
             </div>
         </div>
         <div class="four columns">
-            <div>Adjust CNV Thresholds:</div>
+            <div><b>Adjust CNV Thresholds:</b></div>
             <div style="padding-left: 20px" class="row">
                 <div class="four columns">HIGH AMP:</div> 
                 <input class="four columns" type="number" id="high_amp_adjust" value=2 step=".01"></div>
