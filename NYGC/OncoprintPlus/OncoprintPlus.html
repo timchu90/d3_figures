@@ -86,6 +86,7 @@
     </div>
     <div id="chart">
     </div>
+    
     <script>
         var chartDiv = document.getElementById("chart");
         var width = chartDiv.clientWidth -20;
@@ -243,6 +244,14 @@
                     return getCNVColor(d.CNV, ploidy)
                 })
                 .attr('x', function(d){return (y(cellWidth) + cellPadding) * samples.indexOf(d.Sample)})
+                .attr('pointer-events', function(d){
+                    if (d.CNV != ''){
+                        return 'all'
+                    }
+                    else {
+                        return 'none'
+                    }
+                })
                 .on('mouseover', function(d){
                     console.log(d)
                     div.html(
@@ -311,8 +320,8 @@
                 //if numerical, get range
                 metaValues = metaValues.map(Number);        
                 var hue = Math.floor(Math.random()*360)
-                var hsl_low = d3.color('hsl('+hue+',90%,15%)')
-                var hsl_high = d3.color('hsl('+hue+',90%,80%)')
+                var hsl_high = d3.color('hsl('+hue+',90%,15%)')
+                var hsl_low = d3.color('hsl('+hue+',90%,80%)')
                 var outputScale = d3.scaleLinear().range([hsl_low.toString(),hsl_high.toString()]).domain([Math.min(...metaValues),Math.max(...metaValues)])
                 return outputScale
             }
@@ -496,6 +505,7 @@
                     //for each sample, draw squares for each meta value
                     metaTrack.append('rect')
                         .attr('class',function(d){return d.Sample})
+                        .attr('id', metaList[i])
                         .attr('width',y(cellWidth))
                         .attr('height',y(cellHeight/2))
                         .attr('fill',function(d){
@@ -503,6 +513,34 @@
                         })
                         .attr('x', function(d){return (y(cellWidth) + cellPadding) * samples.indexOf(d.Sample)})
                         .attr('y', (y(metadataHeight) + cellPadding) * i)
+                        .attr('pointer-events', function(d){
+                            if (d[this.id] != ''){
+                                return 'all'
+                            }
+                            else {
+                                return 'none'
+                            }
+                        })
+                        .on('mouseover', function(d){
+                            console.log(d)
+                            div.html(
+                                this.id + ': ' + d[this.id]
+                            )
+                            div.style("left", (d3.event.pageX + 10) + "px")
+                            div.style("top", (d3.event.pageY + 15) + "px")
+                            div.style('opacity','0.9')
+                            div.style('background', 'gray')
+                            d3.select(this)
+                                .attr('stroke','black')
+                                .attr('stroke-width', '2px')
+                        })
+                        .on('mouseout', function(){
+                            d3.select(this)
+                                .attr('stroke','none')
+                            div.style('opacity','0')
+                })
+                    
+                    
                     //append label
                     metaTracks.append('text')
                         .text(metaList[i])
