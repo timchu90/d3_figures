@@ -124,17 +124,23 @@
         var thresh_deepdel = -2
         
         function getCNVColor(cnv, ploidy){
-            if (cnv - ploidy >= thresh_highamp){
-                return colorScale('HIGH AMP')
-            } else if (cnv - ploidy >= thresh_amp){
-                return colorScale('AMP')
-            } else if (cnv - ploidy <= thresh_deepdel){
-                return colorScale('DEEP DEL')
-            } else if (cnv - ploidy <= thresh_del){
-                return colorScale('DEL')
-            } else {
+            if(cnv != ''){
+                if (cnv - ploidy >= thresh_highamp){
+                    return colorScale('HIGH AMP')
+                } else if (cnv - ploidy >= thresh_amp){
+                    return colorScale('AMP')
+                } else if (cnv - ploidy <= thresh_deepdel){
+                    return colorScale('DEEP DEL')
+                } else if (cnv - ploidy <= thresh_del){
+                    return colorScale('DEL')
+                } else {
+                    return 'rgb(0,0,0,0)'
+                }
+            }
+            else{
                 return 'rgb(0,0,0,0)'
             }
+            
         }
         
         function getVARColor(impact){
@@ -189,6 +195,8 @@
                 })
                 rankList.push({gene: geneList[i], score: rank(geneData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
             }
+            rankList = rankList.filter(function(f){return f.gene != 'Unknown'})
+            
             return rankList.sort(function(a,b){return b.score - a.score})
         }
         
@@ -235,6 +243,26 @@
                     return getCNVColor(d.CNV, ploidy)
                 })
                 .attr('x', function(d){return (y(cellWidth) + cellPadding) * samples.indexOf(d.Sample)})
+                .on('mouseover', function(d){
+                    console.log(d)
+                    div.html(
+                        'Gene: ' + d.Gene + '<br>' +
+                        'CNV: ' + d.CNV + '<br>' + 
+                        'Ploidy: ' + d.Ploidy
+                    )
+                    div.style("left", (d3.event.pageX + 10) + "px")
+                    div.style("top", (d3.event.pageY + 15) + "px")
+                    div.style('opacity','0.9')
+                    div.style('background', 'gray')
+                    d3.select(this)
+                        .attr('stroke','black')
+                        .attr('stroke-width', '2px')
+                })
+                .on('mouseout', function(){
+                    d3.select(this)
+                        .attr('stroke','none')
+                    div.style('opacity','0')
+                })
 
             //draw var square
             variant.append('rect')
@@ -244,6 +272,34 @@
                 .attr('fill',function(d){return getVARColor(d.Impact)})
                 .attr('x', function(d){return (y(cellWidth) + cellPadding) * samples.indexOf(d.Sample)})
                 .attr('y', y(cellHeight/4))
+                .attr('pointer-events', function(d){
+                    if (d.Impact == 'MODERATE' || d.Impact == 'HIGH'){
+                        return 'all'
+                    }
+                    else {
+                        return 'none'
+                    }
+                })
+                .on('mouseover', function(d){
+                    if (d.Impact == 'MODERATE' || d.Impact == 'HIGH'){
+                        div.html(
+                            'Gene: ' + d.Gene + '<br>' +
+                            'Impact: ' + d.Impact
+                        )
+                        div.style("left", (d3.event.pageX + 10) + "px")
+                        div.style("top", (d3.event.pageY + 15) + "px")
+                        div.style('opacity','0.9')
+                        div.style('background', 'gray')
+                    }
+                    d3.select(this)
+                        .attr('stroke','black')
+                        .attr('stroke-width', '2px')
+                })
+                .on('mouseout', function(){
+                    d3.select(this)
+                        .attr('stroke','none')
+                    div.style('opacity','0')
+                })
         }
         
         function colorMetadata(key,metadata){
@@ -263,7 +319,6 @@
             else {
                 //if not numerical, make range with unique list of variables, assign n random colors to?
                 uniqValues = [...new Set(metaValues)]
-                console.log(uniqValues)
                 colorRange = []
                 var saturation = Math.floor(Math.random()*70)
                 var lightness = Math.floor(Math.random()*60)
@@ -359,7 +414,7 @@
                     .attr('font-size',scale(yAxistextSize))
                     .on('click', function(d){
                         //show the x 
-                        console.log(this.id)
+                        //console.log(this.id)
                         d3.selectAll(".removeGeneButton")
                             .attr('opacity', 0)
                         d3.selectAll("#"+this.id+"_X")
@@ -390,10 +445,10 @@
                                 return obj.gene != geneToRemove
                             })
                             filteredData = filteredData.filter(function(f){return f.Gene != geneToRemove})
-                            console.log(filteredData)
+                            //console.log(filteredData)
                             //rerank samples
                             samples = rankSamples(samples, filteredData, metadata)
-                            console.log(sampleRankList)
+                            //console.log(sampleRankList)
                             
                             //redraw positions
                             readjustPos(genes, samples, metaList)
