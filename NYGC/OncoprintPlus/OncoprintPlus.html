@@ -124,6 +124,8 @@
         var thresh_del = -1
         var thresh_deepdel = -2
         
+        var sortBy = d3.select('#sortByList')
+        
         function getCNVColor(cnv, ploidy){
             if(cnv != ''){
                 if (cnv - ploidy >= thresh_highamp){
@@ -204,8 +206,8 @@
         function readjustPos(genes, samples, metaList){
             for(var i in samples){
                 //redraw sample label
-                d3.selectAll('#' + samples[i])
-                    .attr('x', (y(cellWidth) + cellPadding) * i)
+                d3.selectAll('#' + samples[i] + "_label")
+                    //.attr('x', (y(cellWidth) + cellPadding) * i)
                     .attr('transform','rotate(45,' + ((y(cellWidth) + cellPadding) * i + y(yAxisWidth) )+ ',' + y(10)+ ')')
                 //redraw sample variants
                 d3.selectAll('.' + samples[i])
@@ -236,7 +238,7 @@
 
             //draw cnv square
             variant.append('rect')
-                .attr('class', function(d){return d.Sample + " CNV"})
+                .attr('class', function(d){return d.Sample + " CNV COL"})
                 .attr('width',y(cellWidth))
                 .attr('height',y(cellHeight))
                 .attr('fill',function(d){
@@ -275,7 +277,7 @@
 
             //draw var square
             variant.append('rect')
-                .attr('class', function(d){return d.Sample + " VAR"})
+                .attr('class', function(d){return d.Sample + " VAR COL"})
                 .attr('width',y(cellWidth))
                 .attr('height',y(cellHeight/2))
                 .attr('fill',function(d){return getVARColor(d.Impact)})
@@ -344,11 +346,21 @@
                     uniqValues.push('')
                     colorRange.push('white')
                 }
-                console.log(colorRange)
-                
+                //console.log(colorRange)
                 return d3.scaleOrdinal().range(colorRange).domain(uniqValues)
                 
             }
+        }
+        
+        function arraysEqual(a, b) {
+          if (a === b) return true;
+          if (a == null || b == null) return false;
+          if (a.length !== b.length) return false;
+
+          for (var i = 0; i < a.length; ++i) {
+            if (a[i] !== b[i]) return false;
+          }
+          return true;
         }
         
         //start drawing actual data
@@ -408,7 +420,7 @@
                 
                 for (var i in samples){
                     gene.append('rect')
-                        .attr('class','background')
+                        .attr('class', samples[i] + ' background COL')
                         .attr('width',y(cellWidth))
                         .attr('height',y(cellHeight))
                         .attr('fill', 'lightgray')
@@ -455,8 +467,10 @@
                             })
                             filteredData = filteredData.filter(function(f){return f.Gene != geneToRemove})
                             //console.log(filteredData)
-                            //rerank samples
-                            samples = rankSamples(samples, filteredData, metadata)
+                            //rerank samples if not locked
+                            if(sortBy.value == 'Sample'){
+                                samples = rankSamples(samples, filteredData, metadata)
+                            }
                             //console.log(sampleRankList)
                             
                             //redraw positions
@@ -470,7 +484,8 @@
             for (var i in samples){
                 xaxis.append('text')
                     .text(samples[i])
-                    .attr('id',samples[i])
+                    .attr('id', samples[i] +"_label")
+                    .attr('class', samples[i])
                     .attr('x', (y(cellWidth) + cellPadding) * i)
                     .attr('dx',y(yAxisWidth))
                     .attr('dy',y(10))
@@ -504,7 +519,7 @@
                     metaColorScale = colorMetadata(metaList[i], metadata)
                     //for each sample, draw squares for each meta value
                     metaTrack.append('rect')
-                        .attr('class',function(d){return d.Sample})
+                        .attr('class',function(d){return d.Sample + " COL"})
                         .attr('id', metaList[i])
                         .attr('width',y(cellWidth))
                         .attr('height',y(cellHeight/2))
@@ -554,6 +569,9 @@
                     .attr('value',metaList[i])
                     .text(metaList[i])
             }
+            sortByList.append('option')
+                .attr('value', 'Custom')
+                .text('Custom')
             
     
             
@@ -594,7 +612,9 @@
                         filteredData = filteredData.concat(data.filter(function(f){return f.Gene == topList[i].gene}))
                     }
                     //rerank samples
-                    samples = rankSamples(samples,filteredData, metadata)
+                    if(sortBy.value == 'Sample'){
+                        samples = rankSamples(samples,filteredData, metadata)
+                    }
                     //add gene to yaxis
                     addGene(geneToAdd, genes.length)
                     //add variants
@@ -625,7 +645,9 @@
                 //reorder genes in list
                 genes = topList.map(a => a.gene)
                 //rerank samples
-                samples = rankSamples(samples,filteredData, metadata)
+                if(sortBy.value == 'Sample'){
+                    samples = rankSamples(samples,filteredData, metadata)
+                }
                 //recolor cnvs of current genes
                 d3.selectAll('.CNV')
                     .attr('fill',function(d){
@@ -636,24 +658,70 @@
             })
             
             //sortBy code
-            var sortBy = d3.select('#sortByList')
-            
             sortBy.on('change',function(d){
                 console.log("sorting by... " + this.value)
                 sortValue = this.value
                 if(this.value == 'Sample'){
                     //sort by default
+                    samples = rankSamples(samples,filteredData, metadata)
                     readjustPos(genes, samples, metaList)
+                }
+                else if(this.value == 'Custom'){
+                    //do nothing
                 }
                 else{
                     metadata.sort((a, b) => (a[sortValue] < b[sortValue]) ? 1 : -1)
-                    sortedSamples = metadata.map(a => a.Sample)
-                    readjustPos(genes, sortedSamples, metaList)
+                    samples = metadata.map(a => a.Sample)
+                    readjustPos(genes, samples, metaList)
                 }
                 
             })
-        })
+            
+            function cPosition(d) {
+                var v = dragging[d.sample];
+                return v == null ? d.x : v;
+            }
+            var dragging = []
+            var draggedSample
+            var positions = []
+            
+            //drag behavior code
+            d3.selectAll(".COL")
+                .call(d3.drag()
+                .subject(function() { 
+                    var t = d3.select(this);
+                    return {sample: t.attr("class").split(" ")[0], x: t.attr("x")};
+                })
+                .on("start", function(d) {
+                    console.log('drag started')
+                    draggedSample = d3.event.subject.sample
+                    for(i in samples){
+                        positions.push({sample: samples[i], x: (y(cellWidth) + cellPadding) * i})
+                    }
 
+                })
+                .on("drag", function(d) {
+                    d3.selectAll("." + draggedSample).attr("x", d3.event.x)
+                    d3.selectAll('#' + draggedSample + "_label")
+                        .attr('transform','rotate(45,' + (d3.event.x + y(yAxisWidth) )+ ',' + y(10)+ ')')
+                    dragging[draggedSample] = d3.event.x
+                    dragsamples = positions.sort(function(a,b){ return cPosition(a) - cPosition(b)}).map(a => a.sample)
+                    if(!arraysEqual(samples, dragsamples)){
+                        //change sortBy value to Custom
+                        sortBy.property('value','Custom')
+                        //resort based on new order
+                        samples = dragsamples 
+                        readjustPos(genes, samples, metaList)
+                    }
+                })
+                .on("end", function(d) {
+                    console.log('drag ended')
+                    positions = []
+                    delete dragging[draggedSample]
+                    readjustPos(genes, samples, metaList)
+                })  
+                );
+        })
     </script>
   </body>
 </html>
