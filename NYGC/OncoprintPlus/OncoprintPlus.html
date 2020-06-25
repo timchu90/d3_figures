@@ -60,10 +60,20 @@
                 </datalist>
                 <button type="button" id="addGeneButton">Add</button>
             </div>
+            <div id='no_variants_error' style="font-size:10px; color:red; opacity:0">No variants found for this gene.</div>
+        </div>
+        <div class="three columns">
             <div class="row">
+                <b>Group by:</b>
+                <br>
+                <select id="groupByList">
+                </select>
+                <br>
                 <b>Sort by:</b>
                 <br>
                 <select id="sortByList">
+                    <option value="max">Max score</option>
+                    <option value="avg">Average score</option>
                 </select>
             </div>
         </div>
@@ -124,6 +134,7 @@
         var thresh_del = -1
         var thresh_deepdel = -2
         
+        var groupBy = d3.select('#groupByList')
         var sortBy = d3.select('#sortByList')
         
         function getCNVColor(cnv, ploidy){
@@ -255,7 +266,7 @@
                     }
                 })
                 .on('mouseover', function(d){
-                    console.log(d)
+                    //console.log(d)
                     div.html(
                         'Gene: ' + d.Gene + '<br>' +
                         'CNV: ' + d.CNV + '<br>' + 
@@ -468,7 +479,7 @@
                             filteredData = filteredData.filter(function(f){return f.Gene != geneToRemove})
                             //console.log(filteredData)
                             //rerank samples if not locked
-                            if(sortBy.value == 'Sample'){
+                            if(document.getElementById("groupByList").value == 'Sample'){
                                 samples = rankSamples(samples, filteredData, metadata)
                             }
                             //console.log(sampleRankList)
@@ -512,7 +523,7 @@
                 .data(metadata).enter()
                 .append('g')
             
-            var sortByList = d3.select('#sortByList')
+            //var groupByList = d3.select('#groupByList')
             for (i in metaList){
                 if(metaList[i] != 'Sample'){
                     //generate colorscale for meta value
@@ -537,7 +548,7 @@
                             }
                         })
                         .on('mouseover', function(d){
-                            console.log(d)
+                            //console.log(d)
                             div.html(
                                 this.id + ': ' + d[this.id]
                             )
@@ -565,11 +576,11 @@
                         .attr('y', (y(metadataHeight) + cellPadding) * i)
                         .attr('font-size',scale(yAxistextSize))
                 }
-                sortByList.append('option')
+                groupBy.append('option')
                     .attr('value',metaList[i])
                     .text(metaList[i])
             }
-            sortByList.append('option')
+            groupBy.append('option')
                 .attr('value', 'Custom')
                 .text('Custom')
             
@@ -583,11 +594,19 @@
             addGeneInput.on("keyup", function(d){
                 addGeneList.html(null) //remove old list
                 geneStartsWith = geneList.filter((gene) => gene.startsWith(this.value))
-                if(geneStartsWith.length <= 20){ //if list less than 20, show list
+
+                if(geneStartsWith.length == 0){
+                    d3.select('#no_variants_error').style('opacity',1)
+                }
+                else if(geneStartsWith.length <= 20){ //if list less than 20, show list
+                    d3.select('#no_variants_error').style('opacity',0)
                     for(var i in geneStartsWith){
                         addGeneList.append('option')
                             .text(geneStartsWith[i])
                     }
+                }
+                else{
+                    d3.select('#no_variants_error').style('opacity',0)
                 }
             })
             addGeneButton.on('click', function(d){
@@ -612,7 +631,7 @@
                         filteredData = filteredData.concat(data.filter(function(f){return f.Gene == topList[i].gene}))
                     }
                     //rerank samples
-                    if(sortBy.value == 'Sample'){
+                    if(document.getElementById("groupByList").value == 'Sample'){
                         samples = rankSamples(samples,filteredData, metadata)
                     }
                     //add gene to yaxis
@@ -645,7 +664,7 @@
                 //reorder genes in list
                 genes = topList.map(a => a.gene)
                 //rerank samples
-                if(sortBy.value == 'Sample'){
+                if(document.getElementById("groupByList").value == 'Sample'){
                     samples = rankSamples(samples,filteredData, metadata)
                 }
                 //recolor cnvs of current genes
@@ -657,24 +676,73 @@
                 readjustPos(genes, samples, metaList)
             })
             
-            //sortBy code
-            sortBy.on('change',function(d){
-                console.log("sorting by... " + this.value)
-                sortValue = this.value
-                if(this.value == 'Sample'){
+            //groupBy code
+            function reSort(groupByValue, sortByValue){
+                console.log("grouping by... " + groupByValue + " on... " + sortByValue)
+                if(groupByValue == 'Sample'){
                     //sort by default
                     samples = rankSamples(samples,filteredData, metadata)
                     readjustPos(genes, samples, metaList)
                 }
-                else if(this.value == 'Custom'){
+                else if(groupByValue == 'Custom'){
                     //do nothing
                 }
                 else{
-                    metadata.sort((a, b) => (a[sortValue] < b[sortValue]) ? 1 : -1)
-                    samples = metadata.map(a => a.Sample)
+                    var metaKey = []
+                    metadata.forEach(function(d){metaKey.push({sample: d.Sample, value: d[groupByValue]})})
+                    var metaValues = metaKey.map(a => a.value)
+                    //check if metadata values are not numerical
+                    if(metaValues.some(isNaN)){
+                        uniqValues = [...new Set(metaValues)]
+                        sampleOrder = []
+                        for(i in uniqValues){
+                            var groupOrder = []
+                            var groupScore = 0
+                            groupData = metaKey.filter(function(f){
+                                return f.value == uniqValues[i]
+                            })
+                            //console.log(sampleData)
+                            for(j in groupData){
+                                sampleData = filteredData.filter(function(f){
+                                    return f.Sample == groupData[j].sample 
+                                })
+                                var sampleScore = rank(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)
+                                groupOrder.push({sample: groupData[j].sample , group: uniqValues[i], score: sampleScore})
+                                if(sortByValue == 'max'){
+                                    groupScore = Math.max(sampleScore, groupScore)
+                                }
+                                else if(sortByValue == 'avg'){
+                                    groupScore = groupScore + sampleScore
+                                }
+                                else{
+                                    //should never happpen
+                                    console.log("error")
+                                }
+                            }
+                            if(sortByValue == 'avg'){
+                                groupScore = groupScore / groupData.length
+                            }
+                            groupOrder = groupOrder.map(a => ({...a, groupScore: groupScore}))
+                            sampleOrder = sampleOrder.concat(groupOrder)
+                        }
+                        sampleOrder.sort(function(a,b){return b.groupScore - a.groupScore || b.score - a.score;})
+                        samples = sampleOrder.map(a => a.sample)  
+                        readjustPos(genes, samples, metaList)
+                    }
+                    //if metadata values are numerical
+                    else{
+                        metadata.sort((a, b) => (a[groupByValue] < b[groupByValue]) ? 1 : -1)
+                        samples = metadata.map(a => a.Sample)
+                    }
                     readjustPos(genes, samples, metaList)
                 }
+            }
                 
+            groupBy.on('change',function(d){
+                reSort(this.value, document.getElementById('sortByList').value)
+            })
+            sortBy.on('change',function(d){
+                reSort(document.getElementById('groupByList').value, this.value )
             })
             
             function cPosition(d) {
@@ -707,8 +775,8 @@
                     dragging[draggedSample] = d3.event.x
                     dragsamples = positions.sort(function(a,b){ return cPosition(a) - cPosition(b)}).map(a => a.sample)
                     if(!arraysEqual(samples, dragsamples)){
-                        //change sortBy value to Custom
-                        sortBy.property('value','Custom')
+                        //change groupBy value to Custom
+                        groupBy.property('value','Custom')
                         //resort based on new order
                         samples = dragsamples 
                         readjustPos(genes, samples, metaList)
