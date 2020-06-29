@@ -239,7 +239,9 @@
         }
         
         function addVariants(data, genes, samples, metadata){
-            variant = svg.selectAll('.variant')
+            var variants = svg.append('g').attr('class','variants')
+            
+            variant = variants.selectAll('.variant')
                 .data(data).enter()
                 .append('g')
                 .attr('transform', function(d){
@@ -412,7 +414,7 @@
             samples = rankSamples(samples, filteredData, metadata)
 
             var genes = topList.map(a => a.gene)
-            var longestGene = Math.max(...(genes.map(el => el.length)))
+            var longestGene = Math.max(...(genes.map(a => a.length)))
             yAxisWidth = yAxistextSize * (longestGene + 5)
             
             xaxis = svg.append('g')
@@ -490,6 +492,66 @@
                         }
                     })
             }
+            function reSort(groupByValue, sortByValue){
+                console.log("grouping by... " + groupByValue + " on... " + sortByValue)
+                if(groupByValue == 'Sample'){
+                    //sort by default
+                    samples = rankSamples(samples,filteredData, metadata)
+                    readjustPos(genes, samples, metaList)
+                }
+                else if(groupByValue == 'Custom'){
+                    //do nothing
+                }
+                else{
+                    var metaKey = []
+                    metadata.forEach(function(d){metaKey.push({sample: d.Sample, value: d[groupByValue]})})
+                    var metaValues = metaKey.map(a => a.value)
+                    //check if metadata values are not numerical
+                    if(metaValues.some(isNaN)){
+                        uniqValues = [...new Set(metaValues)]
+                        sampleOrder = []
+                        for(i in uniqValues){
+                            var groupOrder = []
+                            var groupScore = 0
+                            groupData = metaKey.filter(function(f){
+                                return f.value == uniqValues[i]
+                            })
+                            //console.log(sampleData)
+                            for(j in groupData){
+                                sampleData = filteredData.filter(function(f){
+                                    return f.Sample == groupData[j].sample 
+                                })
+                                var sampleScore = rank(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)
+                                groupOrder.push({sample: groupData[j].sample , group: uniqValues[i], score: sampleScore})
+                                if(sortByValue == 'max'){
+                                    groupScore = Math.max(sampleScore, groupScore)
+                                }
+                                else if(sortByValue == 'avg'){
+                                    groupScore = groupScore + sampleScore
+                                }
+                                else{
+                                    //should never happpen
+                                    console.log("error")
+                                }
+                            }
+                            if(sortByValue == 'avg'){
+                                groupScore = groupScore / groupData.length
+                            }
+                            groupOrder = groupOrder.map(a => ({...a, groupScore: groupScore}))
+                            sampleOrder = sampleOrder.concat(groupOrder)
+                        }
+                        sampleOrder.sort(function(a,b){return b.groupScore - a.groupScore || b.score - a.score;})
+                        samples = sampleOrder.map(a => a.sample)  
+                        readjustPos(genes, samples, metaList)
+                    }
+                    //if metadata values are numerical
+                    else{
+                        metadata.sort((a, b) => (a[groupByValue] < b[groupByValue]) ? 1 : -1)
+                        samples = metadata.map(a => a.Sample)
+                    }
+                    readjustPos(genes, samples, metaList)
+                }
+            }
             
             //add x axis
             for (var i in samples){
@@ -512,6 +574,32 @@
             //add variants to chart
             addVariants(filteredData,genes,samples,metadata)
             
+            //add legend to chart
+            var legend = svg.append('g')
+                .attr('class','legend')
+                .attr('transform', 'translate(' + ((y(cellWidth) + cellPadding) * (samples.length + 2)+ y(yAxisWidth)) + ",0)" )
+            
+            legend.selectAll('.legendAttrRect')
+                .data(attr)
+                .enter()
+                .append('rect')
+                .attr('width',y(cellWidth))
+                .attr('height',y(cellHeight/2))
+                .attr('fill',function(d){
+                    return colorScale(d)
+                })
+                .attr('y', function(d,i){return (y(cellHeight/2) + (cellPadding*2)) * i})
+            
+            legend.selectAll('.legendAttrText')
+                .data(attr)
+                .enter()
+                .append('text')
+                .text(function(d){return d})
+                .attr('font-size',scale(yAxistextSize))
+                .attr('x', y(cellWidth) + cellPadding)
+                .attr('y', function(d,i){return (y(cellHeight/2) + (cellPadding*2)) * i})
+                .attr('dy', scale(yAxistextSize))
+            
             //add metadata to chart
             var metaTracks = svg.append('g')
                 .attr('class','metadata')
@@ -523,7 +611,7 @@
                 .data(metadata).enter()
                 .append('g')
             
-            //var groupByList = d3.select('#groupByList')
+            var metaLegendOffset = (y(cellHeight/2) + (cellPadding*2)) * 7
             for (i in metaList){
                 if(metaList[i] != 'Sample'){
                     //generate colorscale for meta value
@@ -564,9 +652,7 @@
                             d3.select(this)
                                 .attr('stroke','none')
                             div.style('opacity','0')
-                })
-                    
-                    
+                        })
                     //append label
                     metaTracks.append('text')
                         .text(metaList[i])
@@ -575,6 +661,84 @@
                         .attr('text-anchor', 'end')
                         .attr('y', (y(metadataHeight) + cellPadding) * i)
                         .attr('font-size',scale(yAxistextSize))
+                    
+                    var metaValues = metadata.map(a => a[metaList[i]])
+                    
+                    
+                    if(!metaValues.some(isNaN)){
+                        legend.append('text')
+                            .text(metaList[i])
+                            .attr('font-size',scale(yAxistextSize))
+                            .attr('font-weight', 'bold')
+                            .attr('y', function(d){return (y(cellHeight/2) + (cellPadding*2)) + metaLegendOffset})
+                            .attr('dy', scale(-5))
+                        metaLegendOffset =  (y(cellHeight/2) + (cellPadding*2)) + metaLegendOffset
+                        
+                        legendArray = []
+                        for(j=Math.min(...metaValues); j <= Math.max(...metaValues); j = ((Math.max(...metaValues) - Math.min(...metaValues))/5)+j ){
+                            legendArray.push(j)
+                        }
+                         
+                        for(j=0; j < 5; j++){
+                            legend.append('rect')
+                                .attr('width',y(cellWidth))
+                                .attr('height',y(cellHeight/2))
+                                .attr('fill',function(d){
+                                    return metaColorScale(legendArray[j])
+                                })
+                                .attr('x', function(d){return y(cellWidth) * j})
+                                .attr('y', function(d){return metaLegendOffset})    
+                        }
+                        legend.append('text')
+                            .text(Math.min(...metaValues))
+                            .attr('font-size',scale(yAxistextSize))
+                            .attr('text-anchor', 'middle')
+                            .attr('y', function(d){return (y(cellHeight/2) + (cellPadding*2)) + metaLegendOffset})
+                            .attr('dy', scale(yAxistextSize)/2)
+                        
+                        legend.append('text')
+                            .text(Math.max(...metaValues))
+                            .attr('font-size',scale(yAxistextSize))
+                            .attr('text-anchor', 'middle')
+                            .attr('x', function(d){return y(cellWidth) * 5})
+                            .attr('y', function(d){return (y(cellHeight/2) + (cellPadding*2)) + metaLegendOffset})
+                            .attr('dy', scale(yAxistextSize)/2)
+                        
+                        metaLegendOffset =  (y(cellHeight/2) + (cellPadding*2)) * 2 + metaLegendOffset
+                        
+                    }
+                    else{
+                        var uniqValues = [...new Set(metaValues)]
+                        if(uniqValues.includes('')){
+                            uniqValues.splice(uniqValues.indexOf(''),1)
+                        }
+                        legend.append('text')
+                            .text(metaList[i])
+                            .attr('font-size',scale(yAxistextSize))
+                            .attr('font-weight', 'bold')
+                            .attr('y', function(d){return (y(cellHeight/2) + (cellPadding*2)) + metaLegendOffset})
+                            .attr('dy', scale(-5))
+                        
+                        metaLegendOffset =  (y(cellHeight/2) + (cellPadding*2)) + metaLegendOffset
+                        
+                        for(j in uniqValues){
+                            legend.append('rect')
+                                .attr('width',y(cellWidth))
+                                .attr('height',y(cellHeight/2))
+                                .attr('fill',function(d){
+                                    return metaColorScale(uniqValues[j])
+                                })
+                                .attr('y', function(d){return (y(cellHeight/2) + (cellPadding*2)) * j + metaLegendOffset})
+
+                            legend.append('text')
+                                .text(uniqValues[j])
+                                .attr('font-size',scale(yAxistextSize))
+                                .attr('x', y(cellWidth) + cellPadding)
+                                .attr('y', function(d){return (y(cellHeight/2) + (cellPadding*2)) * j + metaLegendOffset})
+                                .attr('dy', scale(yAxistextSize))
+                        }
+                        metaLegendOffset =  (y(cellHeight/2) + (cellPadding*2)) * (uniqValues.length + 1) + metaLegendOffset
+                    }
                 }
                 groupBy.append('option')
                     .attr('value',metaList[i])
@@ -583,8 +747,6 @@
             groupBy.append('option')
                 .attr('value', 'Custom')
                 .text('Custom')
-            
-    
             
             //add gene code
             var addGeneList = d3.select('#addGeneList')
@@ -677,67 +839,6 @@
             })
             
             //groupBy code
-            function reSort(groupByValue, sortByValue){
-                console.log("grouping by... " + groupByValue + " on... " + sortByValue)
-                if(groupByValue == 'Sample'){
-                    //sort by default
-                    samples = rankSamples(samples,filteredData, metadata)
-                    readjustPos(genes, samples, metaList)
-                }
-                else if(groupByValue == 'Custom'){
-                    //do nothing
-                }
-                else{
-                    var metaKey = []
-                    metadata.forEach(function(d){metaKey.push({sample: d.Sample, value: d[groupByValue]})})
-                    var metaValues = metaKey.map(a => a.value)
-                    //check if metadata values are not numerical
-                    if(metaValues.some(isNaN)){
-                        uniqValues = [...new Set(metaValues)]
-                        sampleOrder = []
-                        for(i in uniqValues){
-                            var groupOrder = []
-                            var groupScore = 0
-                            groupData = metaKey.filter(function(f){
-                                return f.value == uniqValues[i]
-                            })
-                            //console.log(sampleData)
-                            for(j in groupData){
-                                sampleData = filteredData.filter(function(f){
-                                    return f.Sample == groupData[j].sample 
-                                })
-                                var sampleScore = rank(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)
-                                groupOrder.push({sample: groupData[j].sample , group: uniqValues[i], score: sampleScore})
-                                if(sortByValue == 'max'){
-                                    groupScore = Math.max(sampleScore, groupScore)
-                                }
-                                else if(sortByValue == 'avg'){
-                                    groupScore = groupScore + sampleScore
-                                }
-                                else{
-                                    //should never happpen
-                                    console.log("error")
-                                }
-                            }
-                            if(sortByValue == 'avg'){
-                                groupScore = groupScore / groupData.length
-                            }
-                            groupOrder = groupOrder.map(a => ({...a, groupScore: groupScore}))
-                            sampleOrder = sampleOrder.concat(groupOrder)
-                        }
-                        sampleOrder.sort(function(a,b){return b.groupScore - a.groupScore || b.score - a.score;})
-                        samples = sampleOrder.map(a => a.sample)  
-                        readjustPos(genes, samples, metaList)
-                    }
-                    //if metadata values are numerical
-                    else{
-                        metadata.sort((a, b) => (a[groupByValue] < b[groupByValue]) ? 1 : -1)
-                        samples = metadata.map(a => a.Sample)
-                    }
-                    readjustPos(genes, samples, metaList)
-                }
-            }
-                
             groupBy.on('change',function(d){
                 reSort(this.value, document.getElementById('sortByList').value)
             })
@@ -788,7 +889,7 @@
                     delete dragging[draggedSample]
                     readjustPos(genes, samples, metaList)
                 })  
-                );
+                )
         })
     </script>
   </body>
