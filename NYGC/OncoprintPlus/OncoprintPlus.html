@@ -167,7 +167,52 @@
             }
         }
         
-        function rank(subset, metadata, thresh_ha, thresh_a, thresh_d, thresh_dd){
+        function rankSampleSubset(subset, metadata, thresh_ha, thresh_a, thresh_d, thresh_dd, genes){
+            score = 0
+            for(i in subset){
+                geneRankPos = genes.indexOf(subset[i].Gene) * 10
+                subset[i].Ploidy = metadata.filter(function(f){return f.Sample == subset[i].Sample})[0].Ploidy
+                if (subset[i].Impact == "MODERATE"){
+                    score = score + (1000/Math.pow(2,geneRankPos))
+                }
+                else if (subset[i].Impact == "HIGH"){
+                    score = score + (10000/Math.pow(2,geneRankPos))
+                }
+                if (subset[i].CNV != ""){
+                    copyNumDiff = subset[i].CNV-subset[i].Ploidy
+                    if(copyNumDiff >= thresh_ha){
+                        score = score + (100/Math.pow(2,geneRankPos))
+                    }
+                    else if(copyNumDiff >= thresh_a && copyNumDiff < thresh_ha){
+                        score = score + (10/Math.pow(2,geneRankPos))
+                    }
+                    else if(copyNumDiff <= thresh_dd){
+                        score = score + (10/Math.pow(2,geneRankPos))
+                    }
+                    else if(copyNumDiff <= thresh_d && copyNumDiff > thresh_dd){
+                        score = score + (100/Math.pow(2,geneRankPos))
+                    }
+                }
+            }
+            /*
+            mod_num = subset.filter(function(f){return f.Impact == "MODERATE"}).length
+            high_num = subset.filter(function(f){return f.Impact == "HIGH"}).length
+            high_amp_num = subset.filter(function(f){return f.CNV-f.Ploidy >= thresh_ha && f.CNV != ""}).length
+            amp_num = subset.filter(function(f){return f.CNV-f.Ploidy >= thresh_a && f.CNV-f.Ploidy < thresh_ha && f.CNV != ""}).length
+            deep_del_num = subset.filter(function(f){return f.CNV-f.Ploidy <= thresh_dd && f.CNV != ""}).length
+            del_num = subset.filter(function(f){return f.CNV-f.Ploidy <= thresh_d && f.CNV-f.Ploidy > thresh_dd && f.CNV != ""}).length
+
+            score = high_num * 20
+                + mod_num * 10
+                + deep_del_num * 4
+                + high_amp_num * 4
+                + del_num * 2
+                + amp_num * 2
+            */
+            return score
+        }
+        
+        function rankGeneSubset(subset, metadata, thresh_ha, thresh_a, thresh_d, thresh_dd, prioritize=false){
             for(i in subset){
                 subset[i].Ploidy = metadata.filter(function(f){return f.Sample == subset[i].Sample})[0].Ploidy
             }
@@ -188,16 +233,17 @@
             return score
         }
         
-        function rankSamples(samples, data, metadata){
+        function rankSamples(samples, data, metadata, genes){
             //console.log(metadata)
             sampleRankList = []
             for (i in samples){
                 sampleData = data.filter(function(f){
                     return f.Sample == samples[i]
                 })
-                sampleRankList.push({Sample: samples[i], score: rank(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
+                sampleRankList.push({Sample: samples[i], score: rankSampleSubset(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel,genes)})
             }
             sampleRankList.sort(function(a,b){return b.score - a.score})
+            console.log(sampleRankList)
             return [...new Set(sampleRankList.map(a => a.Sample))]
         }
         
@@ -208,7 +254,7 @@
                 geneData = data.filter(function(f){
                     return f.Gene == geneList[i]
                 })
-                rankList.push({gene: geneList[i], score: rank(geneData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
+                rankList.push({gene: geneList[i], score: rankGeneSubset(geneData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)})
             }
             rankList = rankList.filter(function(f){return f.gene != 'Unknown'})
             
@@ -410,15 +456,15 @@
 
             //filter data to top 30 ranked
             var topList = rankList.slice(0,30)
+            var genes = topList.map(a => a.gene)
             var filteredData = []
             for(i in topList){
                 filteredData = filteredData.concat(data.filter(function(f){return f.Gene == topList[i].gene}))
             }
             
             //rank and sort samples based on current gene selection
-            samples = rankSamples(samples, filteredData, metadata)
+            samples = rankSamples(samples, filteredData, metadata, genes)
 
-            var genes = topList.map(a => a.gene)
             var longestGene = Math.max(...(genes.map(a => a.length)))
             yAxisWidth = yAxistextSize * (longestGene + 5)
             
@@ -487,7 +533,7 @@
                             //console.log(filteredData)
                             //rerank samples if not locked
                             if(document.getElementById("groupByList").value == 'Sample'){
-                                samples = rankSamples(samples, filteredData, metadata)
+                                samples = rankSamples(samples, filteredData, metadata, genes)
                             }
                             //console.log(sampleRankList)
                             
@@ -501,7 +547,7 @@
                 console.log("grouping by... " + groupByValue + " on... " + sortByValue)
                 if(groupByValue == 'Sample'){
                     //sort by default
-                    samples = rankSamples(samples,filteredData, metadata)
+                    samples = rankSamples(samples,filteredData, metadata, genes)
                     readjustPos(genes, samples, metaList)
                 }
                 else if(groupByValue == 'Custom'){
@@ -526,7 +572,7 @@
                                 sampleData = filteredData.filter(function(f){
                                     return f.Sample == groupData[j].sample 
                                 })
-                                var sampleScore = rank(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)
+                                var sampleScore = rankSampleSubset(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel, genes)
                                 groupOrder.push({sample: groupData[j].sample , group: uniqValues[i], score: sampleScore})
                                 if(sortByValue == 'max'){
                                     groupScore = Math.max(sampleScore, groupScore)
@@ -784,7 +830,7 @@
                     geneData = data.filter(function(f){
                         return f.Gene == geneToAdd
                     })
-                    geneRank = {gene: geneToAdd, score: rank(geneData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)}
+                    geneRank = {gene: geneToAdd, score: rankGeneSubset(geneData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel)}
                     //add to toplist
                     topList.push(geneRank)
                     topList.sort(function(a,b){return b.score - a.score})
@@ -798,7 +844,7 @@
                     }
                     //rerank samples
                     if(document.getElementById("groupByList").value == 'Sample'){
-                        samples = rankSamples(samples,filteredData, metadata)
+                        samples = rankSamples(samples,filteredData, metadata, genes)
                     }
                     //add gene to yaxis
                     addGene(geneToAdd, genes.length)
@@ -831,7 +877,7 @@
                 genes = topList.map(a => a.gene)
                 //rerank samples
                 if(document.getElementById("groupByList").value == 'Sample'){
-                    samples = rankSamples(samples,filteredData, metadata)
+                    samples = rankSamples(samples,filteredData, metadata, genes)
                 }
                 //recolor cnvs of current genes
                 d3.selectAll('.CNV')
