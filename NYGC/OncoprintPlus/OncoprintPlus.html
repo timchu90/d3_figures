@@ -168,29 +168,30 @@
         }
         
         function rankSampleSubset(subset, metadata, thresh_ha, thresh_a, thresh_d, thresh_dd, genes){
-            score = 0
+            score = BigInt(0)
+	    multiplier = BigInt(Math.pow(10,genes.length))
             for(i in subset){
-                geneRankPos = genes.indexOf(subset[i].Gene) * 10
+                geneRankPos = genes.indexOf(subset[i].Gene)
                 subset[i].Ploidy = metadata.filter(function(f){return f.Sample == subset[i].Sample})[0].Ploidy
                 if (subset[i].Impact == "MODERATE"){
-                    score = score + (1000/Math.pow(2,geneRankPos))
+                    score = score + BigInt(3)*multiplier/BigInt(Math.pow(10,geneRankPos))
                 }
                 else if (subset[i].Impact == "HIGH"){
-                    score = score + (10000/Math.pow(2,geneRankPos))
+                    score = score + BigInt(6)*multiplier/BigInt(Math.pow(10,geneRankPos))
                 }
                 if (subset[i].CNV != ""){
                     copyNumDiff = subset[i].CNV-subset[i].Ploidy
                     if(copyNumDiff >= thresh_ha){
-                        score = score + (100/Math.pow(2,geneRankPos))
+                        score = score + BigInt(2)*multiplier/BigInt(Math.pow(10,geneRankPos))
                     }
                     else if(copyNumDiff >= thresh_a && copyNumDiff < thresh_ha){
-                        score = score + (10/Math.pow(2,geneRankPos))
+                        score = score + BigInt(1)*multiplier/BigInt(Math.pow(10,geneRankPos))
                     }
                     else if(copyNumDiff <= thresh_dd){
-                        score = score + (100/Math.pow(2,geneRankPos))
+                        score = score + BigInt(2)*multiplier/BigInt(Math.pow(10,geneRankPos))
                     }
                     else if(copyNumDiff <= thresh_d && copyNumDiff > thresh_dd){
-                        score = score + (10/Math.pow(2,geneRankPos))
+                        score = score + BigInt(1)*multiplier/BigInt(Math.pow(10,geneRankPos))
                     }
                 }
             }
@@ -227,7 +228,14 @@
                 })
                 sampleRankList.push({Sample: samples[i], score: rankSampleSubset(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel,genes)})
             }
-            sampleRankList.sort(function(a,b){return b.score - a.score})
+            sampleRankList.sort(function(a,b){
+		if(b.score < a.score){
+			return -1
+		}
+		else{
+			return 1
+		}
+	    })
             console.log(sampleRankList)
             return [...new Set(sampleRankList.map(a => a.Sample))]
         }
@@ -545,10 +553,11 @@
                     //check if metadata values are not numerical
                     if(metaValues.some(isNaN)){
                         uniqValues = [...new Set(metaValues)]
+			console.log(uniqValues)
                         sampleOrder = []
                         for(i in uniqValues){
                             var groupOrder = []
-                            var groupScore = 0
+                            var groupScore = BigInt(0)
                             groupData = metaKey.filter(function(f){
                                 return f.value == uniqValues[i]
                             })
@@ -560,7 +569,9 @@
                                 var sampleScore = rankSampleSubset(sampleData,metadata,thresh_highamp,thresh_amp,thresh_del,thresh_deepdel, genes)
                                 groupOrder.push({sample: groupData[j].sample , group: uniqValues[i], score: sampleScore})
                                 if(sortByValue == 'max'){
-                                    groupScore = Math.max(sampleScore, groupScore)
+				    if(groupScore < sampleScore){
+					groupScore = sampleScore
+                                    }
                                 }
                                 else if(sortByValue == 'avg'){
                                     groupScore = groupScore + sampleScore
@@ -571,13 +582,26 @@
                                 }
                             }
                             if(sortByValue == 'avg'){
-                                groupScore = groupScore / groupData.length
+                                groupScore = groupScore / BigInt(groupData.length)
                             }
                             groupOrder = groupOrder.map(a => ({...a, groupScore: groupScore}))
                             sampleOrder = sampleOrder.concat(groupOrder)
                         }
-                        sampleOrder.sort(function(a,b){return b.groupScore - a.groupScore || b.score - a.score;})
-                        samples = sampleOrder.map(a => a.sample)  
+                        sampleOrder.sort(function(a,b){
+			    if(b.groupScore > a.groupScore){
+				return 1
+			    }
+			    else if(b.groupScore == a.groupScore){
+				if(b.score > a.score){
+				    return 1
+				}
+			    }
+			    else {
+				return -1
+			    }
+			})
+                        console.log(sampleOrder)
+			samples = sampleOrder.map(a => a.sample)  
                         readjustPos(genes, samples, metaList)
                     }
                     //if metadata values are numerical
