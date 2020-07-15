@@ -187,28 +187,13 @@
                         score = score + (10/Math.pow(2,geneRankPos))
                     }
                     else if(copyNumDiff <= thresh_dd){
-                        score = score + (10/Math.pow(2,geneRankPos))
+                        score = score + (100/Math.pow(2,geneRankPos))
                     }
                     else if(copyNumDiff <= thresh_d && copyNumDiff > thresh_dd){
-                        score = score + (100/Math.pow(2,geneRankPos))
+                        score = score + (10/Math.pow(2,geneRankPos))
                     }
                 }
             }
-            /*
-            mod_num = subset.filter(function(f){return f.Impact == "MODERATE"}).length
-            high_num = subset.filter(function(f){return f.Impact == "HIGH"}).length
-            high_amp_num = subset.filter(function(f){return f.CNV-f.Ploidy >= thresh_ha && f.CNV != ""}).length
-            amp_num = subset.filter(function(f){return f.CNV-f.Ploidy >= thresh_a && f.CNV-f.Ploidy < thresh_ha && f.CNV != ""}).length
-            deep_del_num = subset.filter(function(f){return f.CNV-f.Ploidy <= thresh_dd && f.CNV != ""}).length
-            del_num = subset.filter(function(f){return f.CNV-f.Ploidy <= thresh_d && f.CNV-f.Ploidy > thresh_dd && f.CNV != ""}).length
-
-            score = high_num * 20
-                + mod_num * 10
-                + deep_del_num * 4
-                + high_amp_num * 4
-                + del_num * 2
-                + amp_num * 2
-            */
             return score
         }
         
