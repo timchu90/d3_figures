@@ -34,7 +34,7 @@ while(i < len(texinput)):
             elif ('black,draw,text' in texinput[i]):
                 output.append(texinput[i].strip()
                             .replace("node[black,draw,text width=1.09cm,inner sep=2pt,align=center]{",'"name":"')
-                            .replace("\};", '"},')
+                            .replace("};", '"},')
 
                 )
             elif ('% VAF of acquired mutations' in texinput[i]):
