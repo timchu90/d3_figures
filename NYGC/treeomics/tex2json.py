@@ -9,6 +9,7 @@ texinput = f.read()
 texinput = texinput.replace("\\","")
 texinput = texinput[slice(texinput.index("Tree"), texinput.index("end{tikzpicture}"))]
 texinput = texinput.split('\n')
+
 output = []
 i = 0
 while(i < len(texinput)):
@@ -45,8 +46,9 @@ while(i < len(texinput)):
                             .replace("]","]},",1)
                            )
     i = i + 1
-    
+
 output = "{" + "".join(output).replace("},]", "}]")
 n = output.rindex(",")
-output = output[slice(0,n)] + output[slice(n)].replace(",","",1)
+
+output = output[slice(0,n)] + output[slice(n,len(output))].replace(",","",1)
 print(output)
