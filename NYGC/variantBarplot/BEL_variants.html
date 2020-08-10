@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+        #chart {
+            position: fixed;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+            z-index: -2;
+            height: 100%;
+        }
+        body {
+            font-family: sans-serif
+        }
+        div.tooltip {
+            position: absolute;
+            text-align: left;
+            width: 120px;
+            height: 50px;
+            padding-left: 10px;
+            font: 12px sans-serif;
+            border: 0.5px solid gray;
+            background: white;
+            border-radius: 5px;
+            pointer-events: none;
+            padding-top: 10px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+        var chartDiv = document.getElementById("chart");
+        var margin = 20
+        var width = chartDiv.clientWidth;
+        var height = chartDiv.clientHeight;
+        var xshift = 70
+
+        var signatures = ['stop_lost','stop_gained','start_lost','splice_donor_variant','splice_acceptor_variant','inframe_insertion','inframe_deletion','frameshift_variant',]
+
+        var signatureColors = ['#8dd3c7','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f']
+        
+        var sites = ['Adrenal_gland','Bone','Brain','Liver','Lung','Lymph_node','Prostate']
+        var siteColors = ['#1f78b4','#b2df8a','#a6cee3','#33a02c','#fb9a99','#e31a1c','#fdbf6f']
+        
+        //var sortedSamples = ['PM1024-Z1-1-Case-WGS','PM2086-Z1-Case-WGS','PM1207-Z1-1-Case-WGS','PM1358-Z1-1-Case-WGS','PM191-Z8-1-Case-WGS','PM493-Z1-1-Case-WGS','PM12_Z13_1_Case','PM12_Z4_2_Case','PM223-Z4-1-WGS','PM428-Z2-1-Case-WGS','','PM1388-Z3-1-Case-WGS','PM1207-Z4-1-Case-WGS','PM90-Z25-1-Case-WGS','PM1358A-Z3-1-Case-WGS','PM1358A-Z2-1-Case-WGS','PM90-Z21-1-Case','PM1358A-Z4-1-Case-WGS','PM89-Z1-1-Case','PM1232-Z16-1-Case-WGS','PM1232-Z4-1-Case-WGS','PM0_Tissue_LM2_A','PM677-Z9-1-Case-WGS','PM677-Z7-1-Case-WGS','PM677-Z12-1-Case-WGS','PM677-Z16-1-Case-WGS','PM63-Z6-1-Case-WGS','PM63-Z3-1-Case-WGS','PM59-Z2-1-Case','PM0_Tissue_LM1_A','PM7_Tissue','PM1_Tissue','PM90-Z19-1-Case-WGS','PM159-Z22-1-Case','PM159-Z1-1-Case-WGS','PM159-Z6-1-Case-WGS','PM159-Z7-1-Case-WGS',' ','PM4_Tissue_LLB_LLA_LT2_LA_MED','PM63-Z2-1-Case','PM63-Z10-1-Case-WGS','PM12-Z10-1-Case-WGS','PM223-Z2-1-Case-WGS','PM159-Z13-1-Case-WGS']
+        
+        var sortedSamples = ["WCM12_BR_3","WCM12_BR_2","WCM1024_BR_1","WCM1358_BR_1","WCM2086_BR_1","WCM493_BR_1","WCM428_BR_1","WCM1207_BR_1","WCM191_BR_1","WCM223_BR_1","  ","WCM1207_LV_1","WCM159_LN_1","WCM63_LG_3","WCM63_LV_2","WCM677_BN_1","WCM1388_LV_1","WCM89_LN_1","WCM1358_LN_2","WCM59_LV_1","WCM677_LV_2","WCM0_LV_2","WCM90_LV_1","WCM677_LG_4","WCM677_LN_3","WCM1358_PP_3","WCM0_LV_1","WCM1358_LV_1","WCM90_LN_2","WCM159_LG_4","WCM1232_LN_1","WCM159_AG_2","WCM1232_LN_2","WCM90_LN_1","WCM1_BN_1","WCM7_LV_1","WCM159_LN_3"," ","WCM12_PR_1","WCM4_PR_1","WCM223_PR_1","WCM63_PR_1","WCM63_PR_2","WCM159_PR_1"]
+        
+        //var sortedSamples =["WCM0_LV_1","WCM0_LV_2","","WCM1024_BR_1"," ","WCM1207_BR_1","WCM1207_LV_1","  ","WCM1232_LN_1","WCM1232_LN_2","   ","WCM12_PR_1","WCM12_BR_2","WCM12_BR_3","    ","WCM1358_BR_1","WCM1358_LV_1","WCM1358_LN_2","WCM1358_PP_3","     ","WCM1388_LV_1","      ","WCM159_LN_1","WCM159_PR_1","WCM159_AG_2","WCM159_LN_3","WCM159_LG_4","       ","WCM191_BR_1","        ","WCM1_BN_1","         ","WCM2086_BR_1","          ","WCM223_BR_1","WCM223_PR_1","           ","WCM428_BR_1","            ","WCM493_BR_1","             ","WCM4_PR_1","              ","WCM59_LV_1","               ","WCM63_PR_1","WCM63_PR_2","WCM63_LV_2","WCM63_LG_3","                ","WCM677_BN_1","WCM677_LV_2","WCM677_LN_3","WCM677_LG_4","                 ","WCM7_LV_1","                  ","WCM89_LN_1","                   ","WCM90_LN_1","WCM90_LV_1","WCM90_LN_2"]
+        
+        //var sample_ids = ["PM159-Z22-1-Case","PM59-Z2-1-Case","PM63-Z2-1-Case","PM89-Z1-1-Case","PM90-Z21-1-Case","PM0_Tissue_LM1_A","PM0_Tissue_LM2_A","PM1_Tissue","PM4_Tissue_LLB_LLA_LT2_LA_MED","PM7_Tissue","PM63-Z10-1-Case-WGS","PM63-Z3-1-Case-WGS","PM63-Z6-1-Case-WGS","PM90-Z19-1-Case-WGS","PM90-Z25-1-Case-WGS","PM159-Z13-1-Case-WGS","PM159-Z1-1-Case-WGS","PM159-Z6-1-Case-WGS","PM159-Z7-1-Case-WGS","PM677-Z7-1-Case-WGS","PM677-Z9-1-Case-WGS","PM677-Z12-1-Case-WGS","PM677-Z16-1-Case-WGS","PM1232-Z4-1-Case-WGS","PM1232-Z16-1-Case-WGS","PM1388-Z3-1-Case-WGS","PM1024-Z1-1-Case-WGS","PM223-Z4-1-WGS","PM1207-Z1-1-Case-WGS","PM191-Z8-1-Case-WGS","PM1358-Z1-1-Case-WGS","PM428-Z2-1-Case-WGS","PM12-Z10-1-Case-WGS","PM12_Z13_1_Case","PM12_Z4_2_Case","PM1207-Z4-1-Case-WGS","PM223-Z2-1-Case-WGS","PM1358A-Z2-1-Case-WGS","PM1358A-Z3-1-Case-WGS","PM1358A-Z4-1-Case-WGS","PM493-Z1-1-Case-WGS","PM2086-Z1-Case-WGS"]
+        //var sample_names=["WCM159_LN_1","WCM59_LV_1","WCM63_PR_1","WCM89_LN_1","WCM90_LV_1","WCM0_LV_1","WCM0_LV_2","WCM1_BN_1","WCM4_PR_1","WCM7_LV_1","WCM63_PR_2","WCM63_LV_2","WCM63_LG_3","WCM90_LN_1","WCM90_LN_2","WCM159_PR_1","WCM159_AG_2","WCM159_LN_3","WCM159_LG_4","WCM677_BN_1","WCM677_LV_2","WCM677_LN_3","WCM677_LG_4","WCM1232_LN_1","WCM1232_LN_2","WCM1388_LV_1","WCM1024_BR_1","WCM223_BR_1","WCM1207_BR_1","WCM191_BR_1","WCM1358_BR_1","WCM428_BR_1","WCM12_PR_1","WCM12_BR_2","WCM12_BR_3","WCM1207_LV_1","WCM223_PR_1","WCM1358_LV_1","WCM1358_LN_2","WCM1358_PP_3","WCM493_BR_1","WCM2086_BR_1"]
+        
+        //var convertID = d3.scaleOrdinal().range(sample_names).domain(sample_ids)
+        
+        //,#F2B701,#E73F74,#80BA5A,#E68310,#008695,#CF1C90,#f97b72,#4b4b8f,#A5AA99
+        var x = d3.scaleBand().range([xshift,width-250])
+        var y = d3.scaleLinear().range([height-215,0]).domain([0,80])
+        var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", chartDiv.clientWidth - margin)
+            .attr("height", chartDiv.clientHeight - margin)
+            .attr('transform','translate(' + margin/4 + ',' + margin/4 + ')')
+
+        var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+        
+        var yaxis = d3.axisLeft()
+            .scale(y)
+        
+        var xaxis = d3.axisBottom()
+            .scale(x)
+    
+        //start drawing actual data
+        d3.tsv("BEL.txt", function(error,data){
+            if (error) throw error;
+            console.log(data)
+            var layers = d3.stack().keys(signatures)(data)
+            
+            var samples = layers[0].map(function(d){
+                //console.log(d.data.Sample)
+                return d.data.Sample
+            })
+            
+            //x.domain(samples)
+            x.domain(sortedSamples)
+            signatureShortlist = []
+            var colorScale = d3.scaleOrdinal().range(signatureColors).domain(signatures)
+            var siteScale = d3.scaleOrdinal().range(siteColors).domain(sites)
+            
+            var layer = svg.selectAll('layer')
+                .data(layers)
+                .enter()
+                .append('g')
+                .attr('class', function(d){
+                    return d.key
+                })
+                .style('fill',function(d){
+                    console.log(colorScale(d.key))
+                    return colorScale(d.key)
+                })
+            
+            var column = layer.selectAll('rect')
+                .data(function(d){
+                    return d
+                })
+                .enter()
+                
+            column.append('rect')
+                .attr('x', function(d){
+                    return x(d.data.Sample)
+                })
+                .attr('y', function(d){
+                    return y(d[1])
+                })
+                .attr('height', function(d){
+                    return y(d[0]) - y(d[1])
+                })
+                .attr('width', x.bandwidth()-1)
+            
+            column.append('rect')
+                .attr('transform',`translate(0,${height-200})`)
+                .attr('x', function(d){
+                    return x(d.data.Sample)
+                })
+                .attr('height', x.bandwidth()-1)
+                .attr('width', x.bandwidth()-1)
+                .attr('fill',function(d){
+                    return siteScale(d.data.Site)
+                })
+            
+            svg.append('g')
+                .attr('class','yaxis')
+                .attr('transform',`translate(${xshift-5},0)`)
+                .call(yaxis)
+            
+            svg.append('g')
+                .attr('class','xaxis')
+                .attr('transform',`translate(0,${height-210})`)
+                .call(xaxis)
+                .selectAll('text')
+                    .style('text-anchor','end')
+                    .attr('dy', -6)
+                    .attr('dx', scale(-45))
+                    .attr('transform', function(d){
+                        return "rotate(-90)"
+                    })
+            
+            for(i in signatures){
+                svg.append('rect')
+                    .attr('x', width-230)
+                    .attr('y', scale(i*20))
+                    .attr('fill', function(d){
+                        return colorScale(signatures[i])
+                    })
+                    .attr('height',10)
+                    .attr('width',10)
+
+                svg.append('text')
+                    .attr('x', width-210)
+                    .attr('y', scale(i*20))
+                    .text(signatures[i])
+                    .attr('fill','black')
+                    .attr('dy',scale(12))
+                    .style('font-size',scale(15))
+            }
+            
+            for(i in sites){
+                svg.append('rect')
+                    .attr('x', width-230)
+                    .attr('y', scale(200 + i*20))
+                    .attr('fill', function(d){
+                        return siteScale(sites[i])
+                    })
+                    .attr('height',10)
+                    .attr('width',10)
+
+                svg.append('text')
+                    .attr('x', width-210)
+                    .attr('y', scale(200 +i*20))
+                    .text(sites[i])
+                    .attr('fill','black')
+                    .attr('dy',scale(12))
+                    .style('font-size',scale(15))
+            }
+        })
+
+    </script>
+  </body>
+</html>
