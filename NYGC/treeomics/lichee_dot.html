@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+	<script src="http://dagrejs.github.io/project/graphlib-dot/latest/graphlib-dot.min.js"></script>
+	<script src="https://dagrejs.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
+    <style>
+    	#chart {
+			position: fixed;
+			left: 0px;
+			right: 0px;
+			top: 0px;
+			bottom: 0px;
+			z-index: -2;
+			height: 100%;
+		}
+		body {
+			font-family: sans-serif
+		}
+		div.tooltip {
+			position: absolute;
+			text-align: left;
+			left: 5%;
+			top: 5%;
+			width: 20%;
+			height: 15%;
+			padding: 2px;
+			border: 0px;
+			border-radius: 2px;
+			pointer-events: none;
+		}
+		.node circle{
+			stroke: #fff;
+			stroke-width: 2px;
+			fill: #ffd699; 
+		}
+		.node rect {
+			stroke: #fff;
+			stroke-width: 2px;
+			fill: #ffc2c2; 
+			rx: 10;
+			ry: 10
+		}
+		.edgeLabel rect {
+			fill: #fff;
+		}
+		.edgePath {
+			stroke: #8e8e8e;
+			stroke-width: 0px;
+			fill: none;
+		}
+		.link {
+			
+		}
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+        var chartDiv = document.getElementById("chart");
+        var width = chartDiv.clientWidth -40;
+        var height = chartDiv.clientHeight -40;
+
+        var x = d3.scaleLinear().range([0,width]).domain([0,1000])
+        var y = d3.scaleLinear().range([0,height]).domain([0,1000])
+        var scale = d3.scaleLinear().range([0,width]).domain([0,1000])
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+		
+		var render = new dagreD3.render();
+		
+		d3.text('./nepc_dot/PM63.0.2.trees.dot').then(function(data){
+			customPaths = svg.append('g').attr('class','customPaths')
+			dagre = svg.append('g').attr('class','dagre')
+			
+			data = data.replace(/width=1920 height=1080/g,"") //remove lichee's incorrect width and height attribute
+			data = data.replace(/shape=([\S]+)/g,"") //remove lichee's incorrect shape attribute
+			//console.log(data)
+			var graph = graphlibDot.read(data)
+			graph.graph().rankdir="LR"
+			//graph.graph().ranker="tight-tree"
+			graph.graph().ranker="longest-path"
+			
+			graph.nodes().forEach(function(v) {
+				var node = graph.node(v);
+				console.log(node)
+				if(!isNaN(node.label)){
+					node.shape = "circle"
+					node.height = Math.cbrt(node.label)
+					node.id = v
+					console.log(node.height)
+				}
+				else {
+					node.shape = "rect"
+					node.height = 30
+				}
+			});
+			
+			console.log(graph._edgeLabels)
+			
+			for (i in graph._edgeLabels) {
+				graph._edgeLabels[i].curve = d3.curveBasis
+				//graph._edgeLabels[i].arrowhead = "customPath"
+			}
+			
+			render(d3.select(".dagre"), graph);
+			svg.attr("height",graph.graph().height + 100)
+			svg.attr("width",graph.graph().width + 100)
+			console.log(graph)
+			
+			var nodes = graph._nodes
+			
+			d3.selectAll(".label-container")
+				.attr('r',function(d){
+					if(this.parentElement.id){
+						console.log(nodes[this.parentElement.id])
+						return Math.cbrt(nodes[this.parentElement.id].label)
+					}
+					else{
+						return 5
+					}
+					
+				})
+			
+			//attach parents to node data structure
+			for(i in nodes){
+				nodes[i].parents = Object.keys(graph._preds[i])
+			}
+			
+			for(i in nodes){
+				var d = nodes[i]
+				if(d.parents.length > 0){
+					var link = customPaths.append('g')
+					for(j in d.parents){
+						var parent_id = d.parents[j]
+						var paths = link.append("path")
+							.attr("class", "link")
+							.attr("d", function() {
+								if(!isNaN(d.label)){
+									nodeSize = Math.cbrt(d.label)
+								}
+								else{
+									nodeSize = 5
+								}
+								if(!isNaN(nodes[parent_id].label)){
+									parent_nodeSize = Math.cbrt(nodes[parent_id].label)
+								}
+								else{
+									parent_nodeSize = 5
+								}
+
+								adjustY = d.y + nodeSize
+								adjustParentY = nodes[parent_id].y + parent_nodeSize
+								adjustY2 = d.y - nodeSize
+								adjustParentY2 = nodes[parent_id].y - parent_nodeSize
+
+								return "M" + (d.x) + "," + (adjustY)
+									 + "C" + (d.x + nodes[parent_id].x) / 2 + "," + adjustY
+									 + " " + (d.x + nodes[parent_id].x) / 2 + "," + adjustParentY
+									 + " " + nodes[parent_id].x + "," + adjustParentY
+									 + " L" + nodes[parent_id].x + "," + adjustParentY2
+									 + " C" + (d.x + nodes[parent_id].x) / 2 + "," + adjustParentY2
+									 + " " + (d.x + nodes[parent_id].x) / 2 + "," + adjustY2
+									 + " " + d.x + "," + adjustY2
+
+							})
+							.attr('fill','#cce6ff')
+							//.attr('fill','none')
+							.attr('stroke','#cce6ff')
+							.attr('stroke-width',2)
+							.attr('opacity',0.7)
+					}
+				}
+				
+			}
+		})
+    </script>
+  </body>
+</html>
