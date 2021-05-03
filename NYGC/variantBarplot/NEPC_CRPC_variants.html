@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+        #chart {
+            position: fixed;
+            left: 0px;
+            right: 0px;
+            top: 0px;
+            bottom: 0px;
+            z-index: -2;
+            height: 100%;
+        }
+        body {
+            font-family: sans-serif
+        }
+        div.tooltip {
+            position: absolute;
+            text-align: left;
+            width: 120px;
+            height: 50px;
+            padding-left: 10px;
+            font: 12px sans-serif;
+            border: 0.5px solid gray;
+            background: white;
+            border-radius: 5px;
+            pointer-events: none;
+            padding-top: 10px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+    </style>
+  </head>
+  <body>
+    <div id="chart">
+    </div>
+    <script>
+        var chartDiv = document.getElementById("chart");
+        var margin = 10
+        var width = chartDiv.clientWidth;
+        var height = chartDiv.clientHeight;
+        var xshift = 70
+
+        var variants = [
+            'stop_lost',
+            'stop_gained',
+            'start_lost',
+            'splice_donor_variant',
+            'splice_acceptor_variant',
+            'inframe_insertion',
+            'inframe_deletion',
+            'frameshift_variant',
+            'missense_variant'
+           ]
+
+        var variantColors = ['#8dd3c7','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f']
+        
+        var clinical = ['CRPC','HN met PCA','HN PCA','NEPC','NEPC (de novo)']
+        var clinicalColors = ['#1f78b4','#33a02c','#b2df8a','#e31a1c','#fb9a99']
+        
+        var sites = ["Pelvic mass","Lymph Node","Liver","Bone","Brain","Right Intercostal Mets","Left Supraclavicular Mets","Right Perihilar LN","Thoracic spine Mets","Prostate","Paratracheal LN met","Peripancreatic met","Soft tissue-Right pelvic wall","Adrenal gland","Lung ","Spine","Lung","Other Tissue Type","Peritoneum"]
+        var siteColors = ["#1C86EE","#E31A1C","#008B00","#6A3D9A","#FF7F00","#000000","#FFD700","#7EC0EE","#FB9A99","#90EE90","#CAB2D6","#FDBF6F","#B3B3B3","#EEE685","#B03060","#FF83FA","#FF1493","#0000FF","#36648B"]
+        
+        var pidColors = ["#5f86b7", "#0c1b37", "#36cbd3", "#257950", "#94ea5b", "#012d03", "#c3de9b", "#6e3901", "#e9bf98", "#f24325", "#f7f846", "#59a20c", "#1d077e", "#b07fbd", "#a1085c", "#b859e4", "#5979fe", "#a3c9fe", "#3f16f9", "#fcc2fb", "#7b3f5b", "#f86db1", "#f231fc", "#900e08", "#fe8f06", "#a17f33","#72e5ef", "#194f46", "#ddfe77", "#2aa63a", "#5bef8f", "#051311", "#369094", "#2a165f", "#2975de", "#a7a9c6", "#0b29d0", "#d38ffd", "#934270", "#d427ac", "#635a77", "#ecf1fa", "#708e30", "#34f50e", "#40010e", "#fca283", "#b8451f", "#eb1241", "#fe8f06", "#926026", "#f2c029", "#9f04fc"]
+        
+        var sortedSamples = ["PM0_PM1","PM0_T24","PM0_T5","PM0_Tissue_LM1_A","PM0_Tissue_LM2_A","","PM1_Tissue","","PM1002_Z1_1","","PM1024_Z1_1","","PM1070_Z4_1","PM1070_Z5_1","PM1070_Z6_1","PM1070_Z7_1","PM1070_Z8_1","","PM1089_Z1_1","PM1089_Z2_1","PM1089_Z3_1","PM1089_Z4_1","","PM1177_Z1_1","","PM12_Z10_1","PM12_Z10_1","PM12_Z13_1","PM12_Z4_2","","PM1207_Z1_1","PM1207_Z4_1","","PM1232_Z11_1","PM1232_Z16_1","PM1232_Z4_1","","PM1282_X1_1","","PM1284_Z1","","PM1358_Z1_1","PM1358A_Z2_1","PM1358A_Z3_1","PM1358A_Z4_1","","PM1388_Z3_1","","PM1396_X1_1","","PM1411_X1_1","","PM1461_Z1_1","","PM1504_X1_1","","PM1513_Z1_1","","PM1542_Z1_1","","PM1563_Z1_1","","PM1570_Z1_1","","PM159_Z1_1","PM159_Z13_1","PM159_Z22_1","PM159_Z6_1","PM159_Z7_1","","PM191_Z8_1","","PM201_Z1_1","","PM223_Z2_1","PM223_Z4_1","","PM3_Z1_2","","PM322_Z5_1","","PM364_Z17_1","","PM4_Tissue_LLB_LLA_LT2_LA_MED","","PM428_Z2_1","","PM493_Z1_1","","PM59_Z2_1","","PM63_Z1_1","PM63_Z10_1","PM63_Z19_2","PM63_Z2_1","PM63_Z3_1","PM63_Z4_1","PM63_Z5_1","","PM677_Z12_1","PM677_Z16_1","PM677_Z3_1","PM677_Z6_1","PM677_Z7_1","PM677_Z9_1","","PM7_Tissue","","PM73_X1_1","","PM735_Z7_1","","PM750_Z15","PM750_Z8_1","","PM767_Z1_1","","PM80_Z1_C1","","PM861_Z5_1","","PM89_Z1_1","PM89_ZLN1","","PM897_Z2_1","","PM90_Z19_1","PM90_Z2_1","PM90_Z21_1","PM90_Z25_1","","PM981_Z2_1","","PM992_X1_1"]
+        
+        //var sortedSamples = ["WCM12_BR_3","WCM12_BR_2","WCM1024_BR_1","WCM1358_BR_1","WCM2086_BR_1","WCM493_BR_1","WCM428_BR_1","WCM1207_BR_1","WCM191_BR_1","WCM223_BR_1","","WCM1207_LV_1","WCM159_LN_1","WCM63_LG_3","WCM63_LV_2","WCM677_BN_1","WCM1388_LV_1","WCM89_LN_1","WCM1358_LN_2","WCM59_LV_1","WCM677_LV_2","WCM0_LV_2","WCM90_LV_1","WCM677_LG_4","WCM677_LN_3","WCM1358_PP_3","WCM0_LV_1","WCM1358_LV_1","WCM90_LN_2","WCM159_LG_4","WCM1232_LN_1","WCM159_AG_2","WCM1232_LN_2","WCM90_LN_1","WCM1_BN_1","WCM7_LV_1","WCM159_LN_3"," ","WCM12_PR_1","WCM4_PR_1","WCM223_PR_1","WCM63_PR_1","WCM63_PR_2","WCM159_PR_1"]
+        
+        //var sample_ids = ["PM159-Z22-1-Case","PM59-Z2-1-Case","PM63-Z2-1-Case","PM89-Z1-1-Case","PM90-Z21-1-Case","PM0_Tissue_LM1_A","PM0_Tissue_LM2_A","PM1_Tissue","PM4_Tissue_LLB_LLA_LT2_LA_MED","PM7_Tissue","PM63-Z10-1-Case-WGS","PM63-Z3-1-Case-WGS","PM63-Z6-1-Case-WGS","PM90-Z19-1-Case-WGS","PM90-Z25-1-Case-WGS","PM159-Z13-1-Case-WGS","PM159-Z1-1-Case-WGS","PM159-Z6-1-Case-WGS","PM159-Z7-1-Case-WGS","PM677-Z7-1-Case-WGS","PM677-Z9-1-Case-WGS","PM677-Z12-1-Case-WGS","PM677-Z16-1-Case-WGS","PM1232-Z4-1-Case-WGS","PM1232-Z16-1-Case-WGS","PM1388-Z3-1-Case-WGS","PM1024-Z1-1-Case-WGS","PM223-Z4-1-WGS","PM1207-Z1-1-Case-WGS","PM191-Z8-1-Case-WGS","PM1358-Z1-1-Case-WGS","PM428-Z2-1-Case-WGS","PM12-Z10-1-Case-WGS","PM12_Z13_1_Case","PM12_Z4_2_Case","PM1207-Z4-1-Case-WGS","PM223-Z2-1-Case-WGS","PM1358A-Z2-1-Case-WGS","PM1358A-Z3-1-Case-WGS","PM1358A-Z4-1-Case-WGS","PM493-Z1-1-Case-WGS","PM2086-Z1-Case-WGS"]
+        
+        
+        //var convertID = d3.scaleOrdinal().range(sample_names).domain(sample_ids)
+        
+        //,#F2B701,#E73F74,#80BA5A,#E68310,#008695,#CF1C90,#f97b72,#4b4b8f,#A5AA99
+        var x = d3.scaleBand().range([xshift,width-250])
+        var y = d3.scaleLinear().range([height-215,0])
+        var scale = d3.scaleLinear().range([0,height]).domain([0,1000])
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", chartDiv.clientWidth - margin)
+            .attr("height", chartDiv.clientHeight - margin)
+            .attr('transform','translate(' + margin/4 + ',' + margin/4 + ')')
+
+        var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+        
+        var yaxis = d3.axisLeft()
+            .scale(y)
+        
+        var xaxis = d3.axisBottom()
+            .scale(x)
+    
+        //start drawing actual data
+        d3.tsv("NEPC_CRPC.txt", function(error,data){
+            if (error) throw error;
+            console.log(data)
+            
+            data = data.sort((a, b) => (a.site > b.site) ? 1 : -1)
+            console.log(data)
+            
+            
+            var layers = d3.stack().keys(variants)(data)
+            
+            var samples = layers[0].map(function(d){
+                //console.log(d.data.Sample)
+                return d.data.Sample
+            })
+            
+            var totals = layers[0].map(function(d){
+                //console.log(d.data.Sample)
+                return parseInt(d.data.grand_total)
+            })
+            
+            var pids = layers[0].map(function(d){
+                //console.log(d.data.patient)
+                return d.data.patient
+            })
+            pids = [...new Set(pids)]
+            
+            sortedSamples = samples
+            var indices = d3.range(0, sortedSamples.length);
+            x.domain(indices)
+            y.domain([0,Math.max(...totals) + (Math.max(...totals)*0.05)])
+            y.domain([0,1000])
+
+            var colorScale = d3.scaleOrdinal().range(variantColors).domain(variants)
+            var clinicalScale = d3.scaleOrdinal().range(clinicalColors).domain(clinical)
+            var siteScale = d3.scaleOrdinal().range(siteColors).domain(sites)
+            var pidScale = d3.scaleOrdinal().range(pidColors).domain(pids)
+            
+            var layer = svg.selectAll('layer')
+                .data(layers)
+                .enter()
+                .append('g')
+                .attr('class', function(d){
+                    return d.key
+                })
+                .style('fill',function(d){
+                    console.log(colorScale(d.key))
+                    return colorScale(d.key)
+                })
+            
+            var column = layer.selectAll('rect')
+                .data(function(d){
+                    return d
+                })
+                .enter()
+                
+            column.append('rect')
+                .attr('x', function(d){
+                    return x(sortedSamples.indexOf(d.data.Sample))
+                })
+                .attr('y', function(d){
+                    return y(d[1])
+                })
+                .attr('height', function(d){
+                    return y(d[0]) - y(d[1])
+                })
+                .attr('width', x.bandwidth()-1)
+            
+            column.append('rect')
+                .attr('transform',`translate(0,${height-210})`)
+                .attr('x', function(d){
+                    return x(sortedSamples.indexOf(d.data.Sample))
+                })
+                .attr('height', x.bandwidth()-1)
+                .attr('width', x.bandwidth()-1)
+                .attr('fill',function(d){
+                    return clinicalScale(d.data.clinical_class)
+                })
+            
+            column.append('rect')
+                .attr('transform',`translate(0,${height-195})`)
+                .attr('x', function(d){
+                    return x(sortedSamples.indexOf(d.data.Sample))
+                })
+                .attr('height', x.bandwidth()-1)
+                .attr('width', x.bandwidth()-1)
+                .attr('fill',function(d){
+                    return siteScale(d.data.site)
+                })
+            
+            column.append('rect')
+                .attr('transform',`translate(0,${height-180})`)
+                .attr('x', function(d){
+                    return x(sortedSamples.indexOf(d.data.Sample))
+                })
+                .attr('height', x.bandwidth()-1)
+                .attr('width', x.bandwidth()-1)
+                .attr('fill',function(d){
+                    return pidScale(d.data.patient)
+                })
+            
+            svg.append('g')
+                .attr('class','yaxis')
+                .attr('transform',`translate(${xshift-5},0)`)
+                .call(yaxis)
+            
+            svg.append('text')
+                .text('Clinical Class')
+                .attr('x', 65)
+                .attr('y',height-200)
+                .attr('text-anchor','end')
+                .style('font-size', 10)
+            
+            svg.append('text')
+                .text('Tissue Site')
+                .attr('x', 65)
+                .attr('y',height-185)
+                .attr('text-anchor','end')
+                .style('font-size', 10)
+            
+            svg.append('text')
+                .text('Patient')
+                .attr('x', 65)
+                .attr('y',height-170)
+                .attr('text-anchor','end')
+                .style('font-size', 10)
+            
+            var xaxis = svg.append('g')
+                .attr('class','xaxis')
+                .attr('transform',`translate(0,${height-165})`)
+            
+            for(i in sortedSamples){
+                xaxis.append('text')
+                    .style('text-anchor','end')
+                    .text(function(d){
+                        return sortedSamples[i]
+                    })
+                    .attr('dy', 7.5)
+                    .attr('transform', function(d){
+                        return "translate(" + x(i) + ",0) rotate(-90)"
+                    })
+                    .style('font-size',scale(12))
+            }
+            
+            for(i in variants){
+                svg.append('rect')
+                    .attr('x', width-230)
+                    .attr('y', scale(i*20))
+                    .attr('fill', function(d){
+                        return colorScale(variants[i])
+                    })
+                    .attr('height',10)
+                    .attr('width',10)
+
+                svg.append('text')
+                    .attr('x', width-210)
+                    .attr('y', scale(i*20))
+                    .text(variants[i])
+                    .attr('fill','black')
+                    .attr('dy',scale(12))
+                    .style('font-size',scale(15))
+            }
+            
+            for(i in clinical){
+                svg.append('rect')
+                    .attr('x', width-230)
+                    .attr('y', scale(200 + i*20))
+                    .attr('fill', function(d){
+                        return clinicalScale(clinical[i])
+                    })
+                    .attr('height',10)
+                    .attr('width',10)
+
+                svg.append('text')
+                    .attr('x', width-210)
+                    .attr('y', scale(200 +i*20))
+                    .text(clinical[i])
+                    .attr('fill','black')
+                    .attr('dy',scale(12))
+                    .style('font-size',scale(15))
+            }
+            
+            for(i in sites){
+                svg.append('rect')
+                    .attr('x', width-230)
+                    .attr('y', scale(320 + i*20))
+                    .attr('fill', function(d){
+                        return siteScale(sites[i])
+                    })
+                    .attr('height',10)
+                    .attr('width',10)
+
+                svg.append('text')
+                    .attr('x', width-210)
+                    .attr('y', scale(320 +i*20))
+                    .text(sites[i])
+                    .attr('fill','black')
+                    .attr('dy',scale(12))
+                    .style('font-size',scale(15))
+            }
+        })
+
+    </script>
+  </body>
+</html>
