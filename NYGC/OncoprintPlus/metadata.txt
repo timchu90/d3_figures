@@ -1,0 +1,78 @@
+Sample	patient	site_pathology_specimen_ss	ff_ffpe	qc	gender	age_at_dx	race	tobacco	family_hx	highest_AJCC8th_stage	mets_ps	localization_ss	sample_collection_status_post_chemo	sample_collection_status_post_cki	status	os_from_dx	Purity	Ploidy
+Sample_1-Z3-1-Case-WGS--Sample_1-EBC5-2-Ctrl-WGS	Sample_1	Left nephroureterectomy	FFPE	FAILED	0	73	0	0	1	1	0	0	1	0	0	37	0.27	2
+Sample_2-Z5-1-Case-WGS--Sample_2-EBC2-1-Ctrl-WGS	Sample_2	Bladder	FFPE	FAILED	1	82	1	0	1	4	1	0	0	0	1	11	0.61	3.22
+Sample_2-Z1-1-Case-WGS--Sample_2-EBC2-1-Ctrl-WGS	Sample_2	Bladder	FFPE	FAILED	1	82	1	0	1	4	1	0	1	1	1	11	0.33	2.81
+Sample_3-Z2-1-Case-WGS--Sample_3-EBC5-2-Ctrl-WGS	Sample_3	Right nephroureterectomy	FF	FAILED	1	82	0	0	0	4	1	0	0	0	1	41	0.94	3.6
+Sample_4-Z8-1-Case-WGS--Sample_4-EBC6-1-Ctrl-WGS	Sample_4	Left radical nephroureterectomy	FFPE	FAILED	0	68	0	0	1	0a	0	0	1	0	0	53	0.68	2
+Sample_5-Z8-1-Case-WGS--Sample_5-EBC3-2-Ctrl-WGS	Sample_5	Left nephroureterectomy	FF	FAILED	0	81	0	1	1	4	1	0	0	0	1	9	0.61	3.13
+Sample_6-Z8-1-Case-WGS--Sample_6-EBC8-1-Ctrl-WGS	Sample_6	Peritoneal	FFPE	PASSED	0	64	0	1	1	4	1	1	1	0	1	57	0.69	3.8
+Sample_7-Z2-Case-WGS--Sample_7-EBC4-Ctrl-WGS	Sample_7	Right nephroureterectomy	FF	PASSED	0	64	NA	NA	NA	4	1	0	0	0	1	15	0.69	4.7
+Sample_8-Z1-1-Case-WGS--Sample_8-EBC4-Ctrl-WGS	Sample_8	Lung	FF	PASSED	1	67	0	1	1	4	1	1	1	0	1	137	0.34	2.44
+Sample_9-Z1-1-Case-WGS--Sample_9-EBC4-1-Ctrl-WGS	Sample_9	Left distal ureterectomy	FFPE	FAILED	0	72	0	1	0	4	1	1	0	0	1	29	0.75	2
+Sample_10-Z7-1-Case-WGS--Sample_10-EBC8-1-Ctrl-WGS	Sample_10	Radical cystoprostatectomy	FFPE	FAILED	0	51	0	1	1	4	1	0	1	0	1	46	0.33	2.44
+Sample_11-Z2-1-Case-WGS--Sample_11-EBC3-1-Ctrl-WGS	Sample_11	Bladder	FFPE	FAILED	0	85	0	1	1	2	0	0	1	0	0	50	0.41	2.88
+Sample_11-Z4-1-Case-WGS--Sample_11-EBC3-1-Ctrl-WGS	Sample_11	Partial cystectomy	FF	PASSED	0	85	0	1	1	2	0	0	1	0	0	50	0.69	2.9
+Sample_12-Z4-1-p2-Case-WGS--Sample_12-EBC7-2-Ctrl-WGS	Sample_12	Radical cystoprostatectomy	FF	PASSED	0	59	0	0	0	4	1	0	1	0	1	14	0.86	4
+Sample_12-Z6-1-p2-Case-WGS--Sample_12-EBC7-2-Ctrl-WGS	Sample_12	Radical cystoprostatectomy	FF	PASSED	0	59	0	0	0	4	1	0	1	0	1	14	0.81	3.98
+Sample_12-Z9-1-Case-WGS--Sample_12-EBC7-2-Ctrl-WGS	Sample_12	Kidney	FF	PASSED	0	59	0	0	0	4	1	1	1	0	1	14	0.98	2.1
+Sample_12-Z12-1-Case-WGS--Sample_12-EBC7-2-Ctrl-WGS	Sample_12	Liver	FF	PASSED	0	59	0	0	0	4	1	1	1	0	1	14	0.97	2.1
+Sample_12-Z13-1-Case-WGS--Sample_12-EBC7-2-Ctrl-WGS	Sample_12	Liver	FF	PASSED	0	59	0	0	0	4	1	1	1	0	1	14	0.98	2.1
+Sample_12-Z17-1-Case-WGS--Sample_12-EBC7-2-Ctrl-WGS	Sample_12	Heart	FF	FAILED	0	59	0	0	0	4	1	1	1	0	1	14	0.95	2.1
+Sample_12-Z19-1-Case-WGS--Sample_12-EBC7-2-Ctrl-WGS	Sample_12	Pancreas	FF	FAILED	0	59	0	0	0	4	1	1	1	0	1	14	0.89	2.1
+Sample_13-Z14-1-Case-WGS--Sample_13-EBC2-1-Ctrl-WGS	Sample_13	Radical cystoprostatectomy	FFPE	FAILED	0	63	0	1	0	4	1	0	1	0	1	44	0.44	3.28
+Sample_14-Z1-1-Case-C-WGS--Sample_14-EBC5-2-Ctrl-WGS	Sample_14	Partial cystectomy	FFPE	FAILED	1	70	2	1	1	4	1	0	0	0	0	18	0	2
+Sample_14-Z2-1-Case-S-WGS--Sample_14-EBC5-2-Ctrl-WGS	Sample_14	Partial cystectomy	FFPE	FAILED	1	70	2	1	1	4	1	0	0	0	0	18	0	2
+Sample_15-Z1-1-Case-WGS--Sample_15-EBC5-1-Ctrl-WGS	Sample_15	RP Lymph node	FF	PASSED	1	85	0	1	1	4	1	1	0	0	1	3	0.64	3.17
+Sample_16-Z1-1-Case-WGS--Sample_16-EBC1-Ctrl-WGS	Sample_16	Left nephroureterectomy	FF	PASSED	1	77	0	0	0	4	1	0	1	0	1	32	0.92	4.3
+Sample_16-Z2-1-Case-WGS--Sample_16-EBC1-Ctrl-WGS	Sample_16	Bladder	FFPE	FAILED	1	77	0	0	0	4	1	0	1	0	1	32	0.64	4.5
+Sample_17-Z1-1-Case-WGS--Sample_17-EBC3-2-Ctrl-WGS	Sample_17	Left nephroureterectomy	FF	PASSED	0	73	2	1	0	4	1	0	1	0	0	20	0.8	4
+Sample_18-Z1-1-Case-WGS--Sample_18-EBC5-1-Ctrl-WGS	Sample_18	Lung	FF	PASSED	0	66	NA	0	0	4	1	1	1	0	0	66	0.4	4.3
+Sample_19-Z1-1-Case-WGS--Sample_19-EBC1-Ctrl-WGS	Sample_19	Bladder	FFPE	FAILED	0	78	0	0	1	4	1	0	0	0	1	17	0.5	3.08
+Sample_19-Z2-1-Case-WGS--Sample_19-EBC1-Ctrl-WGS	Sample_19	Bladder	FF	PASSED	0	78	0	0	1	4	1	0	1	0	1	17	0.94	3.8
+Sample_20-Z1-1-Case-WGS--Sample_20-EBC1-Ctrl-WGS	Sample_20	Bladder	FFPE	FAILED	0	79	0	1	1	4	1	0	0	0	0	57	0.6	3.26
+Sample_20-Z2-1-Case-WGS--Sample_20-EBC1-Ctrl-WGS	Sample_20	Cystectomy	FFPE	FAILED	0	79	0	1	1	4	1	0	1	0	0	57	0.51	2.6
+Sample_20-Z3-1-Case-WGS--Sample_20-EBC1-Ctrl-WGS	Sample_20	Pelvic LN	FF	FAILED	0	79	0	1	1	4	1	1	1	0	0	57	0	2
+Sample_21-Z1-1-Case-WGS--Sample_21-EBC2-1-Ctrl-WGS	Sample_21	Peritoneal	FFPE	FAILED	0	62	0	2	0	4	1	1	1	0	1	15	0	2
+Sample_22-Z1-1-Case-WGS--Sample_22-EBC6-1-Ctrl-WGS	Sample_22	Brain	FFPE	FAILED	0	59	4	1	0	4	1	1	1	0	1	17	0.32	3.22
+Sample_22-Z3-1-Case-WGS--Sample_22-EBC6-1-Ctrl-WGS	Sample_22	Brain	FF	PASSED	0	59	4	1	0	4	1	1	1	0	1	17	0.81	3.1
+Sample_23-Z1-1-Case-WGS--Sample_23-EBC4-1-Ctrl-WGS	Sample_23	 Radical cystectomy	FF	PASSED	1	75	1	1	1	3	0	0	0	0	0	62	0.27	4.1
+Sample_24-Z4-1-Case-WGS--Sample_24-EBC3-2-Ctrl-WGS	Sample_24	Radical cystoprostatectomy	FF	FAILED	0	81	1	0	0	3	0	0	0	0	1	8	0.76	3.4
+Sample_25-Z2-1-Case-WGS--Sample_25-EBC5-2-Ctrl-WGS	Sample_25	Left ureter	FFPE	FAILED	1	57	0	1	1	0a	0	0	0	0	0	63	0.85	2
+Sample_25-Z1-1-Case-WGS--Sample_25-EBC5-2-Ctrl-WGS	Sample_25	Radical nephroureterectomy	FF	PASSED	1	57	0	1	1	0a	0	0	1	0	0	63	0.7	1.99
+Sample_26-X1-1-Case-WGS--Sample_26-EBC7-2-Ctrl-WGS	Sample_26	Pelvic	FF	PASSED	0	74	0	0	0	4	1	1	1	0	1	54	0.23	4.1
+Sample_27-Z1-1-Case-WGS--Sample_27-EBC1-2-Ctrl-WGS	Sample_27	Cystoprostatectomy	FF	PASSED	0	68	0	1	1	4	1	1	1	0	1	9	0.8	3.8
+Sample_28-Z8-1-Case-WGS--Sample_28-EBC2-2-Ctrl-WGS	Sample_28	Radical cystectomy	FFPE	FAILED	1	78	0	1	1	4	1	1	1	0	0	49	0	2
+Sample_29-Z5-1-Case-WGS--Sample_29-EBC2-2-Ctrl-WGS	Sample_29	Radical cystectomy	FF	PASSED	1	70	2	0	1	4	1	0	1	0	0	7	0.41	2.77
+Sample_30-Z1-1-Case-WGS--Sample_30-Z1-1-Ctrl-WGS	Sample_30	Radical cystectomy	FF	NA	1	84	NA	NA	NA	4	1	0	0	0	1	9	0.43	4.6
+Sample_31-Z1-Case-WGS--Sample_31-EBC1-Ctrl-WGS	Sample_31	Bladder	FF	NA	1	90	NA	NA	NA	2	0	0	0	0	1	4	0.5	4.18
+Sample_32-Z1-1-Case-WGS--Sample_32-EBC1-Ctrl-WGS	Sample_32	Bladder	FF	NA	1	56	NA	NA	NA	4	1	0	0	0	1	6	0.38	2.9
+Sample_32-Z2-1-Case-WGS--Sample_32-EBC1-Ctrl-WGS	Sample_32	Radical cystectomy	FF	NA	1	56	NA	NA	NA	4	1	0	0	0	1	6	0.57	4.5
+Sample_33-Z1-1-Case-WGS--Sample_33-EBC1-Ctrl-WGS	Sample_33	Cytoprostatectomy	FF	NA	0	78	NA	NA	NA	4	1	0	0	0	0	14	0.72	3.2
+Sample_34-Z1-Case-WGS--Sample_34-EBC1-Ctrl-WGS	Sample_34	Distal ureterectomy - left	FF	NA	0	87	NA	NA	NA	4	1	0	0	0	0	15	0.71	3.7
+Sample_35-Z3-1-Case-WGS--Sample_35-EBC8-2-Ctrl-WGS	Sample_35	Palliative cystectomy	FF	PASSED	1	70	0	1	0	4	1	0	1	0	1	14	0.87	2.69
+Sample_36-Z3-1-Case-WGS--Sample_36-EBC4-2-Ctrl-WGS	Sample_36	Bladder	FFPE	FAILED	0	51	4	2	0	4	1	0	0	0	1	19	0.62	2
+Sample_36-X1-Case-WGS--Sample_36-EBC4-2-Ctrl-WGS	Sample_36	NA	FF	PASSED	0	51	NA	NA	NA	4	1	1	1	0	1	19	0.3	2.05
+Sample_37-X1-1-Case-WGS--Sample_37-EBC1-1-Ctrl-WGS	Sample_37	Liver	FF	NA	0	71	0	1	1	4	1	1	1	0	0	44	0.45	3.51
+Sample_38-X2-1-Case-WGS--Sample_38-EBC2-Ctrl-WGS	Sample_38	Lymph node	FFPE	NA	1	72	NA	NA	NA	4	1	1	0	0	1	12	0.72	2.1
+Sample_38-Z3-1-Case-WGS--Sample_38-EBC2-Ctrl-WGS	Sample_38	Liver	FF	NA	1	72	NA	NA	NA	4	1	1	1	0	1	12	0.93	4.5
+Sample_39-Z1-1-Case-WGS--Sample_39-EBC3-Ctrl-WGS	Sample_39	Radical cystoprostatectomy	FF	NA	0	53	1	1	0	4	1	0	1	1	0	66	0.85	2
+Sample_40-Z5-1-Case-WGS--Sample_40-EBC4-1-Ctrl-WGS	Sample_40	Radical cystoprostatectomy	FFPE	FAILED	0	55	0	1	1	4	1	0	1	0	0	48	0.41	1.83
+Sample_41-Z3-1-Case-WGS--Sample_41-EBC1-1-Ctrl-WGS	Sample_41	 Bladder	FFPE	FAILED	0	85	0	1	1	4	1	0	0	0	1	19	0.59	4.1
+Sample_42-Z11-1-Case-WGS--Sample_42-EBC5-2-Ctrl-WGS	Sample_42	Left nephroureterectomy	FFPE	NA	0	63	0	1	1	4	1	0	1	0	0	65	0.4	2
+Sample_42-Z2-1-Case-WGS--Sample_42-EBC5-2-Ctrl-WGS	Sample_42	Lung	FF	NA	0	63	0	1	1	4	1	1	1	0	0	65	0.47	1.93
+Sample_43-Z1-1-Case-WGS--Sample_43-EBC1-2-Ctrl-WGS	Sample_43	Lung	FF	PASSED	1	66	4	1	0	4	1	1	1	0	1	64	0.18	3.7
+Sample_44-ZLN4-1-Case-WGS--Sample_44-EBC4-1-Ctrl-WGS	Sample_44	Bladder	FFPE	FAILED	0	57	0	0	0	4	1	0	1	0	1	15	0	2
+Sample_44-Z1-1-Case-WGS--Sample_44-EBC4-1-Ctrl-WGS	Sample_44	Lymph node	FF	PASSED	0	57	0	0	0	4	1	1	1	0	1	15	0.54	4.6
+Sample_44-Z10-1-Case-WGS--Sample_44-EBC4-1-Ctrl-WGS	Sample_44	Lymph node	FF	PASSED	0	57	0	0	0	4	1	1	1	0	1	15	0.47	4.6
+Sample_44-Z24-1-Case-WGS--Sample_44-EBC4-1-Ctrl-WGS	Sample_44	Lymph node	FF	FAILED	0	57	0	0	0	4	1	1	1	0	1	15	0.79	2.3
+Sample_44-Z27-1-Case-WGS--Sample_44-EBC4-1-Ctrl-WGS	Sample_44	Liver	FF	FAILED	0	57	0	0	0	4	1	1	1	0	1	15	0.86	2.3
+Sample_44-Z30-1-Case-WGS--Sample_44-EBC4-1-Ctrl-WGS	Sample_44	Liver	FF	FAILED	0	57	0	0	0	4	1	1	1	0	1	15	0.86	2.4
+Sample_45-Z1-1-Case-WGS--Sample_45-EBC5-1-Ctrl-WGS	Sample_45	Bladder	FFPE	FAILED	1	83	0	2	1	4	1	0	0	0	1	19	0.31	1.97
+Sample_46-Z6-2-WGS--Sample_46-Z15-2-Ctrl-WGS	Sample_46	Right lower lobe	FF	NA	1	75	0	1	1	4	1	1	0	1	1	9	0.59	1.85
+Sample_46-Z8-2-WGS--Sample_46-Z15-2-Ctrl-WGS	Sample_46	Lymph node	FF	NA	1	75	0	1	1	4	1	1	0	1	1	9	0.92	1.9
+Sample_46-Z11-2-WGS--Sample_46-Z15-2-Ctrl-WGS	Sample_46	Lymph node	FF	NA	1	75	0	1	1	4	1	1	0	1	1	9	0.8	1.92
+Sample_46-Z4-2-WGS--Sample_46-Z15-2-Ctrl-WGS	Sample_46	Right upper lobe	FF	NA	1	75	0	1	1	4	1	1	0	1	1	9	0.94	1.93
+Sample_47-Z2-1-Case-WGS--Sample_47-EBC1-Ctrl-WGS	Sample_47	Cystectomy	FF	NA	0	73	NA	NA	NA	3	0	0	1	0	0	45	0.1	1.96
+Sample_48-Z2-1-p2-Case-WGS--Sample_48-EBC2-1-Ctrl-WGS	Sample_48	Liver	FF	PASSED	0	75	0	1	1	4	1	1	1	1	0	144	0.7	2
+Sample_49-X1-1-Case-WGS--Sample_49-EBC1-Ctrl-WGS	Sample_49	Sacrum biopsy	FF	NA	0	58	0	1	0	4	1	1	1	0	0	41	0.54	4.47
+Sample_50-Z11-1-Case-WGS--Sample_50-EBC4-1-Ctrl-WGS	Sample_50	Radical cystoprostatectomy	FFPE	FAILED	0	74	0	2	NA	4	1	0	1	0	1	18	0.29	2.06

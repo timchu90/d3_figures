@@ -80,10 +80,10 @@
         };
 
           //start drawing actual data
-        d3.json('example_data.summ.json', function(error,data){
+        d3.json('CAR_12750.summ.json', function(error,data){
             if (error) throw error;
             //select tree tree here (get best tree from witness)
-            treeData = data.trees[1393]
+            treeData = data.trees[1686]
             
             //change flat object to include parent attribute instead of child
             _.each(treeData.structure, function (o,i) {

@@ -1,1 +1,0 @@
-awk 'NR>1 {$1 = substr($1, 0, index($1, "--")-1)} 1' OFS='\t' sbs96.output
