@@ -27,7 +27,6 @@ Sample_25	HRpos	35
 Sample_26	TNBC	64
 Sample_27	HRpos	47
 Sample_28	TNBC	53
-Sample_29	TNBC	49
 Sample_30	TNBC	54
 Sample_31	TNBC	74
 Sample_32	TNBC	56
@@ -65,7 +64,6 @@ Sample_63	TNBC	33
 Sample_64	TNBC	54
 Sample_65	TNBC	26
 Sample_66	TNBC	54
-Sample_67	TNBC	58
 Sample_68	TNBC	37
 Sample_69	TNBC	59
 Sample_70	TNBC	86
@@ -91,7 +89,6 @@ Sample_89	TNBC	62
 Sample_90	TNBC	52
 Sample_91	TNBC	50
 Sample_92	TNBC	59
-Sample_93	TNBC	53
 Sample_94	TNBC	84
 Sample_95	TNBC	55
 Sample_96	TNBC	67
@@ -103,8 +100,6 @@ Sample_101	TNBC	48
 Sample_102	TNBC	64
 Sample_103	HRpos	0
 Sample_104	TNBC	73
-Sample_105	TNBC	75
-Sample_106	TNBC	53
 Sample_107	HRpos	59
 Sample_108	HRpos	74
 Sample_109	HRpos	52
@@ -122,13 +117,10 @@ Sample_120	HRpos	45
 Sample_121	TNBC	32
 Sample_122	HRpos	77
 Sample_123	HRpos	54
-Sample_124	HRpos	70
 Sample_125	HRpos	66
 Sample_126	HRpos	79
 Sample_127	HRpos	66
 Sample_128	HRpos	66
-Sample_129	HRpos	57
-Sample_130	HRpos	69
 Sample_131	HRpos	36
 Sample_132	HRpos	88
 Sample_133	HRpos	68
